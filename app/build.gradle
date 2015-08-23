@@ -36,6 +36,7 @@ task run(type: Exec, dependsOn: 'installDebug') {
 }
 
 dependencies {
+    compile project(':library')
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'com.android.support:support-v4:22.0.0'
