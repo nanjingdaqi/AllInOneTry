@@ -2,6 +2,9 @@ package com.example.peacepassion.library;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,11 +12,19 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import me.ele.commons.AppLogger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by peacepassion on 15/8/23.
  */
-public class WeixinTabLayout extends ViewGroup {
+public class WeixinTabLayout extends ViewGroup implements OnPageChangeListener {
+
+    private List<UnitViewHolder> viewHolders = new ArrayList<>();
+    private int selectedPage = 0;
+
     public WeixinTabLayout(Context context) {
         super(context);
     }
@@ -26,13 +37,28 @@ public class WeixinTabLayout extends ViewGroup {
         super(context, attrs, defStyleAttr);
     }
 
-    public void addUnit(Drawable drawable, String title) {
-        RelativeLayout v = (RelativeLayout) LayoutInflater.from(getContext()).inflate(R.layout.unit, this, false);
-        TextView tv = (TextView) v.findViewById(R.id.text);
-        tv.setText(title);
-        ImageView iv = (ImageView) v.findViewById(R.id.image);
-        iv.setImageDrawable(drawable);
-        addView(v);
+    public void setUpViewPager(ViewPager viewPager, PagerAdapter adapter, List<DataHolder> dataHolders) {
+        viewPager.addOnPageChangeListener(this);
+        if (adapter.getCount() == 0) {
+            throw new IllegalStateException("adapter should has at least one item");
+        }
+        if (adapter.getCount() != dataHolders.size()) {
+            throw new IllegalStateException("adapter should has the same length as unit view holders");
+        }
+        for (DataHolder dataHolder : dataHolders) {
+            RelativeLayout v = (RelativeLayout) LayoutInflater.from(getContext()).inflate(R.layout.unit, this, false);
+            TextView tv = (TextView) v.findViewById(R.id.text);
+            tv.setText(dataHolder.title);
+            ImageView iv = (ImageView) v.findViewById(R.id.image_bg);
+            iv.setImageDrawable(dataHolder.back);
+            ImageView iv2 = (ImageView) v.findViewById(R.id.image_front);
+            iv2.setImageDrawable(dataHolder.front);
+            iv2.setAlpha(0);
+            viewHolders.add(new UnitViewHolder(tv, iv, iv2));
+            addView(v);
+        }
+        selectedPage = 0;
+        viewHolders.get(selectedPage).front.setAlpha(255);
     }
 
     @Override
@@ -65,4 +91,37 @@ public class WeixinTabLayout extends ViewGroup {
             }
         }
     }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        AppLogger.d("position: " + position + ", offset: " + positionOffset);
+        viewHolders.get(position).front.setAlpha((int) ((1 - positionOffset) * 255));
+        if (position + 1 < viewHolders.size()) {
+            viewHolders.get(position + 1).front.setAlpha((int) (positionOffset * 255));
+        }
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        AppLogger.d("position: " + position);
+        selectedPage = position;
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
+
+    private static class UnitViewHolder {
+        private TextView title;
+        private ImageView bg;
+        private ImageView front;
+
+        public UnitViewHolder(TextView title, ImageView bg, ImageView front) {
+            this.title = title;
+            this.bg = bg;
+            this.front = front;
+        }
+    }
+
 }
