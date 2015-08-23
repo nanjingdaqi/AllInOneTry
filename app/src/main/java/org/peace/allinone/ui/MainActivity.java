@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
     WeixinTabLayout weixinTabLayout;
     @InjectView(R.id.view_pager)
     ViewPager viewPager;
-    Fragment[] fragments = {new SampleFragment(), new SampleFragment(), new SampleFragment()};
+    Fragment[] fragments = {SampleFragment.newInstance(0), SampleFragment.newInstance(1), SampleFragment.newInstance(2), SampleFragment.newInstance(3)};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
         List<DataHolder> dataHolders = new ArrayList<>();
         for (int i = 0; i < fragments.length; ++i) {
-            dataHolders.add(new DataHolder(getResources().getDrawable(R.drawable.shopping_home_tab_take_out),
-                getResources().getDrawable(R.drawable.shopping_home_tab_take_out_selected), "外卖"));
+            dataHolders.add(new DataHolder(getResources().getDrawable(R.drawable.shopping_home_tab_personal),
+                getResources().getDrawable(R.drawable.shopping_home_tab_personal_selected), "我"));
         }
         weixinTabLayout.setUpViewPager(viewPager, adapter, dataHolders);
     }

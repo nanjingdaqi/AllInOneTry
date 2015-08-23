@@ -6,6 +6,7 @@
 
     <com.example.peacepassion.library.WeixinTabLayout android:id="@+id/weixin_tab_layout"
         android:layout_alignParentBottom="true"
+        android:background="@drawable/weixin_bg"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:layout_width="match_parent"
