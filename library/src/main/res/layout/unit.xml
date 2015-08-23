@@ -13,16 +13,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <TextView
-        android:id="@+id/text"
-        android:layout_centerHorizontal="true"
+    <TextView android:id="@+id/text"
+        style="@style/unit_text"
         android:layout_below="@id/image_bg"
-        android:layout_marginTop="3dp"
-        android:textSize="12sp"
-        android:textColor="#999"
-        android:gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:textColor="#999"/>
+
+    <TextView android:id="@+id/text_front"
+        style="@style/unit_text"
+        android:layout_below="@id/image_bg"/>
+
 
 </RelativeLayout>
 

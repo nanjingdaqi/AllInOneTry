@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         List<DataHolder> dataHolders = new ArrayList<>();
         for (int i = 0; i < fragments.length; ++i) {
             dataHolders.add(new DataHolder(getResources().getDrawable(R.drawable.unselected),
-                getResources().getDrawable(R.drawable.selected), "我"));
+                getResources().getDrawable(R.drawable.selected), "我", getResources().getColor(R.color.blue)));
         }
         weixinTabLayout.setUpViewPager(viewPager, adapter, dataHolders);
     }

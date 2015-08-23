@@ -56,12 +56,16 @@ public class WeixinTabLayout extends ViewGroup implements OnPageChangeListener {
             DataHolder dataHolder = dataHolders.get(i);
             TextView tv = (TextView) v.findViewById(R.id.text);
             tv.setText(dataHolder.title);
+            TextView tv2 = (TextView) v.findViewById(R.id.text_front);
+            tv2.setText(dataHolder.title);
+            tv2.setTextColor(dataHolder.titleTargetColor);
+            tv2.setAlpha(0);
             ImageView iv = (ImageView) v.findViewById(R.id.image_bg);
             iv.setImageDrawable(dataHolder.back);
             ImageView iv2 = (ImageView) v.findViewById(R.id.image_front);
             iv2.setImageDrawable(dataHolder.front);
-            iv2.setAlpha(0);
-            viewHolders.add(new UnitViewHolder(tv, iv, iv2));
+            iv2.setAlpha((float) 0);
+            viewHolders.add(new UnitViewHolder(tv, tv2, iv, iv2));
             addView(v);
         }
     }
@@ -99,15 +103,19 @@ public class WeixinTabLayout extends ViewGroup implements OnPageChangeListener {
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        viewHolders.get(position).front.setAlpha((int) ((1 - positionOffset) * 255));
+        viewHolders.get(position).front.setAlpha(1 - positionOffset);
+        viewHolders.get(position).titleFront.setAlpha(1 - positionOffset);
         if (position + 1 < viewHolders.size()) {
-            viewHolders.get(position + 1).front.setAlpha((int) (positionOffset * 255));
+            viewHolders.get(position + 1).front.setAlpha(positionOffset);
+            viewHolders.get(position + 1).titleFront.setAlpha(positionOffset);
         }
         for (int i = 0; i < position; ++i) {
-            viewHolders.get(i).front.setAlpha(0);
+            viewHolders.get(i).front.setAlpha((float) 0);
+            viewHolders.get(i).titleFront.setAlpha(0);
         }
         for (int i = position + 2; i < viewHolders.size(); ++i) {
-            viewHolders.get(i).front.setAlpha(0);
+            viewHolders.get(i).front.setAlpha((float) 0);
+            viewHolders.get(i).titleFront.setAlpha(0);
         }
     }
 
@@ -123,11 +131,13 @@ public class WeixinTabLayout extends ViewGroup implements OnPageChangeListener {
 
     private static class UnitViewHolder {
         private TextView title;
+        private TextView titleFront;
         private ImageView bg;
         private ImageView front;
 
-        public UnitViewHolder(TextView title, ImageView bg, ImageView front) {
+        public UnitViewHolder(TextView title, TextView titleFront, ImageView bg, ImageView front) {
             this.title = title;
+            this.titleFront = titleFront;
             this.bg = bg;
             this.front = front;
         }

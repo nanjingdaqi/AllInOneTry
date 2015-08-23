@@ -10,10 +10,12 @@ public class DataHolder {
     Drawable back;
     Drawable front;
     String title;
+    int titleTargetColor;
 
-    public DataHolder(Drawable back, Drawable front, String title) {
+    public DataHolder(Drawable back, Drawable front, String title, int titleTargetColor) {
         this.back = back;
         this.front = front;
         this.title = title;
+        this.titleTargetColor = titleTargetColor;
     }
 }
