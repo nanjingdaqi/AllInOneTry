@@ -22,7 +22,6 @@ public class WeixinTabLayout extends ViewGroup implements OnPageChangeListener {
 
     private ViewPager viewPager;
     private List<UnitViewHolder> viewHolders = new ArrayList<>();
-    private int selectedPage = 0;
 
     public WeixinTabLayout(Context context) {
         super(context);
@@ -51,8 +50,7 @@ public class WeixinTabLayout extends ViewGroup implements OnPageChangeListener {
             v.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    selectedPage = j;
-                    update();
+                    viewPager.setCurrentItem(j, false);
                 }
             });
             DataHolder dataHolder = dataHolders.get(i);
@@ -65,19 +63,6 @@ public class WeixinTabLayout extends ViewGroup implements OnPageChangeListener {
             iv2.setAlpha(0);
             viewHolders.add(new UnitViewHolder(tv, iv, iv2));
             addView(v);
-        }
-        selectedPage = 0;
-        update();
-    }
-
-    private void update() {
-        viewPager.setCurrentItem(selectedPage, false);
-        for (int i = 0; i < viewHolders.size(); i++) {
-            if (selectedPage == i) {
-                viewHolders.get(selectedPage).front.setAlpha(255);
-            } else {
-                viewHolders.get(i).front.setAlpha(0);
-            }
         }
     }
 
@@ -117,6 +102,12 @@ public class WeixinTabLayout extends ViewGroup implements OnPageChangeListener {
         viewHolders.get(position).front.setAlpha((int) ((1 - positionOffset) * 255));
         if (position + 1 < viewHolders.size()) {
             viewHolders.get(position + 1).front.setAlpha((int) (positionOffset * 255));
+        }
+        for (int i = 0; i < position; ++i) {
+            viewHolders.get(i).front.setAlpha(0);
+        }
+        for (int i = position + 2; i < viewHolders.size(); ++i) {
+            viewHolders.get(i).front.setAlpha(0);
         }
     }
 
