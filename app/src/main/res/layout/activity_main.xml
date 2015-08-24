@@ -15,4 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <org.peace.allinone.ui.TagAheadView android:id="@+id/tag_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 </LinearLayout>
