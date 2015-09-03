@@ -7,6 +7,7 @@ import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 
 
@@ -27,7 +28,12 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.start_btn) {
-
+            mStartBtn.setVisibility(View.GONE);
+            if (mStartBtn.getVisibility() == View.GONE) {
+                AppLogger.d("btn is gone");
+            } else if (mStartBtn.getVisibility() == View.VISIBLE) {
+                AppLogger.d("btn is visible");
+            }
         }
     }
 }
