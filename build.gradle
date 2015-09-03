@@ -3,10 +3,19 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url "${server}/nexus/content/groups/mobile"
+            credentials {
+                username nexusUsername
+                password nexusPassword
+            }
+        }
     }
     dependencies {
+        classpath 'me.ele:eradle:1.4.1'
         classpath 'com.android.tools.build:gradle:1.2.3'
-
+        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.1'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
