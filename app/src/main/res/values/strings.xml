@@ -276,7 +276,7 @@
     <string name="get_red_envelopes">兑换红包</string>
     <string name="send_verification_code_to">验证码已发送至手机%s</string>
     <string name="more_online_paymethod">更多支付方式</string>
-    <string name="app_name">饿了么</string>
+    <string name="app_name">仿微信底部切换栏</string>
     <string name="qqpay_error_title">QQ支付失败</string>
     <string name="qqpay_error_cancel">QQ支付已取消</string>
     <string name="qqpay_error_error">一般错误</string>
