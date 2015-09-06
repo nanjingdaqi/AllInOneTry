@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
     @InjectView(R.id.start_btn)
     Button mStartBtn;
+    Button mStartBtn2;
 
     @InjectView(R.id.text)
     TextView textView;
