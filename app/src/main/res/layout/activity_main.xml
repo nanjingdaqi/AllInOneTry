@@ -10,11 +10,23 @@
     tools:context=".ui.MainActivity"
     >
 
+<<<<<<< HEAD
   <Button
       android:id="@+id/start_btn"
       android:text="Start"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       />
+=======
+    <FrameLayout android:id="@+id/frag_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/start_btn"
+        android:text="Start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+>>>>>>> try Fragment Added Exception
 
 </LinearLayout>
