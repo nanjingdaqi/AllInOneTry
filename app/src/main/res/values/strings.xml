@@ -4,5 +4,6 @@
     <string name="app_name">All In One Try</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="test">The phone is: </string>
 
 </resources>
