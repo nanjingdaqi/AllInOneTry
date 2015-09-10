@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.peace.allinone.ui.TriangleRectPopTextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:text="请输入详细地址"
+    android:gravity="center"
+    android:layout_width="160dp"
+    android:layout_height="60dp"/>
+

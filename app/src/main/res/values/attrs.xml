@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="TriangleRectPopTextView">
+        <attr name="rect_radius" format="dimension"/>
+        <attr name="triangle_height" format="dimension"/>
+    </declare-styleable>
+
+</resources>
