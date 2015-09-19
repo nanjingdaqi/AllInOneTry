@@ -2,6 +2,8 @@ package org.peace.allinone.ui;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -9,11 +11,18 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
+  @BindView(R.id.start_btn) Button mStartBtn;
+  @BindView(R.id.r_v) RecyclerView rv;
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
+
+    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+    rv.setLayoutManager(linearLayoutManager);
+    rv.setAdapter(new RVAdapter());
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
