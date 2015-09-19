@@ -5,14 +5,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
-  @BindView(R.id.start_btn) Button mStartBtn;
   @BindView(R.id.r_v) RecyclerView rv;
+
+  RVAdapter adapter = new RVAdapter();
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -22,11 +24,14 @@ public class MainActivity extends AppCompatActivity {
 
     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
     rv.setLayoutManager(linearLayoutManager);
-    rv.setAdapter(new RVAdapter());
+    rv.setItemAnimator(new RVItemAnimator());
+    rv.setAdapter(adapter);
     rv.addItemDecoration(new RVItemDecorator());
   }
 
-  @OnClick(R.id.start_btn) public void onClick(View v) {
-
+  @OnClick({ R.id.start_btn }) public void onClick(View v) {
+    int id = v.getId();
+    if (id == R.id.start_btn) {
+    }
   }
 }
