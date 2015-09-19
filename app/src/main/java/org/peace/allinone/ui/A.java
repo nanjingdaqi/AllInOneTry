@@ -9,6 +9,7 @@ public class A {
 
   public void foo() {
     AppLogger.d("original");
+    //new Fix().foo();
   }
-  
+
 }
