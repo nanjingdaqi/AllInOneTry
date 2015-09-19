@@ -20,6 +20,8 @@
             </intent-filter>
         </activity>
 
+      <activity android:name=".ui.SubActivity"/>
+
         <activity android:name="com.github.mmin18.layoutcast.ResetActivity" />
 
     </application>
