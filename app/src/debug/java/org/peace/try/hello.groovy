@@ -1,20 +1,14 @@
 
 
-def foo(str) {
-  println str
-}
+println 1.hashCode()
 
-foo 'Hello groovy'
+l = [1, 'hello']
+println l
 
-void bar(str) {
-  println str
-}
+def m = [1: 100, 'hello': 'world']
+println m
 
-bar 'hello void'
-
-void foo2() {
-  println 'foo2'
-}
-
-foo2()
-
+def r = 1..10
+def r2 = 1..<5
+println r
+println r2
