@@ -12,6 +12,11 @@ repositories {
     jcenter()
 }
 
+task foo << {
+    println x
+    println y
+}
+
 android {
     compileSdkVersion 22
     buildToolsVersion "22"

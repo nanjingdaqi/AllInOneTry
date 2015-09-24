@@ -12,6 +12,11 @@ buildscript {
     }
 }
 
+ext.x = 100
+ext {
+    y = 200
+}
+
 allprojects {
     repositories {
         jcenter()
