@@ -4,6 +4,7 @@
 
   <data>
     <import type="org.peace.allinone.ui.DataMgr"/>
+    <import type="android.view.View" />
 
     <variable
         name="dataMgr"
@@ -23,6 +24,7 @@
       >
 
     <TextView
+        android:visibility="@{dataMgr != null ? View.VISIBLE : View.GONE}"
         android:text="@{dataMgr.data}"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
