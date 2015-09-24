@@ -1,29 +1,30 @@
 package org.peace.allinone.ui;
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import org.peace.allinone.R;
+import org.peace.allinone.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
-  @InjectView(R.id.start_btn) Button mStartBtn;
+  Button mStartBtn;
+
+  DataMgr dataMgr;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-
-    ButterKnife.inject(this);
+    ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+    binding.setDataMgr(dataMgr);
   }
 
-  @OnClick({ R.id.start_btn }) public void onClick(View v) {
+  public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-
     }
   }
 }
