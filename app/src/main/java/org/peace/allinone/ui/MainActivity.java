@@ -9,8 +9,8 @@ import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import org.peace.allinone.BuildConfig;
 import org.peace.allinone.R;
-import org.peace.debug.DebugActivity;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.start_btn) {
-            startActivity(new Intent(this, DebugActivity.class));
         }
     }
 }

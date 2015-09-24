@@ -24,13 +24,14 @@ def moveApk() {
     }
 }
 
-task foo << {
-    moveApk()
+task releaseMove  {
+    doFirst {
+        println 'gonna move apk'
+        moveApk()
+    }
 }
 
-gradle.buildFinished { buildResult ->
-    moveApk()
-}
+assembleRelease.dependsOn 'releaseMove'
 
 android {
     compileSdkVersion 22
