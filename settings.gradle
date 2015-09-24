@@ -4,6 +4,7 @@ def globalInit() {
   println 'gradle obj: ' + gradle.hashCode()
   println 'gradle home: ' + gradle.gradleHomeDir
   println 'gradle user home: ' + gradle.gradleUserHomeDir
+  println 'rootDir: ' + rootDir
 }
 
 globalInit()

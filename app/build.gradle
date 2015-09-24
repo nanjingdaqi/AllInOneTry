@@ -12,9 +12,24 @@ repositories {
     jcenter()
 }
 
+def moveApk() {
+    def orgPath = new File(rootDir.getAbsolutePath() + '/app/build/outputs/apk')
+    orgPath.eachFileRecurse {file ->
+        println 'moving: ' + file.getAbsolutePath()
+        def newPath = rootDir.getAbsolutePath() + '/apks'
+        new File(newPath).mkdirs()
+        def newName = file.getName().substring(0, file.getName().indexOf('.')) + '-' + new Date(System.currentTimeMillis()) + '.apk'
+        newName = newName.replace(' ', '-')
+        file.renameTo(new File(newPath + '/' + newName))
+    }
+}
+
 task foo << {
-    println x
-    println y
+    moveApk()
+}
+
+gradle.buildFinished { buildResult ->
+    moveApk()
 }
 
 android {
