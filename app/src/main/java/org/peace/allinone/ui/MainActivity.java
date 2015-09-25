@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.databinding.DataBindingUtil;
+import android.databinding.ObservableField;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -18,14 +19,14 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
     dataMgr = new DataMgr();
-    dataMgr.data = "init data";
+    dataMgr.data = new ObservableField<>("init data");
     binding.setDataMgr(dataMgr);
   }
 
   public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      dataMgr.setData("new Data");
+      dataMgr.data.set("new data");
     }
   }
 }
