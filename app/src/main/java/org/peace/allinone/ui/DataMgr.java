@@ -1,13 +1,19 @@
 package org.peace.allinone.ui;
 
+import android.databinding.BaseObservable;
+import android.databinding.Bindable;
+import org.peace.allinone.BR;
+
 /**
  * Created by peacepassion on 15/9/24.
  */
-public class DataMgr {
+public class DataMgr extends BaseObservable {
 
-  String data;
+  @Bindable
+  public String data;
 
-  public String getData() {
-    return data;
+  public void setData(String data) {
+    this.data = data;
+    notifyPropertyChanged(BR.data);
   }
 }

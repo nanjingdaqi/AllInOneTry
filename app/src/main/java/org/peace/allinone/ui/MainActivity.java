@@ -17,12 +17,15 @@ public class MainActivity extends AppCompatActivity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+    dataMgr = new DataMgr();
+    dataMgr.data = "init data";
     binding.setDataMgr(dataMgr);
   }
 
   public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
+      dataMgr.setData("new Data");
     }
   }
 }
