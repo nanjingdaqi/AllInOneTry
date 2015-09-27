@@ -4,9 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
-import android.widget.TextView;
 import me.ele.commons.DimenUtil;
 
 /**
@@ -16,7 +16,8 @@ public class MyView extends View {
 
   Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
   Scroller scroller;
-
+  float scaler = 1.0f;
+  float ly;
 
   public MyView(Context context) {
     super(context);
@@ -48,6 +49,25 @@ public class MyView extends View {
     }
   }
 
+  @Override public boolean onTouchEvent(MotionEvent event) {
+    int action = event.getAction();
+    if (action == MotionEvent.ACTION_DOWN) {
+      ly = event.getY();
+      return true;
+    }
+    if (action == MotionEvent.ACTION_MOVE) {
+      float y = event.getY();
+      float dy = (y - ly) * scaler;
+      scrollBy(0, (int) -dy);
+      ly = y;
+      return true;
+    }
+    if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
+      return true;
+    }
+    return true;
+  }
+
   public void smoothScrollBy(int dy) {
     scroller.startScroll(0, getScrollY(), 0, dy, 3000);
     invalidate();
@@ -55,9 +75,9 @@ public class MyView extends View {
 
   @Override public void computeScroll() {
     super.computeScroll();
-    if (scroller.computeScrollOffset()) {
-      scrollTo(0, scroller.getCurrY());
-      postInvalidate();
-    }
+    //if (scroller.computeScrollOffset()) {
+    //  scrollTo(0, scroller.getCurrY());
+    //  postInvalidate();
+    //}
   }
 }
