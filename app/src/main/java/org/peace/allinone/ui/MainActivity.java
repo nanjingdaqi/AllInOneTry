@@ -21,31 +21,31 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.inject(this);
 
-    runOnUiThread(new Runnable() {
+    tv.postDelayed(new Runnable() {
       @Override public void run() {
         tv.setVisibility(View.GONE);
         tv.setVisibility(View.GONE);
       }
-    });
+    }, 1000);
 
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      runOnUiThread(new Runnable() {
+      tv.postDelayed(new Runnable() {
         @Override public void run() {
           tv.setVisibility(View.GONE);
           tv.setVisibility(View.GONE);
         }
-      });
+      }, 1000);
 
-      runOnUiThread(new Runnable() {
+      tv.postDelayed(new Runnable() {
         @Override public void run() {
           tv.setVisibility(View.GONE);
           tv.setVisibility(View.VISIBLE);
         }
-      });
+      }, 1000);
     }
   }
 }
