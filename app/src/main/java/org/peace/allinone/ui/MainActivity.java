@@ -13,7 +13,7 @@ import org.peace.allinone.R;
 public class MainActivity extends AppCompatActivity {
 
   @InjectView(R.id.start_btn) Button mStartBtn;
-  @InjectView(R.id.tv) TextView tv;
+  @InjectView(R.id.tv) TriangleRectPopTextView tv;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -27,12 +27,18 @@ public class MainActivity extends AppCompatActivity {
         tv.setVisibility(View.GONE);
       }
     }, 1000);
-
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
+      tv.postDelayed(new Runnable() {
+        @Override public void run() {
+          tv.setVisibility(View.GONE);
+          tv.setVisibility(View.GONE);
+        }
+      }, 1000);
+
       tv.postDelayed(new Runnable() {
         @Override public void run() {
           tv.setVisibility(View.GONE);
