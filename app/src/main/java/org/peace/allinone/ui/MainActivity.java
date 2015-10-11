@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
   @InjectView(R.id.toolbar) Toolbar toolbar;
   @InjectView(R.id.rv) RecyclerView rv;
+  @InjectView(R.id.toolbar_layout) CollapsingToolbarLayout toolbarLayout;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
   private void init() {
     setSupportActionBar(toolbar);
     getSupportActionBar().setTitle("CoOrdinateLayout Try");
+    toolbarLayout.setTitle("CoOrdinateLayout Try");
 
     rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
     rv.setAdapter(new RVAdapter(this));
