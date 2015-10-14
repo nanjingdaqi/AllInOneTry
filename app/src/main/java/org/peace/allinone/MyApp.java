@@ -2,6 +2,7 @@ package org.peace.allinone;
 
 import android.app.Application;
 import android.content.Context;
+import com.facebook.stetho.Stetho;
 import com.github.mmin18.layoutcast.LayoutCast;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
@@ -21,6 +22,7 @@ public class MyApp extends Application {
 
     if (BuildConfig.DEBUG) {
       LayoutCast.init(this);
+      Stetho.initializeWithDefaults(this);
     }
   }
 
