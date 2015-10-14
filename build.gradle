@@ -15,7 +15,6 @@ buildscript {
 allprojects {
   repositories {
     jcenter()
-    //    mavenCenter()
     maven {
       url "${server}/nexus/content/groups/mobile"
       //      url "https://jitpack.io"
@@ -24,8 +23,8 @@ allprojects {
         password nexusPassword
       }
     }
-//    maven {
-//      url "https://jitpack.io"
-//    }
+    maven {
+      url "https://jitpack.io"
+    }
   }
 }
