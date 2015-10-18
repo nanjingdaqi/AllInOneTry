@@ -58,9 +58,9 @@ public class MainActivity extends AppCompatActivity {
 
   void tryRx() {
     Observable<User> o1 = service.getUserName();
-    Observable<User> o2 = service.getUserAge();
-    Observable.zip(o1, o2, new Func2<User, User, Void>() {
-      @Override public Void call(User user, User user2) {
+    Observable<Integer> o2 = service.getUserAge();
+    Observable.zip(o1, o2, new Func2<User, Integer, Void>() {
+      @Override public Void call(User user, Integer user2) {
         AppLogger.e("name: " + user.name);
         AppLogger.e("age: " + user.age);
         return null;

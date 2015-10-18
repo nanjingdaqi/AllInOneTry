@@ -15,7 +15,7 @@ public interface UserService {
   @GET("/")
   Observable<User> getUserName();
 
-  @GET("/")
-  Observable<User> getUserAge();
+  @GET("/error")
+  Observable<Integer> getUserAge();
 
 }
