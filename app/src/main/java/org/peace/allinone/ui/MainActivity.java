@@ -14,6 +14,12 @@ import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
+import rx.Observable;
+import rx.Scheduler;
+import rx.Subscriber;
+import rx.functions.Func1;
+import rx.functions.Func2;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,20 +38,48 @@ public class MainActivity extends AppCompatActivity {
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      Call<User> userCall = service.getUser();
-      userCall.enqueue(new Callback<User>() {
-        @Override public void onResponse(Response<User> response, Retrofit retrofit) {
-          User user = response.body();
-          AppLogger.d("name: " + user.name);
-        }
-
-        @Override public void onFailure(Throwable throwable) {
-          AppLogger.e("fail");
-          AppLogger.e(throwable.getCause());
-          AppLogger.e(throwable.getMessage());
-          AppLogger.e(throwable.getLocalizedMessage());
-        }
-      });
+      tryRx();
     }
+  }
+
+  void tryCommon() {
+    Call<User> userCall = service.getUser();
+    userCall.enqueue(new Callback<User>() {
+      @Override public void onResponse(Response<User> response, Retrofit retrofit) {
+        User user = response.body();
+        AppLogger.d("name: " + user.name);
+      }
+
+      @Override public void onFailure(Throwable throwable) {
+        AppLogger.e("fail");
+      }
+    });
+  }
+
+  void tryRx() {
+    Observable<User> o1 = service.getUserName();
+    Observable<User> o2 = service.getUserAge();
+    Observable.zip(o1, o2, new Func2<User, User, Void>() {
+      @Override public Void call(User user, User user2) {
+        AppLogger.e("name: " + user.name);
+        AppLogger.e("age: " + user.age);
+        return null;
+      }
+    })
+        .observeOn(Schedulers.newThread())
+        .subscribeOn(Schedulers.newThread())
+        .subscribe(new Subscriber<Void>() {
+          @Override public void onCompleted() {
+            AppLogger.d("onComplete");
+          }
+
+          @Override public void onError(Throwable throwable) {
+            AppLogger.e("error");
+          }
+
+          @Override public void onNext(Void aVoid) {
+            AppLogger.d("onnext");
+          }
+        });
   }
 }
