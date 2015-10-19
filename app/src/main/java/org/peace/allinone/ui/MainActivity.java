@@ -4,10 +4,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import com.google.gson.annotations.SerializedName;
 import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 import retrofit.Call;
@@ -15,15 +15,16 @@ import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
-import rx.functions.Func1;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
   @InjectView(R.id.start_btn) Button mStartBtn;
+  @InjectView(R.id.name) TextView name;
+  @InjectView(R.id.age) TextView age;
 
   UserService service;
 
@@ -58,17 +59,17 @@ public class MainActivity extends AppCompatActivity {
 
   void tryRx() {
     Observable<User> o1 = service.getUserName();
-    Observable<Integer> o2 = service.getUserAge();
-    Observable.zip(o1, o2, new Func2<User, Integer, Void>() {
-      @Override public Void call(User user, Integer user2) {
+    Observable<User> o2 = service.getUserAge();
+    Observable.zip(o1, o2, new Func2<User, User, User>() {
+      @Override public User call(User user, User user2) {
         AppLogger.e("name: " + user.name);
         AppLogger.e("age: " + user.age);
-        return null;
+        return user;
       }
     })
-        .observeOn(Schedulers.newThread())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.newThread())
-        .subscribe(new Subscriber<Void>() {
+        .subscribe(new Subscriber<User>() {
           @Override public void onCompleted() {
             AppLogger.d("onComplete");
           }
@@ -77,8 +78,9 @@ public class MainActivity extends AppCompatActivity {
             AppLogger.e("error");
           }
 
-          @Override public void onNext(Void aVoid) {
-            AppLogger.d("onnext");
+          @Override public void onNext(User user) {
+            name.setText(user.name);
+            age.setText(String.valueOf(user.age));
           }
         });
   }
