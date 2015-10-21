@@ -25,13 +25,9 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.inject(this);
 
-    RxView.clickEvents(mStartBtn).subscribe(new Action1<ViewClickEvent>() {
-      @Override public void call(ViewClickEvent viewClickEvent) {
-        View v = viewClickEvent.view();
-        int id = v.getId();
-        AppLogger.d("view id: " + id);
-      }
+    RxView.clickEvents(mStartBtn).subscribe((event) -> {
+      View v = event.view();
+      AppLogger.d("view id: " + v.getId());
     });
   }
-
 }
