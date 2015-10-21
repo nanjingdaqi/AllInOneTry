@@ -7,7 +7,13 @@ import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.view.ViewClickEvent;
+import com.jakewharton.rxbinding.widget.RxCompoundButton;
+import com.jakewharton.rxbinding.widget.RxTextView;
+import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
+import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,12 +24,14 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     ButterKnife.inject(this);
+
+    RxView.clickEvents(mStartBtn).subscribe(new Action1<ViewClickEvent>() {
+      @Override public void call(ViewClickEvent viewClickEvent) {
+        View v = viewClickEvent.view();
+        int id = v.getId();
+        AppLogger.d("view id: " + id);
+      }
+    });
   }
 
-  @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    int id = v.getId();
-    if (id == R.id.start_btn) {
-
-    }
-  }
 }
