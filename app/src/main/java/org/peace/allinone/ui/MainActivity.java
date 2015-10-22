@@ -36,10 +36,10 @@ public class MainActivity extends AppCompatActivity {
     private void initToolbar() {
         setSupportActionBar(toolbar);
         toolbar.setTitle("Customized Title");
-        toolbar.setSubtitle("Sub Title");
-        toolbar.setLogo(R.drawable.ic_launcher);
-        toolbar.setNavigationIcon(R.drawable.ic_menu);
-        toolbar.setNavigationContentDescription("Custom up description");
+        //toolbar.setSubtitle("Sub Title");
+        //toolbar.setLogo(R.drawable.ic_launcher);
+        //toolbar.setNavigationIcon(R.drawable.ic_menu);
+        //toolbar.setNavigationContentDescription("Custom up description");
     }
 
     @Override
