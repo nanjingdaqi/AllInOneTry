@@ -23,8 +23,16 @@ public class TouchEventViewGroup extends FrameLayout {
   }
 
   @Override public boolean dispatchTouchEvent(MotionEvent ev) {
-    AppLogger.w("dispatch event: " + ev);
+    AppLogger.d("dispatch event: " + ev);
     return super.dispatchTouchEvent(ev);
+  }
+
+  @Override public boolean onInterceptTouchEvent(MotionEvent ev) {
+    AppLogger.d("on intercept event: " + ev);
+    if (ev.getAction() == MotionEvent.ACTION_MOVE) {
+      return true;
+    }
+    return false;
   }
 
   @Override public boolean onTouchEvent(MotionEvent event) {

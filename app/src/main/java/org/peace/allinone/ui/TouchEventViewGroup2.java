@@ -32,7 +32,7 @@ public class TouchEventViewGroup2 extends ViewGroup {
   }
 
   @Override public boolean onTouchEvent(MotionEvent event) {
-    AppLogger.d("onTouch event: " + event);
+    AppLogger.w("onTouch event: " + event);
     int action = event.getAction();
     if (MotionEvent.ACTION_DOWN == action) {
       return true;
