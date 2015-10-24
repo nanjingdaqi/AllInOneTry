@@ -2,7 +2,9 @@ package org.peace.allinone.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import me.ele.commons.AppLogger;
 
 /**
  * Created by peacepassion on 15/10/24.
@@ -23,8 +25,12 @@ public class MyView extends View {
 
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    setMeasuredDimension(MeasureSpec.makeMeasureSpec(100, MeasureSpec.EXACTLY),
-        MeasureSpec.makeMeasureSpec(100, MeasureSpec.EXACTLY));
+    setMeasuredDimension(MeasureSpec.makeMeasureSpec(600, MeasureSpec.EXACTLY),
+        MeasureSpec.makeMeasureSpec(600, MeasureSpec.EXACTLY));
   }
 
+  @Override public boolean onTouchEvent(MotionEvent event) {
+    AppLogger.d("motion event: " + event);
+    return true;
+  }
 }
