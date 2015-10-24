@@ -5,6 +5,7 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.animation.LinearInterpolator;
@@ -39,37 +40,32 @@ public class MyScrollView extends LinearLayout {
   VelocityTracker velocityTracker;
   float dFlingSpd = 0.005f; // px/ms
   ValueAnimator flingAnim;
+  GestureDetector gestureDetector =
+      new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+        @Override public boolean onDown(MotionEvent e) {
+          if (flingAnim != null) {
+            flingAnim.cancel();
+          }
+          return true;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+          scrollBy(0, (int) distanceY);
+          return true;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+          AppLogger.w("vy: " + velocityY / 1000);
+          startFlingMove(
+              velocityY > 0 ? Math.max(velocityY / 1000, 3) : -Math.max(-velocityY / 1000, 3));
+          return true;
+        }
+      });
 
   @Override public boolean onTouchEvent(MotionEvent event) {
-    int action = event.getAction();
-    if (action == MotionEvent.ACTION_DOWN) {
-      if (flingAnim != null) {
-        flingAnim.cancel();
-      }
-      ly = event.getY();
-      velocityTracker = VelocityTracker.obtain();
-      velocityTracker.addMovement(event);
-      return true;
-    }
-    velocityTracker.addMovement(event);
-    if (action == MotionEvent.ACTION_MOVE) {
-      for (int i = 0, hz = event.getHistorySize(); i < hz; ++i) {
-        //AppLogger.d("hz: " + hz);
-        float cy = event.getHistoricalY(i);
-        float dy = cy - ly;
-        scrollBy(0, -(int) dy);
-        ly = cy;
-      }
-      return true;
-    }
-    if (action == MotionEvent.ACTION_UP) {
-      velocityTracker.computeCurrentVelocity(1, 3);
-      float yv = velocityTracker.getYVelocity();
-      AppLogger.w("fling speed: " + yv);
-      startFlingMove(yv);
-      return true;
-    }
-    return true;
+    return gestureDetector.onTouchEvent(event);
   }
 
   private void startFlingMove(float yv) {
@@ -80,7 +76,7 @@ public class MyScrollView extends LinearLayout {
       float frac = (float) anim.getAnimatedValue() / 100;
       float t = duration * frac;
       float dy = Math.abs(yv) * t - dFlingSpd * t * t / 2;
-      float ty = yv < 0 ? csy + dy : csy -dy;
+      float ty = yv < 0 ? csy + dy : csy - dy;
       AppLogger.d("t: " + t + ", dy: " + dy);
       scrollTo(0, (int) ty);
     });
