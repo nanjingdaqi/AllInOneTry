@@ -63,7 +63,7 @@ public class MyScrollView extends LinearLayout {
       return true;
     }
     if (action == MotionEvent.ACTION_UP) {
-      velocityTracker.computeCurrentVelocity(1);
+      velocityTracker.computeCurrentVelocity(1, 3);
       float yv = velocityTracker.getYVelocity();
       AppLogger.w("fling speed: " + yv);
       startFlingMove(yv);
