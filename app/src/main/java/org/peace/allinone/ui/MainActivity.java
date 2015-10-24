@@ -12,6 +12,7 @@ import org.peace.allinone.R;
 public class MainActivity extends AppCompatActivity {
 
   @InjectView(R.id.start_btn) Button mStartBtn;
+  @InjectView(R.id.my_view) View myView;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -23,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-
+      myView.setTranslationX(100);
+      myView.setTranslationY(100);
     }
   }
 }
