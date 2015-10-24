@@ -35,7 +35,7 @@ public class TouchEventViewGroup extends ViewGroup {
     AppLogger.d("onTouch event: " + event);
     int action = event.getAction();
     if (MotionEvent.ACTION_DOWN == action) {
-      return true;
+      return false;
     }
     return false;
   }
