@@ -37,11 +37,15 @@ public class MyScrollView extends LinearLayout {
 
   float ly;
   VelocityTracker velocityTracker;
-  float dFlingSpd = 0.02f; // px/ms
+  float dFlingSpd = 0.005f; // px/ms
+  ValueAnimator flingAnim;
 
   @Override public boolean onTouchEvent(MotionEvent event) {
     int action = event.getAction();
     if (action == MotionEvent.ACTION_DOWN) {
+      if (flingAnim != null) {
+        flingAnim.cancel();
+      }
       ly = event.getY();
       velocityTracker = VelocityTracker.obtain();
       velocityTracker.addMovement(event);
@@ -71,8 +75,8 @@ public class MyScrollView extends LinearLayout {
   private void startFlingMove(float yv) {
     final float duration = Math.abs(yv) / dFlingSpd;
     final int csy = getScrollY();
-    ValueAnimator va = TimeAnimator.ofFloat(0, 100).setDuration((long) (duration));
-    va.addUpdateListener(anim -> {
+    flingAnim = TimeAnimator.ofFloat(0, 100).setDuration((long) (duration));
+    flingAnim.addUpdateListener(anim -> {
       float frac = (float) anim.getAnimatedValue() / 100;
       float t = duration * frac;
       float dy = Math.abs(yv) * t - dFlingSpd * t * t / 2;
@@ -80,6 +84,6 @@ public class MyScrollView extends LinearLayout {
       AppLogger.d("t: " + t + ", dy: " + dy);
       scrollTo(0, (int) ty);
     });
-    va.start();
+    flingAnim.start();
   }
 }
