@@ -3,6 +3,7 @@ package org.peace.allinone.ui;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import me.ele.commons.AppLogger;
 
@@ -28,28 +29,51 @@ public class TouchEventViewGroup2 extends ViewGroup {
 
   @Override public boolean dispatchTouchEvent(MotionEvent ev) {
     AppLogger.w("dispatch event: " + ev);
+    int action = ev.getAction();
+    float x = ev.getRawX(), y = ev.getRawY();
+    switch (action) {
+      case MotionEvent.ACTION_DOWN:
+        downX = x;
+        downY = y;
+        mine = false;
+        getParent().requestDisallowInterceptTouchEvent(true);
+        break;
+      case MotionEvent.ACTION_MOVE:
+        if (mine) {
+          break;
+        }
+        if (Math.hypot(x - downX, y - downY) < 3) {
+          return false;
+        }
+        if (Math.abs(x - downX) > Math.abs(y - downY)) {
+          getParent().requestDisallowInterceptTouchEvent(false);
+          return false;
+        }
+        mine = true;
+        break;
+      default:
+        break;
+    }
     return super.dispatchTouchEvent(ev);
   }
 
+  float downX, downY;
   float lx, ly;
+  boolean mine;
 
   @Override public boolean onTouchEvent(MotionEvent event) {
     AppLogger.w("onTouch event: " + event);
     int action = event.getAction();
-    float x = event.getRawY(), y = event.getRawY();
-    if (MotionEvent.ACTION_DOWN == action) {
-      lx = x;
-      ly = y;
-      return true;
+    float y = event.getRawY();
+    switch (action) {
+      case MotionEvent.ACTION_MOVE:
+        float dy = y - ly;
+        setY(getY() + dy);
+        break;
+      default:
+        break;
     }
-    if (MotionEvent.ACTION_MOVE == action) {
-      float dx = x - lx, dy = y - ly;
-      if (Math.hypot(dx, dy) < 3) {
-        return false;
-      }
-      setTranslationY(getTranslationY() + dy);
-      ly = y;
-    }
+    ly = y;
     return true;
   }
 }

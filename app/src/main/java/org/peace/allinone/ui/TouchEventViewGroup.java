@@ -34,46 +34,26 @@ public class TouchEventViewGroup extends FrameLayout {
 
   @Override public boolean onInterceptTouchEvent(MotionEvent ev) {
     AppLogger.d("on intercept event: " + ev);
-    float x = ev.getRawX(), y = ev.getRawY();
-    lx = x;
     if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-      downX = x;
-      downY = y;
-      notMine = false;
+      lx = ev.getRawX();
       return false;
     }
-
-    if (notMine) {
-      return false;
-    }
-
-    if (Math.hypot(x - downX, y - downY) < 3) {
-      return false;
-    }
-
-    if (ev.getAction() == MotionEvent.ACTION_MOVE) {
-      if (Math.abs(x - downX) >= Math.abs(y - downY)) {
-        return true;
-      }
-      notMine = true;
-    }
-    return false;
+    return true;
   }
 
   @Override public boolean onTouchEvent(MotionEvent event) {
     AppLogger.d("onTouch event: " + event);
-    boolean res = false;
     int action = event.getAction();
     float x = event.getRawX();
-    AppLogger.d("x: " + x);
-    if (MotionEvent.ACTION_DOWN == action) {
-      res = true;
-    } else if (MotionEvent.ACTION_MOVE == action) {
-      float dx = x - lx;
-      setTranslationX(getTranslationX() + dx);
-      res = true;
+    switch (action) {
+      case MotionEvent.ACTION_MOVE:
+        float dx = x - lx;
+        setX(getX() + dx);
+        break;
+      default:
+        break;
     }
     lx = x;
-    return res;
+    return true;
   }
 }
