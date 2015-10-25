@@ -10,6 +10,7 @@ import me.ele.commons.AppLogger;
  * Created by peacepassion on 15/10/24.
  */
 public class TouchEventViewGroup extends FrameLayout {
+
   public TouchEventViewGroup(Context context) {
     super(context);
   }
@@ -22,6 +23,10 @@ public class TouchEventViewGroup extends FrameLayout {
     super(context, attrs, defStyleAttr);
   }
 
+  float lx, ly;
+  float downX, downY;
+  boolean notMine;
+
   @Override public boolean dispatchTouchEvent(MotionEvent ev) {
     AppLogger.d("dispatch event: " + ev);
     return super.dispatchTouchEvent(ev);
@@ -29,18 +34,46 @@ public class TouchEventViewGroup extends FrameLayout {
 
   @Override public boolean onInterceptTouchEvent(MotionEvent ev) {
     AppLogger.d("on intercept event: " + ev);
+    float x = ev.getRawX(), y = ev.getRawY();
+    lx = x;
+    if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+      downX = x;
+      downY = y;
+      notMine = false;
+      return false;
+    }
+
+    if (notMine) {
+      return false;
+    }
+
+    if (Math.hypot(x - downX, y - downY) < 3) {
+      return false;
+    }
+
     if (ev.getAction() == MotionEvent.ACTION_MOVE) {
-      return true;
+      if (Math.abs(x - downX) >= Math.abs(y - downY)) {
+        return true;
+      }
+      notMine = true;
     }
     return false;
   }
 
   @Override public boolean onTouchEvent(MotionEvent event) {
     AppLogger.d("onTouch event: " + event);
+    boolean res = false;
     int action = event.getAction();
+    float x = event.getRawX();
+    AppLogger.d("x: " + x);
     if (MotionEvent.ACTION_DOWN == action) {
-      return false;
+      res = true;
+    } else if (MotionEvent.ACTION_MOVE == action) {
+      float dx = x - lx;
+      setTranslationX(getTranslationX() + dx);
+      res = true;
     }
-    return false;
+    lx = x;
+    return res;
   }
 }

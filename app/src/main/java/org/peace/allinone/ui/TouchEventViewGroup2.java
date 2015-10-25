@@ -32,41 +32,24 @@ public class TouchEventViewGroup2 extends ViewGroup {
   }
 
   float lx, ly;
-  boolean downStart;
-  boolean canScroll;
 
   @Override public boolean onTouchEvent(MotionEvent event) {
     AppLogger.w("onTouch event: " + event);
     int action = event.getAction();
-    float x = event.getX(), y = event.getY();
+    float x = event.getRawY(), y = event.getRawY();
     if (MotionEvent.ACTION_DOWN == action) {
-      downStart = true;
-      canScroll = true;
       lx = x;
       ly = y;
       return true;
-    }
-    if (!canScroll) {
-      return false;
     }
     if (MotionEvent.ACTION_MOVE == action) {
       float dx = x - lx, dy = y - ly;
-      if (Math.hypot(dx, dy) < 2 && downStart) {
+      if (Math.hypot(dx, dy) < 3) {
         return false;
       }
-      AppLogger.w("dx: " + dx + ", dy: " + dy);
-      lx = x;
-      ly = y;
-      if (Math.abs(dy) < Math.abs(dx) && downStart) {
-        downStart = false;
-        canScroll = false;
-        return false;
-      }
-      downStart = false;
       setTranslationY(getTranslationY() + dy);
-      return true;
+      ly = y;
     }
-    downStart = false;
-    return false;
+    return true;
   }
 }
