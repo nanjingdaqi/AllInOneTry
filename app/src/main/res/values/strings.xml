@@ -4,5 +4,10 @@
   <string name="app_name">All In One Try</string>
   <string name="hello_world">Hello world!</string>
   <string name="action_settings">Settings</string>
+  <string name="application_name">Scalpel Sample</string>
+  <string name="launcher_name">Scalpel</string>
+
+  <string name="first_run">Touch to rotate.\nPinch vertically to zoom.\nPinch horizontally to stretch.</string>
+
 
 </resources>
