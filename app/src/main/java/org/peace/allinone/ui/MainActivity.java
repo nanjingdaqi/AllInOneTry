@@ -1,11 +1,16 @@
 package org.peace.allinone.ui;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -33,6 +38,28 @@ public class MainActivity extends AppCompatActivity {
 
     list1.setAdapter(adapter1);
     list2.setAdapter(adapter2);
+    list1.getViewTreeObserver()
+        .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+          @TargetApi(Build.VERSION_CODES.JELLY_BEAN) @Override public void onGlobalLayout() {
+            list1.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            int h = adapter1.getCount() * 60;
+            LinearLayout.LayoutParams params =
+                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h);
+            list1.setLayoutParams(params);
+            list1.requestLayout();
+          }
+        });
+    list2.getViewTreeObserver()
+        .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+          @TargetApi(Build.VERSION_CODES.JELLY_BEAN) @Override public void onGlobalLayout() {
+            list2.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            int h = adapter1.getCount() * 60;
+            LinearLayout.LayoutParams params =
+                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h);
+            list2.setLayoutParams(params);
+            list2.requestLayout();
+          }
+        });
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
