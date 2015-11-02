@@ -8,6 +8,8 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 import retrofit.Call;
@@ -39,8 +41,20 @@ public class MainActivity extends AppCompatActivity {
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      tryRx();
+      tryBuildFromTree();
     }
+  }
+
+  private void tryBuildFromTree() {
+    User user = new User();
+    user.age = 20;
+    user.name = "Daqi";
+    Bar bar = new Bar();
+    bar.content = "Bar Content";
+    Gson gson = new Gson();
+    JsonObject jsonObject = gson.toJsonTree(user).getAsJsonObject();
+    jsonObject.add("bar", gson.toJsonTree(bar));
+    AppLogger.d(jsonObject.toString());
   }
 
   void tryCommon() {
