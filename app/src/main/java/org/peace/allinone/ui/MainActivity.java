@@ -1,16 +1,11 @@
 package org.peace.allinone.ui;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -28,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.list2) ListView list2;
 
   MyAdapter adapter1 = new MyAdapter();
-  MyAdapter adapter2 = new MyAdapter();
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -37,33 +31,27 @@ public class MainActivity extends AppCompatActivity {
     ButterKnife.bind(this);
 
     list1.setAdapter(adapter1);
-    list2.setAdapter(adapter2);
-    list1.getViewTreeObserver()
-        .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-          @TargetApi(Build.VERSION_CODES.JELLY_BEAN) @Override public void onGlobalLayout() {
-            list1.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            int h = adapter1.getCount() * 60;
-            LinearLayout.LayoutParams params =
-                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h);
-            list1.setLayoutParams(params);
-            list1.requestLayout();
-          }
-        });
-    list2.getViewTreeObserver()
-        .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-          @TargetApi(Build.VERSION_CODES.JELLY_BEAN) @Override public void onGlobalLayout() {
-            list2.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            int h = adapter1.getCount() * 60;
-            LinearLayout.LayoutParams params =
-                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h);
-            list2.setLayoutParams(params);
-            list2.requestLayout();
-          }
-        });
+    list1.setVisibility(View.GONE);
   }
 
-  @OnClick(R.id.start_btn) public void onClick(View v) {
-
+  @OnClick({ R.id.start_btn }) public void onClick(View v) {
+    int id = v.getId();
+    if (id == R.id.start_btn) {
+      adapter1.addContents();
+      list1.setVisibility(View.VISIBLE);
+      adapter1.notifyDataSetChanged();
+      list1.post(new Runnable() {
+        @Override public void run() {
+          list1.setVisibility(View.GONE);
+          adapter1.contents.remove(0);
+          list1.post(new Runnable() {
+            @Override public void run() {
+              list1.setVisibility(View.VISIBLE);
+            }
+          });
+        }
+      });
+    }
   }
 
   class MyAdapter extends BaseAdapter {
@@ -71,6 +59,14 @@ public class MainActivity extends AppCompatActivity {
     List<String> contents;
 
     MyAdapter() {
+      contents = new LinkedList<>();
+    }
+
+    public void clearContents() {
+      contents.clear();
+    }
+
+    public void addContents() {
       contents = new LinkedList<>();
       for (int i = 0; i < 20; ++i) {
         contents.add("Item: " + i);
