@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      tryBuildFromTree();
+      tryCommon();
     }
   }
 
