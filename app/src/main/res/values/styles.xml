@@ -6,4 +6,14 @@
     <!-- Customize your theme here. -->
   </style>
 
+  <style name="ProcessDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <item name="android:windowBackground">@android:color/transparent</item>
+    <item name="android:windowAnimationStyle">@style/MD_WindowAnimation</item>
+  </style>
+
+  <style name="MD_WindowAnimation">
+    <item name="android:windowEnterAnimation">@anim/popup_enter</item>
+    <item name="android:windowExitAnimation">@anim/popup_exit</item>
+  </style>
+
 </resources>
