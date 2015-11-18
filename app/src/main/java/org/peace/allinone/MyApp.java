@@ -2,6 +2,7 @@ package org.peace.allinone;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.StrictMode;
 import com.facebook.stetho.DumperPluginsProvider;
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.dumpapp.DumperPlugin;
@@ -28,6 +29,10 @@ public class MyApp extends Application {
           .enableDumpapp(new MyDumperPluginsProvider(this))
           .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
           .build());
+      StrictMode.setVmPolicy(
+          new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().penaltyDeath().build());
+      StrictMode.setThreadPolicy(
+          new StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().penaltyDeath().build());
     }
   }
 

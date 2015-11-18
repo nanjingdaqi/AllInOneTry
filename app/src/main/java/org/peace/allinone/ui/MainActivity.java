@@ -23,7 +23,19 @@ public class MainActivity extends AppCompatActivity {
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-
+      longCall();
     }
+  }
+
+  public void longCall() {
+    new Thread(new Runnable() {
+      @Override public void run() {
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }).start();
   }
 }
