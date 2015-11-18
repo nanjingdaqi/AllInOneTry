@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      String json = "{ \"t\":1.232}";
+      String json = "{ \"t\":1.2323e3}";
       Gson gson = new Gson();
       T t = gson.fromJson(json, T.class);
       AppLogger.d("t: " + t.t);
