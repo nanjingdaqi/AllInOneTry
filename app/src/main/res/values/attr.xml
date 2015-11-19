@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="global">
-        <attr name="testAttr" format="dimension"/>
-    </declare-styleable>
+  <declare-styleable name="global">
+    <attr name="testAttr"
+        format="dimension"/>
+    <attr name="android:textSize"/>
+  </declare-styleable>
 </resources>
