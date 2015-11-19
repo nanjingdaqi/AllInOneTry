@@ -1,10 +1,9 @@
 package org.peace.allinone.ui;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,29 +49,28 @@ public class MainActivity extends AppCompatActivity {
                             dialog.dismiss();
                         }
                     })
+                    .positiveColor(Color.parseColor("#3190e8"))
+                    .negativeColor(Color.parseColor("#3190e8"))
                     .build();
-            ListView rv = (ListView) dlg.findViewById(R.id.list);
-            rv.setAdapter(new MyAdapter(this));
-            rv.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    rv.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    int maxH = DimenUtil.dip2px(MainActivity.this, 80);
-                    if (maxH < rv.getMeasuredHeight()) {
-                        ViewGroup.LayoutParams layoutParams = rv.getLayoutParams();
-                        if (layoutParams != null) {
-                            layoutParams.height = maxH;
-                        }
-                    }
-                }
+            ListView lv = (ListView) dlg.findViewById(R.id.list);
+            lv.setAdapter(new MyAdapter(this));
+            int heightSpec = View.MeasureSpec.makeMeasureSpec(DimenUtil.dip2px(MainActivity.this, 130),
+                    View.MeasureSpec.AT_MOST);
+            lv.measure(0, heightSpec);
+            ViewGroup.LayoutParams layoutParams = lv.getLayoutParams();
+            if (layoutParams != null) {
+                layoutParams.height = lv.getMeasuredHeight();
             }
+            dlg.show();
         }
     }
 
     public static class MyVH {
 
-        @InjectView(R.id.content)
+        @InjectView(R.id.food_name)
         TextView content;
+        @InjectView(R.id.price)
+        TextView price;
 
         public MyVH(View itemView) {
             ButterKnife.inject(this, itemView);
@@ -89,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 inflater = LayoutInflater.from(activity);
                 data = new LinkedList<>();
                 for (int i = 0; i < 10; ++i) {
-                    data.add("Item " + i);
+                    data.add("番茄炒鸡蛋" + i);
                 }
             }
 
@@ -118,7 +116,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 vh = (MyVH) convertView.getTag();
                 vh.content.setText((String) getItem(position));
+                vh.price.setText("-¥" + position);
                 return convertView;
+            }
+
+            @Override
+            public boolean isEnabled(int position) {
+                return false;
             }
         }
     }
