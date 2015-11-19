@@ -17,13 +17,16 @@
       android:textColor="#333"
       android:text="17.5"
       android:layout_gravity="center_horizontal"
+      android:layout_marginTop="10dp"
       android:layout_marginBottom="32dp"
       />
 
   <include layout="@layout/include_dlg_divider"/>
 
-  <android.support.v7.widget.RecyclerView
+  <ListView
       android:id="@+id/list"
+      android:divider="@null"
+      android:dividerHeight="0dp"
       android:layout_marginTop="16dp"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"

@@ -9,7 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -29,10 +31,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ButterKnife.bind(this);
+        ButterKnife.inject(this);
     }
 
-    @OnClick(R.id.start_btn)
+    @OnClick({R.id.start_btn})
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.start_btn) {
@@ -49,8 +51,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     })
                     .build();
-            RecyclerView rv = (RecyclerView) dlg.findViewById(R.id.list);
-            rv.setLayoutManager(new LinearLayoutManager(this));
+            ListView rv = (ListView) dlg.findViewById(R.id.list);
             rv.setAdapter(new MyAdapter(this));
             rv.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
@@ -64,51 +65,62 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
-            });
-            dlg.show();
+            }
         }
     }
 
-    public static class MyVH extends RecyclerView.ViewHolder {
+    public static class MyVH {
 
         @InjectView(R.id.content)
         TextView content;
 
         public MyVH(View itemView) {
-            super(itemView);
             ButterKnife.inject(this, itemView);
         }
-    }
 
-    public static class MyAdapter extends RecyclerView.Adapter<MyVH> {
+        public static class MyAdapter extends BaseAdapter {
 
-        Activity activity;
-        LayoutInflater inflater;
-        List<String> data;
+            Activity activity;
+            LayoutInflater inflater;
+            List<String> data;
 
-        MyAdapter(Activity activity) {
-            this.activity = activity;
-            inflater = LayoutInflater.from(activity);
-            data = new LinkedList<>();
-            for (int i = 0; i < 1; ++i) {
-                data.add("Item " + i);
+            MyAdapter(Activity activity) {
+                this.activity = activity;
+                inflater = LayoutInflater.from(activity);
+                data = new LinkedList<>();
+                for (int i = 0; i < 10; ++i) {
+                    data.add("Item " + i);
+                }
             }
-        }
 
-        @Override
-        public MyVH onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView = inflater.inflate(R.layout.item_dlg, parent, false);
-            return new MyVH(itemView);
-        }
+            @Override
+            public int getCount() {
+                return data.size();
+            }
 
-        @Override
-        public void onBindViewHolder(MyVH holder, int position) {
-            holder.content.setText(data.get(position));
-        }
+            @Override
+            public Object getItem(int position) {
+                return data.get(position);
+            }
 
-        @Override
-        public int getItemCount() {
-            return data.size();
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                MyVH vh;
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.item_dlg, parent, false);
+                    vh = new MyVH(convertView);
+                    convertView.setTag(vh);
+                }
+                vh = (MyVH) convertView.getTag();
+                vh.content.setText((String) getItem(position));
+                return convertView;
+            }
         }
     }
 }
+
