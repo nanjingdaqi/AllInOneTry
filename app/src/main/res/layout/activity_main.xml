@@ -17,4 +17,16 @@
       android:layout_height="wrap_content"
       />
 
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="20dp"
+      />
+
+  <view
+      android:id="@+id/my_view"
+      class="org.peace.allinone.ui.MainActivity$MyView"
+      android:layout_width="match_parent"
+      android:layout_height="200dp"
+      />
+
 </LinearLayout>
