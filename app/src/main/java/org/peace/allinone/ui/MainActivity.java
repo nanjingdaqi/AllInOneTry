@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
       canvas.drawPath(path, paint);
       paint.setTextSize(50);
       canvas.rotate(180, x / 2, y / 2);
-      canvas.drawTextOnPath("This is a canvas demo app", path, 0, 0, paint);
+      canvas.drawTextOnPath("This is a canvas demo app", path, 10, 10, paint);
     }
   }
 }
