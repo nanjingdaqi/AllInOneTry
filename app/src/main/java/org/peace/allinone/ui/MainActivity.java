@@ -2,8 +2,13 @@ package org.peace.allinone.ui;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +24,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import me.ele.base.utils.DimenUtil;
 import org.peace.allinone.R;
 
@@ -61,8 +65,33 @@ public class MainActivity extends AppCompatActivity {
             if (layoutParams != null) {
                 layoutParams.height = lv.getMeasuredHeight();
             }
-            dlg.show();
-        }
+          })
+          .positiveColor(Color.parseColor("#3190e8"))
+          .negativeColor(Color.parseColor("#3190e8"))
+          .build();
+      ListView lv = (ListView) dlg.findViewById(R.id.list);
+      lv.setAdapter(new MyAdapter(this));
+      int heightSpec = View.MeasureSpec.makeMeasureSpec(DimenUtil.dip2px(MainActivity.this, 130),
+          View.MeasureSpec.AT_MOST);
+      lv.measure(0, heightSpec);
+      ViewGroup.LayoutParams layoutParams = lv.getLayoutParams();
+      if (layoutParams != null) {
+        layoutParams.height = lv.getMeasuredHeight();
+      }
+
+      TextView title = (TextView) dlg.findViewById(R.id.price_change);
+      SpannableString ss =
+          new SpannableString(StringUtil.RMB + String.valueOf(Math.abs(20.0)) + " ");
+      AbsoluteSizeSpan textSizeSpan = new AbsoluteSizeSpan(DimenUtil.sp2px(this, 24));
+      ss.setSpan(textSizeSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+      // todo replace by a smaller image
+      Drawable drawable = this.getResources().getDrawable(R.drawable.down);
+      drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+      ImageSpan imageSpan = new ImageSpan(drawable);
+      ss.setSpan(imageSpan, ss.length() - 1, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+      title.setText(ss);
+
+      dlg.show();
     }
 
     public static class MyVH {
