@@ -81,13 +81,15 @@ public class MainActivity extends AppCompatActivity {
 
       TextView title = (TextView) dlg.findViewById(R.id.price_change);
       SpannableString ss =
-          new SpannableString(StringUtil.RMB + String.valueOf(Math.abs(20.0)) + " ");
+          new SpannableString(StringUtil.RMB + String.valueOf(Math.abs(17.5)) + " ");
       AbsoluteSizeSpan textSizeSpan = new AbsoluteSizeSpan(DimenUtil.sp2px(this, 24));
       ss.setSpan(textSizeSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
       // todo replace by a smaller image
       Drawable drawable = this.getResources().getDrawable(R.drawable.down);
-      drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-      ImageSpan imageSpan = new ImageSpan(drawable);
+      int pt = 4;
+      drawable.setBounds(DimenUtil.dip2px(this, pt), 0,
+          drawable.getIntrinsicWidth() + DimenUtil.dip2px(this, pt), drawable.getIntrinsicHeight());
+      ImageSpan imageSpan = new ImageSpan(drawable, ImageSpan.ALIGN_BASELINE);
       ss.setSpan(imageSpan, ss.length() - 1, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
       title.setText(ss);
 
