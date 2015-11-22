@@ -17,4 +17,12 @@
       android:layout_height="wrap_content"
       />
 
+  <ImageSwitcher
+      android:id="@+id/image_switcher"
+      android:layout_marginTop="100dp"
+      android:layout_gravity="center_horizontal"
+      android:layout_width="200dp"
+      android:layout_height="200dp"
+      />
+
 </LinearLayout>
