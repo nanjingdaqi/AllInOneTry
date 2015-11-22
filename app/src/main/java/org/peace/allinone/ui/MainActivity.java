@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
       paint = new Paint(Paint.ANTI_ALIAS_FLAG);
       paint.setColor(getResources().getColor(android.R.color.holo_red_light));
-      paint.setStyle(Paint.Style.FILL);
+      paint.setStyle(Paint.Style.STROKE);
     }
 
     @Override protected void onDraw(Canvas canvas) {
@@ -66,12 +66,12 @@ public class MainActivity extends AppCompatActivity {
 
       int x = getMeasuredWidth(), y = getMeasuredHeight();
       int r = 200;
-      canvas.save();
-      canvas.translate(x / 2, y / 2);
-      canvas.restore();
-      canvas.drawCircle(0, 0, r, paint);
-      paint.setColor(getResources().getColor(android.R.color.holo_blue_light));
-      canvas.drawCircle(x / 2, y / 2, r, paint);
+      Path path = new Path();
+      path.addCircle(x / 2, y / 2, r, Path.Direction.CW);
+      canvas.drawPath(path, paint);
+      paint.setTextSize(50);
+      canvas.rotate(180, x / 2, y / 2);
+      canvas.drawTextOnPath("This is a canvas demo app", path, 0, 0, paint);
     }
   }
 }
