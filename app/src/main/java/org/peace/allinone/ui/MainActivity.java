@@ -59,13 +59,32 @@ public class MainActivity extends AppCompatActivity {
       paint = new Paint(Paint.ANTI_ALIAS_FLAG);
       paint.setColor(getResources().getColor(android.R.color.holo_red_light));
       paint.setStyle(Paint.Style.STROKE);
+      paint.setStrokeWidth(8);
     }
 
     @Override protected void onDraw(Canvas canvas) {
       super.onDraw(canvas);
-
       int x = getMeasuredWidth(), y = getMeasuredHeight();
+      int x2 = canvas.getWidth(), y2 = canvas.getHeight();
       int r = 200;
+      AppLogger.d("x: " + x + ", y: " + y);
+      AppLogger.d("x2: " + x2 + ", y2: " + y2);
+
+      Matrix m = canvas.getMatrix();
+      AppLogger.d("matrix: " + m);
+      //m.setRotate(90);
+      //AppLogger.d("matrix: " + m);
+      m.setRotate(90, x / 2, y / 2);
+      AppLogger.d("matrix: " + m);
+      //m.setTranslate(x / 2, y / 2);
+      //AppLogger.d("matrix: " + m);
+
+      canvas.concat(m);
+      AppLogger.d("canvas matrix: " + canvas.getMatrix());
+      //canvas.translate(x / 2, y / 2);
+      canvas.drawColor(getResources().getColor(android.R.color.black));
+      canvas.drawLine(0, y / 2, x, y / 2, paint);
+
       Path path = new Path();
       path.addCircle(x / 2, y / 2, r, Path.Direction.CW);
       canvas.drawPath(path, paint);
