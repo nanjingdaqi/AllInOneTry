@@ -3,6 +3,6 @@
   <dimen name="activity_horizontal_margin">16dp</dimen>
   <dimen name="activity_vertical_margin">16dp</dimen>
 
-  <dimen name="mt">10dp</dimen>
-  <dimen name="mb">10dp</dimen>
+  <dimen name="mt">0dp</dimen>
+  <dimen name="mb">0dp</dimen>
 </resources>

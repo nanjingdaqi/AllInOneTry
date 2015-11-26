@@ -20,12 +20,10 @@
       android:layout_width="match_parent"
       android:layout_height="40dp"/>
 
-  <View
-      android:background="@color/md_material_blue_600"
-      android:layout_marginTop="@dimen/mt"
-      android:layout_marginBottom="@dimen/mb"
+  <Space
       android:layout_width="match_parent"
       android:layout_height="40dp"/>
+      />
 
   <View
       android:background="@color/md_material_blue_600"
@@ -34,12 +32,10 @@
       android:layout_width="match_parent"
       android:layout_height="40dp"/>
 
-  <View
-      android:background="@color/md_material_blue_600"
-      android:layout_marginTop="@dimen/mt"
-      android:layout_marginBottom="@dimen/mb"
+  <Space
       android:layout_width="match_parent"
       android:layout_height="40dp"/>
+  />
 
   <View
       android:background="@color/md_material_blue_600"
@@ -47,6 +43,35 @@
       android:layout_marginBottom="@dimen/mb"
       android:layout_width="match_parent"
       android:layout_height="40dp"/>
+
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="40dp"/>
+  />
+
+  <View
+      android:background="@color/md_material_blue_600"
+      android:layout_marginTop="@dimen/mt"
+      android:layout_marginBottom="@dimen/mb"
+      android:layout_width="match_parent"
+      android:layout_height="40dp"/>
+
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="40dp"/>
+  />
+
+  <View
+      android:background="@color/md_material_blue_600"
+      android:layout_marginTop="@dimen/mt"
+      android:layout_marginBottom="@dimen/mb"
+      android:layout_width="match_parent"
+      android:layout_height="40dp"/>
+
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="40dp"/>
+  />
 
   <View
       android:background="@color/md_material_blue_600"
