@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Created by peacepassion on 15/12/5.
  */
 @Retention(RetentionPolicy.CLASS)
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.FIELD})
 public @interface MyAnnotation {
-
+  String value() default "Hello APT";
 }

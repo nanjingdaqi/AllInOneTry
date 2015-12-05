@@ -12,7 +12,7 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
-  @InjectView(R.id.start_btn) Button mStartBtn;
+  @MyAnnotation("This is button") @InjectView(R.id.start_btn) Button mStartBtn;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -21,14 +21,18 @@ public class MainActivity extends AppCompatActivity {
     ButterKnife.inject(this);
   }
 
-  @OnClick({ R.id.start_btn }) public void onClick(View v) {
+  @MyAnnotation @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
 
     }
   }
 
-  @MyAnnotation public void foo() {
+  @MyAnnotation("I am foo") public void foo() {
+
+  }
+
+  @MyAnnotation public void bar() {
 
   }
 }
