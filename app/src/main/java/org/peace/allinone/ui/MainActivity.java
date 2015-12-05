@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
-  @MyAnnotation public void bar() {
+  @MyAnnotation("This is bar method") public void bar() {
 
   }
 }
