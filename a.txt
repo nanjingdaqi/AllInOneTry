@@ -3,4 +3,4 @@ Second line
 Third line
 Fourth line
 
-git_try change
+resolved by git_try_sub
