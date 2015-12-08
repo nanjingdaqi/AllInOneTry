@@ -18,4 +18,7 @@ public interface UserService {
   @GET("/error")
   Observable<User> getUserAge();
 
+  @GET("/")
+  Call<Void> getVoid();
+
 }

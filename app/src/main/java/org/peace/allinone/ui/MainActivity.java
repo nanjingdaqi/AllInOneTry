@@ -41,8 +41,25 @@ public class MainActivity extends AppCompatActivity {
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      tryCommon();
+      tryVoid();
     }
+  }
+
+  private void tryVoid() {
+    Call<Void> voidCall = service.getVoid();
+    voidCall.enqueue(new Callback<Void>() {
+      @Override public void onResponse(Response<Void> response, Retrofit retrofit) {
+        Void v = response.body();
+        AppLogger.e("response: " + v);
+        if (v == null) {
+          AppLogger.e("response is null");
+        }
+      }
+
+      @Override public void onFailure(Throwable t) {
+        AppLogger.e("fail");
+      }
+    });
   }
 
   private void tryBuildFromTree() {

@@ -10,7 +10,7 @@ import retrofit.RxJavaCallAdapterFactory;
 public class UserRest {
 
   public static UserService getUserService() {
-    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.3.2:3004")
+    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://localhost:3000")
         .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .build();
