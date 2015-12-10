@@ -1,9 +1,16 @@
 package org.peace.allinone.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -13,6 +20,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import java.util.LinkedList;
 import java.util.List;
+import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.list2) ListView list2;
 
   MyAdapter adapter1 = new MyAdapter();
+  ArrayAdapter<String> adapter2;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -30,27 +39,44 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
 
-    list1.setAdapter(adapter1);
-    list1.setVisibility(View.GONE);
+    adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+    for (int i = 0; i < 100; ++i) {
+      adapter2.add("Item: " + i);
+    }
+
+    list1.setAdapter(adapter2);
+
+    list1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ViewGroup.LayoutParams lp = view.getLayoutParams();
+        int oh = view.getHeight();
+        ValueAnimator va = ValueAnimator.ofFloat(0, 1);
+        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+          @Override public void onAnimationUpdate(ValueAnimator animation) {
+            float h = oh * (1- (float) animation.getAnimatedValue());
+            lp.height = (int) h;
+            view.setLayoutParams(lp);
+          }
+        });
+        va.addListener(new AnimatorListenerAdapter() {
+          @Override public void onAnimationEnd(Animator animation) {
+            adapter2.remove(adapter2.getItem(position));
+            view.post(new Runnable() {
+              @Override public void run() {
+                adapter2.notifyDataSetChanged();
+              }
+            });
+          }
+        });
+        va.setDuration(500).start();
+      }
+    });
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      adapter1.addContents();
-      list1.setVisibility(View.VISIBLE);
-      adapter1.notifyDataSetChanged();
-      list1.post(new Runnable() {
-        @Override public void run() {
-          list1.setVisibility(View.GONE);
-          adapter1.contents.remove(0);
-          list1.post(new Runnable() {
-            @Override public void run() {
-              list1.setVisibility(View.VISIBLE);
-            }
-          });
-        }
-      });
+
     }
   }
 
@@ -60,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
 
     MyAdapter() {
       contents = new LinkedList<>();
+      for (int i = 0; i < 100; ++i) {
+        contents.add("item: " + i);
+      }
     }
 
     public void clearContents() {
@@ -79,6 +108,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override public String getItem(int position) {
       return contents.get(position);
+    }
+
+    public void removeItem(int position) {
+      contents.remove(position);
+      notifyDataSetChanged();
     }
 
     @Override public long getItemId(int position) {
