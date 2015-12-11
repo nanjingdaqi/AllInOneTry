@@ -50,22 +50,23 @@ public class MainActivity extends AppCompatActivity {
       @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ViewGroup.LayoutParams lp = view.getLayoutParams();
         int oh = view.getHeight();
-        ValueAnimator va = ValueAnimator.ofFloat(0, 1);
+        ValueAnimator va = ValueAnimator.ofInt(oh, 1);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
           @Override public void onAnimationUpdate(ValueAnimator animation) {
-            float h = oh * (1- (float) animation.getAnimatedValue());
-            lp.height = (int) h;
+            int h = (int) animation.getAnimatedValue();
+            lp.height = h;
             view.setLayoutParams(lp);
+            view.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
           }
         });
         va.addListener(new AnimatorListenerAdapter() {
           @Override public void onAnimationEnd(Animator animation) {
+            // todo 根据position删除元素,在同时操作多个item时,会出现后面删除的position已经无效的bug
             adapter2.remove(adapter2.getItem(position));
-            view.post(new Runnable() {
-              @Override public void run() {
-                adapter2.notifyDataSetChanged();
-              }
-            });
+            adapter2.notifyDataSetChanged();
+            lp.height = oh;
+            view.setLayoutParams(lp);
+            view.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
           }
         });
         va.setDuration(500).start();
