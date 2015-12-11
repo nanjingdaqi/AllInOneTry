@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -48,9 +49,10 @@ public class MainActivity extends AppCompatActivity {
 
     list1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        String target = adapter2.getItem(position);
         ViewGroup.LayoutParams lp = view.getLayoutParams();
         int oh = view.getHeight();
-        ValueAnimator va = ValueAnimator.ofInt(oh, 1);
+        ValueAnimator va = ValueAnimator.ofInt(oh, 0);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
           @Override public void onAnimationUpdate(ValueAnimator animation) {
             int h = (int) animation.getAnimatedValue();
@@ -60,16 +62,19 @@ public class MainActivity extends AppCompatActivity {
           }
         });
         va.addListener(new AnimatorListenerAdapter() {
+          @Override public void onAnimationStart(Animator animation) {
+
+          }
+
           @Override public void onAnimationEnd(Animator animation) {
-            // todo 根据position删除元素,在同时操作多个item时,会出现后面删除的position已经无效的bug
-            adapter2.remove(adapter2.getItem(position));
+            adapter2.remove(target);
             adapter2.notifyDataSetChanged();
             lp.height = oh;
             view.setLayoutParams(lp);
             view.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
           }
         });
-        va.setDuration(500).start();
+        va.setDuration(2000).start();
       }
     });
   }
