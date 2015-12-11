@@ -46,11 +46,14 @@ public class MainActivity extends AppCompatActivity {
         @Override public void onClick(View v) {
           ValueAnimator va = ValueAnimator.ofInt(tv.getHeight(), 0);
           LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) tv.getLayoutParams();
+          float y = tv.getY();
           va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override public void onAnimationUpdate(ValueAnimator animation) {
               int h = (int) animation.getAnimatedValue();
               lp.height = h;
               tv.setLayoutParams(lp);
+              //tv.setTranslationY(h);
+              //tv.setY(y + h);
             }
           });
           va.setDuration(1000).start();

@@ -27,12 +27,20 @@
         android:visibility="gone"
         />
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="100dp"
+        >
+
     <LinearLayout
         android:id="@+id/ll"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />
+
+    </ScrollView>
 
   </LinearLayout>
 
