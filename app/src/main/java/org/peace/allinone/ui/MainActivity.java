@@ -1,19 +1,14 @@
 package org.peace.allinone.ui;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -21,7 +16,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import java.util.LinkedList;
 import java.util.List;
-import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
 
   @BindView(R.id.list1) ListView list1;
   @BindView(R.id.list2) ListView list2;
+
+  @InjectView(R.id.ll) LinearLayout ll;
+  @InjectView(R.id.root) LinearLayout root;
 
   MyAdapter adapter1 = new MyAdapter();
   ArrayAdapter<String> adapter2;
@@ -40,44 +37,26 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
 
-    adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
-    for (int i = 0; i < 100; ++i) {
-      adapter2.add("Item: " + i);
+    for (int i = 0; i < 10; ++i) {
+      TextView tv = new TextView(this);
+      tv.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 160));
+      tv.setText("Item " + i);
+      ll.addView(tv);
+      tv.setOnClickListener(new View.OnClickListener() {
+        @Override public void onClick(View v) {
+          ValueAnimator va = ValueAnimator.ofInt(tv.getHeight(), 0);
+          LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) tv.getLayoutParams();
+          va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override public void onAnimationUpdate(ValueAnimator animation) {
+              int h = (int) animation.getAnimatedValue();
+              lp.height = h;
+              tv.setLayoutParams(lp);
+            }
+          });
+          va.setDuration(1000).start();
+        }
+      });
     }
-
-    list1.setAdapter(adapter2);
-
-    list1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-      @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String target = adapter2.getItem(position);
-        ViewGroup.LayoutParams lp = view.getLayoutParams();
-        int oh = view.getHeight();
-        ValueAnimator va = ValueAnimator.ofInt(oh, 0);
-        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-          @Override public void onAnimationUpdate(ValueAnimator animation) {
-            int h = (int) animation.getAnimatedValue();
-            lp.height = h;
-            view.setLayoutParams(lp);
-            view.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
-          }
-        });
-        va.addListener(new AnimatorListenerAdapter() {
-          @Override public void onAnimationStart(Animator animation) {
-            list1.setEnabled(false);
-          }
-
-          @Override public void onAnimationEnd(Animator animation) {
-            adapter2.remove(target);
-            adapter2.notifyDataSetChanged();
-            lp.height = oh;
-            view.setLayoutParams(lp);
-            view.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-            list1.setEnabled(true);
-          }
-        });
-        va.setDuration(200).start();
-      }
-    });
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
