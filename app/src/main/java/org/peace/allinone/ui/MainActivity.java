@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         });
         va.addListener(new AnimatorListenerAdapter() {
           @Override public void onAnimationStart(Animator animation) {
-
+            list1.setEnabled(false);
           }
 
           @Override public void onAnimationEnd(Animator animation) {
@@ -72,9 +72,10 @@ public class MainActivity extends AppCompatActivity {
             lp.height = oh;
             view.setLayoutParams(lp);
             view.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+            list1.setEnabled(true);
           }
         });
-        va.setDuration(2000).start();
+        va.setDuration(200).start();
       }
     });
   }
