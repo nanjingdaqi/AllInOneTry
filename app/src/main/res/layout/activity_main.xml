@@ -17,4 +17,18 @@
       android:layout_height="wrap_content"
       />
 
+  <Button
+      android:id="@+id/second_btn"
+      android:text="Second"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      />
+
+  <View
+      android:id="@+id/target"
+      android:background="@android:color/holo_red_light"
+      android:layout_width="100dp"
+      android:layout_height="100dp"
+      />
+
 </LinearLayout>

@@ -11,7 +11,7 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
-  @InjectView(R.id.start_btn) Button mStartBtn;
+  @InjectView(R.id.target) View target;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -20,10 +20,11 @@ public class MainActivity extends AppCompatActivity {
     ButterKnife.inject(this);
   }
 
-  @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    int id = v.getId();
-    if (id == R.id.start_btn) {
+  @OnClick({ R.id.start_btn }) public void onStartBtn(View v) {
+    target.animate().translationXBy(300).setDuration(4000).start();
+  }
 
-    }
+  @OnClick(R.id.second_btn) public void onSecondBtn(View v) {
+    target.animate().translationXBy(-300).setDuration(4000).start();
   }
 }
