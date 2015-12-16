@@ -26,6 +26,7 @@
 
   <View
       android:id="@+id/target"
+      android:visibility="gone"
       android:background="@android:color/holo_red_light"
       android:layout_width="100dp"
       android:layout_height="100dp"
