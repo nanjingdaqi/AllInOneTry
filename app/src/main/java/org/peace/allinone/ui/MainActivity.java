@@ -9,6 +9,9 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
+  @InjectView(R.id.start_btn) Button mStartBtn;
+  @InjectView(R.id.target) View target;
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);

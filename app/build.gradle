@@ -1,3 +1,15 @@
+<<<<<<< HEAD
+=======
+cbuildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:1.2.3'
+    classpath 'me.tatarka:gradle-retrolambda:3.2.0'
+  }
+}
+>>>>>>> try using butterknife in lib module
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
@@ -23,6 +35,11 @@ def support_version = "23.2.1"
 
 dependencies {
   compile fileTree(include: ['*.jar'], dir: 'libs')
+  compile project(':mylib')
+  compile('com.android.support:appcompat-v7:23.1.1') {
+    force = true
+  }
+  compile 'com.android.support:design:23.2.0'
 
   compile "com.android.support:appcompat-v7:${support_version}"
   compile "com.android.support:design:${support_version}"
