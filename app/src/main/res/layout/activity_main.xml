@@ -12,7 +12,9 @@
     <TextView android:id="@+id/text"
         android:textSize="10sp"
         android:text="PlaceHolder"
-        android:gravity="bottom"
+        android:drawableLeft="@drawable/rec"
+        android:drawablePadding="10dp"
+        android:gravity="center_vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
