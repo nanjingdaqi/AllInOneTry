@@ -5,11 +5,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
+    AppLogger.e("before super");
+
+    if (1 == 1) {
+      finish();
+      return;
+    }
+
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
