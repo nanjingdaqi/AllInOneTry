@@ -1,7 +1,7 @@
 package org.peace.allinone.ui;
 
-import retrofit.Call;
-import retrofit.http.GET;
+import retrofit2.Call;
+import retrofit2.http.GET;
 import rx.Observable;
 
 /**
@@ -9,8 +9,7 @@ import rx.Observable;
  */
 public interface UserService {
 
-  @GET("/")
-  Call<User> getUser();
+  @GET("/") Call<User> getUser();
 
   @GET("/")
   Observable<User> getUserName();

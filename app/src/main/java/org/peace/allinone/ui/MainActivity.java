@@ -12,10 +12,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -48,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
   private void tryVoid() {
     Call<Void> voidCall = service.getVoid();
     voidCall.enqueue(new Callback<Void>() {
-      @Override public void onResponse(Response<Void> response, Retrofit retrofit) {
+      @Override public void onResponse(Response<Void> response) {
         Void v = response.body();
         AppLogger.e("response: " + v);
         if (v == null) {
@@ -77,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
   void tryCommon() {
     Call<User> userCall = service.getUser();
     userCall.enqueue(new Callback<User>() {
-      @Override public void onResponse(Response<User> response, Retrofit retrofit) {
+      @Override public void onResponse(Response<User> response) {
         User user = response.body();
         AppLogger.d("name: " + user.name);
       }
