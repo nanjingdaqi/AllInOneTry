@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.http.Body;
+import retrofit2.http.JSONBodyPart;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FieldMap;
@@ -70,6 +71,7 @@ final class RequestFactoryParser {
   private boolean hasBody;
   private boolean isFormEncoded;
   private boolean isMultipart;
+  private boolean hasJSONBodyPart;
   private String relativeUrl;
   private okhttp3.Headers headers;
   private MediaType contentType;
@@ -248,7 +250,6 @@ final class RequestFactoryParser {
                   "@Url must be String, java.net.URI, or android.net.Uri type.");
             }
             gotUrl = true;
-
           } else if (methodParameterAnnotation instanceof Path) {
             if (gotQuery) {
               throw parameterError(i, "A @Path parameter must not come after a @Query.");
@@ -269,7 +270,6 @@ final class RequestFactoryParser {
             Converter<?, String> valueConverter =
                 retrofit.stringConverter(methodParameterType, methodParameterAnnotations);
             action = new RequestAction.Path<>(name, valueConverter, path.encoded());
-
           } else if (methodParameterAnnotation instanceof Query) {
             Query query = (Query) methodParameterAnnotation;
             String name = query.value();
@@ -300,7 +300,6 @@ final class RequestFactoryParser {
             }
 
             gotQuery = true;
-
           } else if (methodParameterAnnotation instanceof QueryMap) {
             if (!Map.class.isAssignableFrom(Utils.getRawType(methodParameterType))) {
               throw parameterError(i, "@QueryMap parameter type must be Map.");
@@ -319,7 +318,6 @@ final class RequestFactoryParser {
 
             QueryMap queryMap = (QueryMap) methodParameterAnnotation;
             action = new RequestAction.QueryMap<>(valueConverter, queryMap.encoded());
-
           } else if (methodParameterAnnotation instanceof Header) {
             Header header = (Header) methodParameterAnnotation;
             String name = header.value();
@@ -347,7 +345,6 @@ final class RequestFactoryParser {
                   retrofit.stringConverter(methodParameterType, methodParameterAnnotations);
               action = new RequestAction.Header<>(name, valueConverter);
             }
-
           } else if (methodParameterAnnotation instanceof Field) {
             if (!isFormEncoded) {
               throw parameterError(i, "@Field parameters can only be used with form encoding.");
@@ -381,7 +378,6 @@ final class RequestFactoryParser {
             }
 
             gotField = true;
-
           } else if (methodParameterAnnotation instanceof FieldMap) {
             if (!isFormEncoded) {
               throw parameterError(i, "@FieldMap parameters can only be used with form encoding.");
@@ -404,7 +400,6 @@ final class RequestFactoryParser {
             FieldMap fieldMap = (FieldMap) methodParameterAnnotation;
             action = new RequestAction.FieldMap<>(valueConverter, fieldMap.encoded());
             gotField = true;
-
           } else if (methodParameterAnnotation instanceof Part) {
             if (!isMultipart) {
               throw parameterError(i, "@Part parameters can only be used with multipart encoding.");
@@ -439,7 +434,6 @@ final class RequestFactoryParser {
             }
 
             gotPart = true;
-
           } else if (methodParameterAnnotation instanceof PartMap) {
             if (!isMultipart) {
               throw parameterError(i,
@@ -463,7 +457,6 @@ final class RequestFactoryParser {
             PartMap partMap = (PartMap) methodParameterAnnotation;
             action = new RequestAction.PartMap<>(valueConverter, partMap.encoding());
             gotPart = true;
-
           } else if (methodParameterAnnotation instanceof Body) {
             if (isFormEncoded || isMultipart) {
               throw parameterError(i,
@@ -483,6 +476,12 @@ final class RequestFactoryParser {
             }
             action = new RequestAction.Body<>(converter);
             gotBody = true;
+          } else if (methodParameterAnnotation instanceof JSONBodyPart) {
+            hasJSONBodyPart = true;
+
+            Converter<Map<String, Object>, RequestBody> converter =
+                new GsonJSONBodyRequestConverter();
+            action = new RequestAction.BodyPart(converter);
           }
 
           if (action != null) {

@@ -1,1 +1,1 @@
-include ':app', ':retrofit', ':retrofit-adapter-gson'
+include ':app', ':retrofit', ':retrofit-adapter-gson', ':retrofit-adapter-rx'

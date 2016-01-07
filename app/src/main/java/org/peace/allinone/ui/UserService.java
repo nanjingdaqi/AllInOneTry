@@ -1,7 +1,10 @@
 package org.peace.allinone.ui;
 
+import java.util.Map;
 import retrofit2.Call;
+import retrofit2.http.JSONBodyPart;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import rx.Observable;
 
 /**
@@ -19,5 +22,7 @@ public interface UserService {
 
   @GET("/")
   Call<Void> getVoid();
+
+  @POST("/user") Call<User> postUser(@JSONBodyPart Map<String, Object> map);
 
 }

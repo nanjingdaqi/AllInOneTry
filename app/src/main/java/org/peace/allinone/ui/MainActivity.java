@@ -10,6 +10,8 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import java.util.HashMap;
+import java.util.Map;
 import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 import retrofit2.Call;
@@ -40,7 +42,9 @@ public class MainActivity extends AppCompatActivity {
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      tryVoid();
+      //tryVoid();
+      //tryCommon();
+      tryBodyPart();
     }
   }
 
@@ -83,6 +87,24 @@ public class MainActivity extends AppCompatActivity {
 
       @Override public void onFailure(Throwable throwable) {
         AppLogger.e("fail");
+      }
+    });
+  }
+
+  void tryBodyPart() {
+    Map<String, Object> map = new HashMap<>();
+    map.put("name", "Jiangxiaoyue");
+    map.put("age", 27);
+    Call<User> userCall = service.postUser(map);
+
+    userCall.enqueue(new Callback<User>() {
+      @Override public void onResponse(Response<User> response) {
+        User user = response.body();
+        AppLogger.d("name: " + user.name);
+      }
+
+      @Override public void onFailure(Throwable t) {
+
       }
     });
   }

@@ -263,4 +263,18 @@ abstract class RequestAction<T> {
       builder.setBody(body);
     }
   }
+
+  static final class BodyPart extends RequestAction<Map<String, Object>> {
+    private Converter<Map<String, Object>, RequestBody> converter;
+
+    BodyPart(Converter<Map<String, Object>, RequestBody> converter) {
+      this.converter = converter;
+    }
+
+    @Override void perform(RequestBuilder builder, Map<String, Object> map) throws IOException {
+      RequestBody body = converter.convert(map);
+
+      builder.setBody(body);
+    }
+  }
 }
