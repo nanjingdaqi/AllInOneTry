@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <attr name="IconViewStyle" format="reference" />
+
+  <declare-styleable name="IconView">
+    <attr format="color" name="textColor"/>
+    <attr format="dimension" name="itemRadius"/>
+    <attr format="dimension" name="textSize"/>
+    <attr format="dimension" name="padding"/>
+    <attr format="dimension" name="itemMargin"/>
+    <attr format="boolean" name="isSolid"/>
+    <attr format="reference" name="drawableLeft"/>
+    <attr format="dimension" name="drawablePadding"/>
+  </declare-styleable>
+</resources>
