@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
-import me.ele.commons.AppLogger;
+import me.ele.base.utils.AppLogger;
 
 /**
  * Created by peacepassion on 15/9/9.
