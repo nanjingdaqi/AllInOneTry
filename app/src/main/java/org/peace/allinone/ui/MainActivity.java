@@ -30,11 +30,11 @@ public class MainActivity extends AppCompatActivity {
     ButterKnife.inject(this);
     et1.append("Hello world");
 
-    et1.clearFocus();
+    //et1.clearFocus();
 
-    mStartBtn.setFocusable(true);
-    mStartBtn.setFocusableInTouchMode(true);
-    mStartBtn.requestFocus();
+    //mStartBtn.setFocusable(true);
+    //mStartBtn.setFocusableInTouchMode(true);
+    //mStartBtn.requestFocus();
   }
 
   @OnClick({ R.id.start_btn })
