@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
       int sh = sv.getHeight();
       int delta = bottom - (sy + sh);
 
-      sv.smoothScrollBy(0, delta);
+      sv.scrollBy(0, delta);
     }
   }
 }
