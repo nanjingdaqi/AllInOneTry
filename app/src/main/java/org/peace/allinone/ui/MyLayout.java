@@ -1,6 +1,8 @@
 package org.peace.allinone.ui;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -17,7 +19,7 @@ public class MyLayout extends FrameLayout {
 
   private TextView buyHistoryTV;
   private TextView buyFoodsTV;
-  private TextView rebuyBtn;
+  private Button rebuyBtn;
 
   public MyLayout(Context context) {
     super(context);
@@ -47,10 +49,15 @@ public class MyLayout extends FrameLayout {
     buyFoodsTV.setEllipsize(TextUtils.TruncateAt.END);
     addView(buyFoodsTV, lp);
 
-    rebuyBtn = new TextView(ctx);
+    rebuyBtn = new Button(ctx);
     rebuyBtn.setText("再来一单");
     Drawable bg = getResources().getDrawable(R.drawable.shape);
     rebuyBtn.setBackgroundDrawable(bg);
+    rebuyBtn.setMinimumHeight(DimenUtil.dip2px(ctx, 0));
+    rebuyBtn.setMinHeight(DimenUtil.dip2px(ctx, 0));
+    rebuyBtn.setMinimumWidth(0);
+    rebuyBtn.setMinWidth(0);
+    rebuyBtn.setIncludeFontPadding(false);
     addView(rebuyBtn, lp);
 
     setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
@@ -88,6 +95,10 @@ public class MyLayout extends FrameLayout {
     int rebuyH = rebuyBtn.getMeasuredHeight();
 
     AppLogger.d("rebuy padding" + ", " + rebuyBtn.getPaddingTop());
+    AppLogger.d("rebuy h: " + rebuyH);
+    AppLogger.d("rebuy minim h: " + rebuyBtn.getMinHeight());
+    AppLogger.d("rebuy cpdt: " + rebuyBtn.getCompoundPaddingTop());
+    AppLogger.d("bh pdt: " + buyHistoryTV.getPaddingTop());
 
     int maxW = parentWidth - paddingLR * 2 - rebuyW - DimenUtil.dip2px(getContext(), 8);
     if (maxW < buyFoodsTV.getMeasuredWidth()) {
