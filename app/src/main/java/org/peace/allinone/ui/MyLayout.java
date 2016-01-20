@@ -1,14 +1,15 @@
 package org.peace.allinone.ui;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import me.ele.commons.AppLogger;
 import me.ele.commons.DimenUtil;
+import org.peace.allinone.R;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -16,7 +17,7 @@ public class MyLayout extends FrameLayout {
 
   private TextView buyHistoryTV;
   private TextView buyFoodsTV;
-  private Button rebuyBtn;
+  private TextView rebuyBtn;
 
   public MyLayout(Context context) {
     super(context);
@@ -46,8 +47,10 @@ public class MyLayout extends FrameLayout {
     buyFoodsTV.setEllipsize(TextUtils.TruncateAt.END);
     addView(buyFoodsTV, lp);
 
-    rebuyBtn = new Button(ctx);
+    rebuyBtn = new TextView(ctx);
     rebuyBtn.setText("再来一单");
+    Drawable bg = getResources().getDrawable(R.drawable.shape);
+    rebuyBtn.setBackgroundDrawable(bg);
     addView(rebuyBtn, lp);
 
     setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
@@ -83,6 +86,8 @@ public class MyLayout extends FrameLayout {
 
     int rebuyW = rebuyBtn.getMeasuredWidth();
     int rebuyH = rebuyBtn.getMeasuredHeight();
+
+    AppLogger.d("rebuy padding" + ", " + rebuyBtn.getPaddingTop());
 
     int maxW = parentWidth - paddingLR * 2 - rebuyW - DimenUtil.dip2px(getContext(), 8);
     if (maxW < buyFoodsTV.getMeasuredWidth()) {
