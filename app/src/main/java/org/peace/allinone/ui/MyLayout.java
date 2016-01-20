@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -40,7 +41,9 @@ public class MyLayout extends FrameLayout {
     addView(buyHistoryTV, lp);
 
     buyFoodsTV = new TextView(ctx);
-    buyFoodsTV.setText("Buy Foods");
+    buyFoodsTV.setText("Buy FoodsBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuy");
+    buyFoodsTV.setSingleLine(true);
+    buyFoodsTV.setEllipsize(TextUtils.TruncateAt.END);
     addView(buyFoodsTV, lp);
 
     rebuyBtn = new Button(ctx);
@@ -80,6 +83,11 @@ public class MyLayout extends FrameLayout {
 
     int rebuyW = rebuyBtn.getMeasuredWidth();
     int rebuyH = rebuyBtn.getMeasuredHeight();
+
+    int maxW = parentWidth - paddingLR * 2 - rebuyW - DimenUtil.dip2px(getContext(), 8);
+    if (maxW < buyFoodsTV.getMeasuredWidth()) {
+      buyFoodsTV.setMaxWidth(maxW);
+    }
 
     int rebuyL = parentWidth - paddingLR - rebuyW;
     int rebuyT = (parentHeight - rebuyH) / 2;
