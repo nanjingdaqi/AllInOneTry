@@ -1,36 +1,12 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:orientation="vertical"
-    android:paddingLeft="22dp"
-    android:paddingRight="22dp"
-    android:gravity="center"
-    android:background="@android:color/holo_red_light"
+    android:layout_height="wrap_content"
     >
 
-  <TextView
-      android:id="@+id/buy_history"
-      android:layout_width="wrap_content"
+  <org.peace.allinone.ui.MyLayout
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:text="Left Top"
       />
 
-  <TextView
-      android:id="@+id/buy_foods"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_below="@id/buy_history"
-      android:layout_marginTop="4dp"
-      android:text="Left Bottom"
-      />
-
-  <Button
-      android:id="@+id/buy"
-      android:layout_width="wrap_content"
-      android:layout_height="28dp"
-      android:layout_alignParentRight="true"
-      android:text="再来一单"
-      />
-
-</RelativeLayout>
+</FrameLayout>

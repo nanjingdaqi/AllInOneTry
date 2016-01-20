@@ -9,13 +9,12 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
-  @InjectView(R.id.buy) View v;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    ButterKnife.inject(this);
+    //ButterKnife.inject(this);
   }
 }
