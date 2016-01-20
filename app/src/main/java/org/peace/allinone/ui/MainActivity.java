@@ -4,10 +4,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.style.ImageSpan;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -24,9 +26,17 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.inject(this);
 
-    ImageSpan is = new ImageSpan(this, R.drawable.__leak_canary_icon);
+    ClickableSpan cs = new ClickableSpan() {
+      @Override public void onClick(View widget) {
+        Toast.makeText(MainActivity.this, "Click", Toast.LENGTH_SHORT).show();
+      }
+    };
+
     SpannableString ss = new SpannableString(textView.getText());
-    ss.setSpan(is, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    ss.setSpan(cs, 0, 10, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+    textView.setText(ss);
+    textView.setMovementMethod(LinkMovementMethod.getInstance());
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
