@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <attr name="paddingLeft" format="dimension"/>
+
+  <declare-styleable name="MyView">
+    <attr name="p" format="dimension"/>
+  </declare-styleable>
+
+  <declare-styleable name="MyView2">
+    <attr name="p"/>
+  </declare-styleable>
+
+</resources>
