@@ -21,20 +21,17 @@
       android:id="@+id/my_layout"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_gravity="bottom"
+      android:layout_gravity="center"
       android:orientation="vertical"
       >
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
+    <org.peace.allinone.ui.MyView
+        android:id="@+id/my_view"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:layout_marginTop="100dp"
         android:background="@android:color/holo_red_light"
-        />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="@android:color/holo_blue_light"
+        android:clickable="true"
         />
 
   </org.peace.allinone.ui.MyLayout>
