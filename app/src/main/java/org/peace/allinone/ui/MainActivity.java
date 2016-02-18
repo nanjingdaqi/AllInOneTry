@@ -1,121 +1,145 @@
 package org.peace.allinone.ui;
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.View;
-import android.widget.Button;
-import java.util.Timer;
-import java.util.TimerTask;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.TextView;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
+  private static final int MENU_EASY = 1;
 
-  /** Called when the activity is first created. */
-  Button btnSimpleDraw, btnTimerDraw;
-  SurfaceView sfv;
-  SurfaceHolder sfh;
+  private static final int MENU_HARD = 2;
 
-  private Timer mTimer;
-  private MyTimerTask mTimerTask;
-  int Y_axis[],//保存正弦波的Y轴上的点
-      centerY,//中心线
-      oldX,oldY,//上一个XY点
-      currentX;//当前绘制到的X轴上的点
+  private static final int MENU_MEDIUM = 3;
 
+  private static final int MENU_PAUSE = 4;
+
+  private static final int MENU_RESUME = 5;
+
+  private static final int MENU_START = 6;
+
+  private static final int MENU_STOP = 7;
+
+  /** A handle to the thread that's actually running the animation. */
+  private LunarView.LunarThread mLunarThread;
+
+  /** A handle to the View in which the game is running. */
+  private LunarView mLunarView;
+
+  /**
+   * Invoked during init to give the Activity a chance to set up its Menu.
+   *
+   * @param menu the Menu to which entries may be added
+   * @return true
+   */
   @Override
-  public void onCreate(Bundle savedInstanceState) {
+  public boolean onCreateOptionsMenu(Menu menu) {
+    super.onCreateOptionsMenu(menu);
+
+    menu.add(0, MENU_START, 0, R.string.menu_start);
+    menu.add(0, MENU_STOP, 0, R.string.menu_stop);
+    menu.add(0, MENU_PAUSE, 0, R.string.menu_pause);
+    menu.add(0, MENU_RESUME, 0, R.string.menu_resume);
+    menu.add(0, MENU_EASY, 0, R.string.menu_easy);
+    menu.add(0, MENU_MEDIUM, 0, R.string.menu_medium);
+    menu.add(0, MENU_HARD, 0, R.string.menu_hard);
+
+    return true;
+  }
+
+  /**
+   * Invoked when the user selects an item from the Menu.
+   *
+   * @param item the Menu entry which was selected
+   * @return true if the Menu item was legit (and we consumed it), false
+   *         otherwise
+   */
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case MENU_START:
+        mLunarThread.doStart();
+        return true;
+      case MENU_STOP:
+        mLunarThread.setState(LunarView.LunarThread.STATE_LOSE,
+            getText(R.string.message_stopped));
+        return true;
+      case MENU_PAUSE:
+        mLunarThread.pause();
+        return true;
+      case MENU_RESUME:
+        mLunarThread.unpause();
+        return true;
+      case MENU_EASY:
+        mLunarThread.setDifficulty(LunarView.LunarThread.DIFFICULTY_EASY);
+        return true;
+      case MENU_MEDIUM:
+        mLunarThread.setDifficulty(LunarView.LunarThread.DIFFICULTY_MEDIUM);
+        return true;
+      case MENU_HARD:
+        mLunarThread.setDifficulty(LunarView.LunarThread.DIFFICULTY_HARD);
+        return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Invoked when the Activity is created.
+   *
+   * @param savedInstanceState a Bundle containing state saved from a previous
+   *        execution, or null if this is a new execution
+   */
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    // tell system to use the layout defined in our XML file
     setContentView(R.layout.activity_main);
 
-    btnSimpleDraw = (Button) this.findViewById(R.id.Button01);
-    btnTimerDraw = (Button) this.findViewById(R.id.Button02);
-    btnSimpleDraw.setOnClickListener(new ClickEvent());
-    btnTimerDraw.setOnClickListener(new ClickEvent());
-    sfv = (SurfaceView) this.findViewById(R.id.SurfaceView01);
-    sfh = sfv.getHolder();
+    // get handles to the LunarView from XML, and its LunarThread
+    mLunarView = (LunarView) findViewById(R.id.lunar);
+    mLunarThread = mLunarView.getThread();
 
-    //动态绘制正弦波的定时器
-    mTimer = new Timer();
-    mTimerTask = new MyTimerTask();
+    // give the LunarView a handle to the TextView used for messages
+    mLunarView.setTextView((TextView) findViewById(R.id.text));
 
-    // 初始化y轴数据
-    centerY = (getWindowManager().getDefaultDisplay().getHeight() - sfv
-        .getTop()) / 2;
-    Y_axis = new int[getWindowManager().getDefaultDisplay().getWidth()];
-    for (int i = 1; i < Y_axis.length; i++) {// 计算正弦波
-      Y_axis[i - 1] = centerY
-          - (int) (100 * Math.sin(i * 2 * Math.PI / 180));
+    if (savedInstanceState == null) {
+      // we were just launched: set up a new game
+      mLunarThread.setState(LunarView.LunarThread.STATE_READY);
+      Log.w(this.getClass().getName(), "SIS is null");
+    } else {
+      // we are being restored: resume a previous game
+      mLunarThread.restoreState(savedInstanceState);
+      Log.w(this.getClass().getName(), "SIS is nonnull");
     }
   }
 
-  class ClickEvent implements View.OnClickListener {
-
-    @Override
-    public void onClick(View v) {
-
-      if (v == btnSimpleDraw) {
-        SimpleDraw(Y_axis.length-1);//直接绘制正弦波
-
-      } else if (v == btnTimerDraw) {
-        oldY = centerY;
-        mTimer.schedule(mTimerTask, 0, 5);//动态绘制正弦波
-      }
-
-    }
-
-  }
-
-  class MyTimerTask extends TimerTask {
-    @Override
-    public void run() {
-
-      SimpleDraw(currentX);
-      currentX++;//往前进
-      if (currentX == Y_axis.length - 1) {//如果到了终点，则清屏重来
-        ClearDraw();
-        currentX = 0;
-        oldY = centerY;
-      }
-    }
-
-  }
-
-  /*
-   * 绘制指定区域
+  /**
+   * Invoked when the Activity loses user focus.
    */
-  void SimpleDraw(int length) {
-    if (length == 0)
-      oldX = 0;
-    Canvas canvas = sfh.lockCanvas(new Rect(oldX, 0, oldX + length,
-        getWindowManager().getDefaultDisplay().getHeight()));// 关键:获取画布
-    Log.i("Canvas:",
-        String.valueOf(oldX) + "," + String.valueOf(oldX + length));
-
-    Paint mPaint = new Paint();
-    mPaint.setColor(Color.GREEN);// 画笔为绿色
-    mPaint.setStrokeWidth(2);// 设置画笔粗细
-
-    int y;
-    for (int i = oldX + 1; i < length; i++) {// 绘画正弦波
-      y = Y_axis[i - 1];
-      canvas.drawLine(oldX, oldY, i, y, mPaint);
-      oldX = i;
-      oldY = y;
-    }
-    sfh.unlockCanvasAndPost(canvas);// 解锁画布，提交画好的图像
+  @Override
+  protected void onPause() {
+    mLunarView.getThread().pause(); // pause game when Activity pauses
+    super.onPause();
   }
 
-  void ClearDraw() {
-    Canvas canvas = sfh.lockCanvas(null);
-    canvas.drawColor(Color.BLACK);// 清除画布
-    sfh.unlockCanvasAndPost(canvas);
-
+  /**
+   * Notification that something is about to happen, to give the Activity a
+   * chance to save state.
+   *
+   * @param outState a Bundle into which this Activity should save its state
+   */
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    // just have the View's thread save its state into our Bundle
+    super.onSaveInstanceState(outState);
+    mLunarThread.saveState(outState);
+    Log.w(this.getClass().getName(), "SIS called");
   }
+
+
 }
