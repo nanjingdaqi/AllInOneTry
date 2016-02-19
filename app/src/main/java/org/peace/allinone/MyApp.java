@@ -23,6 +23,8 @@ public class MyApp extends Application {
     AppLogger.debug = true;
     refWatcher = LeakCanary.install(this);
 
+    AppLogger.e("APP onCreate");
+
     if (BuildConfig.DEBUG) {
       Stetho.initialize(Stetho.newInitializerBuilder(this)
           .enableDumpapp(new MyDumperPluginsProvider(this))
