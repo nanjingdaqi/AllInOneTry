@@ -138,6 +138,7 @@ public class SlideBottomPanel extends LinearLayout {
                 childView.setPadding(0, 0, 0, (int)mTitleHeightNoDisplay);
             }
         }
+        mPanelHeight = findViewWithTag(TAG_PANEL).getMeasuredHeight();
     }
 
     @Override
