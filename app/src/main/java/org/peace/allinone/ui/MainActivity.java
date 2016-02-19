@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.inject(this);
 
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 60; i++) {
       TextView tv = new TextView(this);
       tv.setBackgroundColor(getResources().getColor(android.R.color.white));
       tv.setText("TV: " + i);
