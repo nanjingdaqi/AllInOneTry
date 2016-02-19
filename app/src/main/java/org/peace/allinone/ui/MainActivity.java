@@ -15,7 +15,7 @@ import org.peace.allinone.R;
 public class MainActivity extends AppCompatActivity {
 
   @InjectView(R.id.start_btn) Button mStartBtn;
-  @InjectView(R.id.list_view_container) MyLayout myLayout;
+  @InjectView(R.id.list_view_container) SlideBottomPanel myLayout;
   @InjectView(R.id.item_container) LinearLayout itemContainer;
   @InjectView(R.id.drag_view) LinearLayout dragView;
 
@@ -40,9 +40,11 @@ public class MainActivity extends AppCompatActivity {
     AppLogger.e("dragView h: " + h);
     AppLogger.e("myLayout cy: " + cy);
 
-    ObjectAnimator anim = ObjectAnimator.ofFloat(dragView, "y", cy + h, cy);
-    anim.setDuration(500);
-    anim.start();
+    //ObjectAnimator anim = ObjectAnimator.ofFloat(dragView, "y", cy + h, cy);
+    //anim.setDuration(500);
+    //anim.start();
+
+    myLayout.displayPanel();
   }
 
   @OnClick(R.id.start_btn) public void onStartBtn() {
