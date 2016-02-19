@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.peace.allinone.ui.MyLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/list_view_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    android:orientation="vertical"
+    >
+
+  <Space
+      android:id="@+id/space"
+      android:layout_width="match_parent"
+      android:layout_height="80dp"
+      />
+
+  <View
+      android:id="@+id/head"
+      android:layout_width="match_parent"
+      android:layout_height="46dp"
+      android:background="@android:color/holo_red_light"
+      android:clickable="true"
+      />
+
+  <ScrollView
+      android:id="@+id/item_container_scroll"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:overScrollMode="never"
+      >
+
+    <LinearLayout
+        android:id="@+id/item_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        />
+
+  </ScrollView>
+
+</org.peace.allinone.ui.MyLayout>

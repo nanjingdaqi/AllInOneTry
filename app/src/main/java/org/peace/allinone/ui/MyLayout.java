@@ -4,26 +4,27 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
+import butterknife.InjectView;
 
 public class MyLayout extends LinearLayout {
+
   public MyLayout(Context context) {
     super(context);
+    init();
   }
 
   public MyLayout(Context context, AttributeSet attrs) {
     super(context, attrs);
+    init();
   }
 
   public MyLayout(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    init();
   }
 
-  @Override public boolean onInterceptTouchEvent(MotionEvent ev) {
-    int event = ev.getActionMasked();
-    if (event == MotionEvent.ACTION_POINTER_DOWN) {
-      return true;
-    }
+  private void init() {
 
-    return false;
   }
+
 }
