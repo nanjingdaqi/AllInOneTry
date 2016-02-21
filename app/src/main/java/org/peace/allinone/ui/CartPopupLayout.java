@@ -14,9 +14,8 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import me.ele.commons.AppLogger;
 
-public class SlideBottomPanel extends LinearLayout {
+public class CartPopupLayout extends LinearLayout {
 
   private static final int MOVE_DISTANCE_TO_TRIGGER = 10;
   private static final int MAX_ANIMATION_DURATION = 400;
@@ -35,7 +34,6 @@ public class SlideBottomPanel extends LinearLayout {
   private VelocityTracker mVelocityTracker;
 
   private int layoutH;
-  private float firstDownX;
   private float firstDownY;
   private float downY;
   private float deltaY;
@@ -51,15 +49,15 @@ public class SlideBottomPanel extends LinearLayout {
   int trans = getContext().getResources().getColor(android.R.color.transparent);
   int black = getContext().getResources().getColor(android.R.color.black);
 
-  public SlideBottomPanel(Context context) {
+  public CartPopupLayout(Context context) {
     this(context, null);
   }
 
-  public SlideBottomPanel(Context context, AttributeSet attrs) {
+  public CartPopupLayout(Context context, AttributeSet attrs) {
     this(context, attrs, 0);
   }
 
-  public SlideBottomPanel(Context context, AttributeSet attrs, int defStyleAttr) {
+  public CartPopupLayout(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     ViewConfiguration vc = ViewConfiguration.get(context);
     mMaxVelocity = vc.getScaledMaximumFlingVelocity();
@@ -119,7 +117,6 @@ public class SlideBottomPanel extends LinearLayout {
 
   private boolean handleActionDown(MotionEvent event) {
     boolean isConsume = false;
-    firstDownX = event.getX();
     firstDownY = downY = event.getY();
     float currentY = dragView.getY();
     if (!isDragViewShowing && downY > layoutH) {
@@ -206,7 +203,6 @@ public class SlideBottomPanel extends LinearLayout {
         }
       } else {
         float dy = currentY - (layoutH - dragViewH);
-        AppLogger.e("dy: " + dy);
         if (dy < dragViewH / 2) {
           doDisplayPanel();
         } else {
@@ -235,9 +231,6 @@ public class SlideBottomPanel extends LinearLayout {
       duration = (long) (fdy / v0);
     }
     final float finalV = v0;
-    AppLogger.e("duration: " + duration);
-    AppLogger.e("y0: " + y0);
-    AppLogger.e("v0: " + v0);
     ValueAnimator animator = ValueAnimator.ofFloat(0, duration);
     animator.setInterpolator(mCloseAnimationInterpolator);
     animator.setTarget(dragView);
@@ -248,8 +241,7 @@ public class SlideBottomPanel extends LinearLayout {
         float t = (float) animation.getAnimatedValue();
         float dy = finalV * t;
         float y = y0 + dy;
-        AppLogger.e("y: " + y + ", t: " + t);
-        dragView.setY(y);
+        dragView.setY(Math.min(y, layoutH));
         updateBg();
       }
     });
