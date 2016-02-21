@@ -18,7 +18,7 @@ import me.ele.commons.AppLogger;
 public class SlideBottomPanel extends LinearLayout {
 
   private static final int MOVE_DISTANCE_TO_TRIGGER = 10;
-  private static final int ANIMATION_DURATION = 400;
+  private static final int MAX_ANIMATION_DURATION = 400;
   private static final int TRIGGER_VELOCITY = 1000;
 
   private LinearLayout dragView;
@@ -62,7 +62,7 @@ public class SlideBottomPanel extends LinearLayout {
     super(context, attrs, defStyleAttr);
     ViewConfiguration vc = ViewConfiguration.get(context);
     mMaxVelocity = vc.getScaledMaximumFlingVelocity();
-    mTouchSlop = vc.getScaledTouchSlop();
+    mTouchSlop = Math.min(vc.getScaledTouchSlop(), 8);
   }
 
   @Override protected void onFinishInflate() {
@@ -140,10 +140,11 @@ public class SlideBottomPanel extends LinearLayout {
       return;
     }
 
-    if (isDragViewShowing && scrollView.canScrollVertically((int) (firstDownY - event.getY()))) {
+    if (isDragViewShowing && canConsumedByScrollView(event)) {
       return;
     }
 
+    AppLogger.e("ready to move1");
     computeVelocity();
 
     if (Math.abs(xVelocity) > Math.abs(yVelocity)) {
@@ -161,16 +162,33 @@ public class SlideBottomPanel extends LinearLayout {
       downY = event.getY();
 
       float currentY = dragView.getY();
-      if (currentY + deltaY <= layoutH - dragViewH) {
+      float destY = currentY + deltaY;
+      AppLogger.e("destY: " + destY);
+      if (destY <= layoutH - dragViewH) {
         dragView.setY(layoutH - dragViewH);
-      } else if (currentY + deltaY >= layoutH) {
+      } else if (destY >= layoutH) {
         dragView.setY(layoutH);
       } else {
-        dragView.setY(currentY + deltaY);
+        dragView.setY(destY);
       }
 
       updateBg();
     }
+  }
+
+  private boolean canConsumedByScrollView(MotionEvent ev) {
+    float l = scrollView.getX() + dragView.getX();
+    float t = scrollView.getY() + dragView.getY();
+    float r = l + scrollView.getWidth();
+    float b = t + scrollView.getHeight();
+    float x = ev.getX();
+    float y = ev.getY();
+    AppLogger.e("l: " + l + ", t: " + t + ", r: " + r + ", b: " + b + ", x: " + x + ", y: " + y);
+    if (x >= l && x <= r && y >= t && y <= b
+        && scrollView.canScrollVertically((int) (firstDownY - y))) {
+      return true;
+    }
+    return false;
   }
 
   private void handleActionUp(MotionEvent event) {
@@ -212,7 +230,7 @@ public class SlideBottomPanel extends LinearLayout {
     ValueAnimator animator = ValueAnimator.ofFloat(dragView.getY(), layoutH);
     animator.setInterpolator(mCloseAnimationInterpolator);
     animator.setTarget(dragView);
-    animator.setDuration(ANIMATION_DURATION);
+    animator.setDuration(MAX_ANIMATION_DURATION);
     animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override
       public void onAnimationUpdate(ValueAnimator animation) {
@@ -274,7 +292,7 @@ public class SlideBottomPanel extends LinearLayout {
 
     float currentY = dragView.getY();
     ValueAnimator animator =
-        ValueAnimator.ofFloat(currentY, layoutH - dragViewH).setDuration(ANIMATION_DURATION);
+        ValueAnimator.ofFloat(currentY, layoutH - dragViewH).setDuration(MAX_ANIMATION_DURATION);
     animator.setTarget(dragView);
     animator.setInterpolator(mOpenAnimationInterpolator);
     animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
