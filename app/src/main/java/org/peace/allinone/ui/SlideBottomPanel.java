@@ -11,6 +11,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import me.ele.commons.AppLogger;
@@ -44,7 +45,7 @@ public class SlideBottomPanel extends LinearLayout {
   private boolean isDragViewOnTouch = false;
 
   private Interpolator mOpenAnimationInterpolator = new AccelerateInterpolator();
-  private Interpolator mCloseAnimationInterpolator = new AccelerateInterpolator();
+  private Interpolator mCloseAnimationInterpolator = new LinearInterpolator();
 
   ArgbEvaluator bgEvaluator = new ArgbEvaluator();
   int trans = getContext().getResources().getColor(android.R.color.transparent);
@@ -144,7 +145,6 @@ public class SlideBottomPanel extends LinearLayout {
       return;
     }
 
-    AppLogger.e("ready to move1");
     computeVelocity();
 
     if (Math.abs(xVelocity) > Math.abs(yVelocity)) {
@@ -162,7 +162,6 @@ public class SlideBottomPanel extends LinearLayout {
 
       float currentY = dragView.getY();
       float destY = currentY + deltaY;
-      AppLogger.e("destY: " + destY);
       if (destY <= layoutH - dragViewH) {
         dragView.setY(layoutH - dragViewH);
       } else if (destY >= layoutH) {
@@ -182,7 +181,6 @@ public class SlideBottomPanel extends LinearLayout {
     float b = t + scrollView.getHeight();
     float x = ev.getX();
     float y = ev.getY();
-    AppLogger.e("l: " + l + ", t: " + t + ", r: " + r + ", b: " + b + ", x: " + x + ", y: " + y);
     if (x >= l && x <= r && y >= t && y <= b
         && scrollView.canScrollVertically((int) (firstDownY - y))) {
       return true;
@@ -226,15 +224,32 @@ public class SlideBottomPanel extends LinearLayout {
     if (isAnimating) {
       return;
     }
-    ValueAnimator animator = ValueAnimator.ofFloat(dragView.getY(), layoutH);
+    float y0 = dragView.getY();
+    float fdy = layoutH - dragView.getY();
+    long duration = (long) (MAX_ANIMATION_DURATION * (layoutH - dragView.getY()) / dragViewH);
+    float minSpd = fdy / duration;
+    float v0 = minSpd;
+    float vy = Math.min(yVelocity / 1000, 8);
+    if (vy > minSpd) {
+      v0 = vy;
+      duration = (long) (fdy / v0);
+    }
+    final float finalV = v0;
+    AppLogger.e("duration: " + duration);
+    AppLogger.e("y0: " + y0);
+    AppLogger.e("v0: " + v0);
+    ValueAnimator animator = ValueAnimator.ofFloat(0, duration);
     animator.setInterpolator(mCloseAnimationInterpolator);
     animator.setTarget(dragView);
-    animator.setDuration(MAX_ANIMATION_DURATION);
+    animator.setDuration(duration);
     animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override
       public void onAnimationUpdate(ValueAnimator animation) {
-        float value = (float) animation.getAnimatedValue();
-        dragView.setY(value);
+        float t = (float) animation.getAnimatedValue();
+        float dy = finalV * t;
+        float y = y0 + dy;
+        AppLogger.e("y: " + y + ", t: " + t);
+        dragView.setY(y);
         updateBg();
       }
     });
@@ -290,8 +305,10 @@ public class SlideBottomPanel extends LinearLayout {
     }
 
     float currentY = dragView.getY();
+    long duration =
+        (long) ((currentY - (layoutH - dragViewH)) / dragViewH * MAX_ANIMATION_DURATION);
     ValueAnimator animator =
-        ValueAnimator.ofFloat(currentY, layoutH - dragViewH).setDuration(MAX_ANIMATION_DURATION);
+        ValueAnimator.ofFloat(currentY, layoutH - dragViewH).setDuration(duration);
     animator.setTarget(dragView);
     animator.setInterpolator(mOpenAnimationInterpolator);
     animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
