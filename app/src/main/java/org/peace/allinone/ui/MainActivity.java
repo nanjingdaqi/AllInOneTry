@@ -3,6 +3,7 @@ package org.peace.allinone.ui;
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -11,6 +12,8 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
+
+import static android.view.View.GONE;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,18 +35,11 @@ public class MainActivity extends AppCompatActivity {
       LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 100);
       itemContainer.addView(tv, lp);
     }
+
+    myLayout.setVisibility(GONE);
   }
 
   @OnClick(R.id.toggle) public void onToggle() {
-    int h = dragView.getMeasuredHeight();
-    float cy = myLayout.getMeasuredHeight() - h;
-    AppLogger.e("dragView h: " + h);
-    AppLogger.e("myLayout cy: " + cy);
-
-    //ObjectAnimator anim = ObjectAnimator.ofFloat(dragView, "y", cy + h, cy);
-    //anim.setDuration(500);
-    //anim.start();
-
     myLayout.displayPanel();
   }
 
