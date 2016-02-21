@@ -27,7 +27,6 @@ public class CartPopupLayout extends LinearLayout {
   private boolean isAnimating = false;
   private boolean isDragViewShowing = false;
 
-  private float xVelocity;
   private float yVelocity;
   private float mTouchSlop;
   private int mMaxVelocity;
@@ -138,15 +137,11 @@ public class CartPopupLayout extends LinearLayout {
       return;
     }
 
-    if (isDragViewShowing && canConsumedByScrollView(event)) {
+    if (!isDragging && isDragViewShowing && canConsumedByScrollView(event)) {
       return;
     }
 
     computeVelocity();
-
-    if (Math.abs(xVelocity) > Math.abs(yVelocity)) {
-      return;
-    }
 
     if (!isDragging && Math.abs(event.getY() - firstDownY) > mTouchSlop) {
       isDragging = true;
@@ -179,6 +174,7 @@ public class CartPopupLayout extends LinearLayout {
     float x = ev.getX();
     float y = ev.getY();
     if (x >= l && x <= r && y >= t && y <= b
+        && firstDownY >= t && firstDownY <= b
         && scrollView.canScrollVertically((int) (firstDownY - y))) {
       return true;
     }
@@ -344,7 +340,6 @@ public class CartPopupLayout extends LinearLayout {
   private void computeVelocity() {
     //units是单位表示， 1代表px/毫秒, 1000代表px/秒
     mVelocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
-    xVelocity = mVelocityTracker.getXVelocity();
     yVelocity = mVelocityTracker.getYVelocity();
   }
 
