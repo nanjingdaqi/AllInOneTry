@@ -151,8 +151,7 @@ public class SlideBottomPanel extends LinearLayout {
       return;
     }
 
-    if (!isDragging && Math.abs(event.getY() - firstDownY) > mTouchSlop
-        && Math.abs(event.getX() - firstDownX) < mTouchSlop) {
+    if (!isDragging && Math.abs(event.getY() - firstDownY) > mTouchSlop) {
       isDragging = true;
       downY = event.getY();
     }
