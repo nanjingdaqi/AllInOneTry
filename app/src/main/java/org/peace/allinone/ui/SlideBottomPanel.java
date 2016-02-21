@@ -22,6 +22,7 @@ public class SlideBottomPanel extends LinearLayout {
   private static final int TRIGGER_VELOCITY = 1000;
 
   private LinearLayout dragView;
+  private ScrollView scrollView;
 
   private boolean isAnimating = false;
   private boolean isDragViewShowing = false;
@@ -49,8 +50,6 @@ public class SlideBottomPanel extends LinearLayout {
   int trans = getContext().getResources().getColor(android.R.color.transparent);
   int black = getContext().getResources().getColor(android.R.color.black);
 
-  private Context mContext;
-
   public SlideBottomPanel(Context context) {
     this(context, null);
   }
@@ -61,8 +60,7 @@ public class SlideBottomPanel extends LinearLayout {
 
   public SlideBottomPanel(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    mContext = context;
-    ViewConfiguration vc = ViewConfiguration.get(mContext);
+    ViewConfiguration vc = ViewConfiguration.get(context);
     mMaxVelocity = vc.getScaledMaximumFlingVelocity();
     mTouchSlop = vc.getScaledTouchSlop();
   }
@@ -70,11 +68,7 @@ public class SlideBottomPanel extends LinearLayout {
   @Override protected void onFinishInflate() {
     super.onFinishInflate();
     dragView = (LinearLayout) getChildAt(1);
-  }
-
-  @Override
-  protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-    super.onLayout(changed, left, top, right, bottom);
+    scrollView = (ScrollView) dragView.getChildAt(1);
   }
 
   @Override
@@ -82,11 +76,6 @@ public class SlideBottomPanel extends LinearLayout {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     layoutH = getMeasuredHeight();
     dragViewH = dragView.getMeasuredHeight();
-  }
-
-  private boolean superDispatchTouchEvent(MotionEvent ev) {
-    requestDisallowInterceptTouchEvent(false);
-    return super.dispatchTouchEvent(ev);
   }
 
   @Override
@@ -109,8 +98,12 @@ public class SlideBottomPanel extends LinearLayout {
         releaseVelocityTracker();
         break;
     }
-    boolean ret = isConsume || superDispatchTouchEvent(ev);
-    return ret;
+    return isConsume || superDispatchTouchEvent(ev);
+  }
+
+  private boolean superDispatchTouchEvent(MotionEvent ev) {
+    requestDisallowInterceptTouchEvent(false);
+    return super.dispatchTouchEvent(ev);
   }
 
   @Override
@@ -146,13 +139,17 @@ public class SlideBottomPanel extends LinearLayout {
     if (!isDragViewOnTouch) {
       return;
     }
-    if (isDragViewShowing && supportScrollInView((int) (firstDownY - event.getY()))) {
+
+    if (isDragViewShowing && scrollView.canScrollVertically((int) (firstDownY - event.getY()))) {
       return;
     }
+
     computeVelocity();
+
     if (Math.abs(xVelocity) > Math.abs(yVelocity)) {
       return;
     }
+
     if (!isDragging && Math.abs(event.getY() - firstDownY) > mTouchSlop
         && Math.abs(event.getX() - firstDownX) < mTouchSlop) {
       isDragging = true;
@@ -180,9 +177,8 @@ public class SlideBottomPanel extends LinearLayout {
     if (!isDragViewOnTouch) {
       return;
     }
-    computeVelocity();
 
-    AppLogger.e("yV: " + yVelocity);
+    computeVelocity();
 
     float currentY = dragView.getY();
 
@@ -242,6 +238,7 @@ public class SlideBottomPanel extends LinearLayout {
       public void onAnimationCancel(Animator animation) {
         isAnimating = false;
         isDragViewShowing = false;
+        setVisibility(GONE);
       }
 
       @Override
@@ -274,9 +271,8 @@ public class SlideBottomPanel extends LinearLayout {
     if (isAnimating) {
       return;
     }
-    AppLogger.e("mMH: " + layoutH + ", mPH: " + dragViewH);
+
     float currentY = dragView.getY();
-    AppLogger.e("cy: " + currentY);
     ValueAnimator animator =
         ValueAnimator.ofFloat(currentY, layoutH - dragViewH).setDuration(ANIMATION_DURATION);
     animator.setTarget(dragView);
@@ -324,11 +320,6 @@ public class SlideBottomPanel extends LinearLayout {
     mVelocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
     xVelocity = mVelocityTracker.getXVelocity();
     yVelocity = mVelocityTracker.getYVelocity();
-  }
-
-  private boolean supportScrollInView(int direction) {
-    ScrollView scrollView = (ScrollView) dragView.getChildAt(1);
-    return scrollView.canScrollVertically(direction);
   }
 
   private void initVelocityTracker(MotionEvent event) {
