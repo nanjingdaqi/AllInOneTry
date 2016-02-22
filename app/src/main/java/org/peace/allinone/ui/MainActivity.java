@@ -15,7 +15,7 @@ import static android.view.View.GONE;
 public class MainActivity extends AppCompatActivity {
 
   @InjectView(R.id.start_btn) Button mStartBtn;
-  @InjectView(R.id.list_view_container) CartPopupLayout myLayout;
+  @InjectView(R.id.list_view_container) SlidingDownPanelLayout myLayout;
   @InjectView(R.id.item_container) LinearLayout itemContainer;
   @InjectView(R.id.drag_view) LinearLayout dragView;
 

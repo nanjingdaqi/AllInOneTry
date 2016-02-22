@@ -15,7 +15,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-public class CartPopupLayout extends LinearLayout {
+public class SlidingDownPanelLayout extends LinearLayout {
 
   private static final int MOVE_DISTANCE_TO_TRIGGER = 10;
   private static final int MAX_ANIMATION_DURATION = 400;
@@ -48,15 +48,15 @@ public class CartPopupLayout extends LinearLayout {
   int trans = getContext().getResources().getColor(android.R.color.transparent);
   int black = getContext().getResources().getColor(android.R.color.black);
 
-  public CartPopupLayout(Context context) {
+  public SlidingDownPanelLayout(Context context) {
     this(context, null);
   }
 
-  public CartPopupLayout(Context context, AttributeSet attrs) {
+  public SlidingDownPanelLayout(Context context, AttributeSet attrs) {
     this(context, attrs, 0);
   }
 
-  public CartPopupLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+  public SlidingDownPanelLayout(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     ViewConfiguration vc = ViewConfiguration.get(context);
     mMaxVelocity = vc.getScaledMaximumFlingVelocity();
@@ -88,9 +88,6 @@ public class CartPopupLayout extends LinearLayout {
         handleActionMove(ev);
         break;
       case MotionEvent.ACTION_UP:
-        handleActionUp(ev);
-        releaseVelocityTracker();
-        break;
       case MotionEvent.ACTION_CANCEL:
         handleActionUp(ev);
         releaseVelocityTracker();
