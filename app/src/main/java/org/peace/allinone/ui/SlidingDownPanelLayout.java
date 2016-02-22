@@ -4,9 +4,13 @@ import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
@@ -14,6 +18,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import org.peace.allinone.R;
 
 public class SlidingDownPanelLayout extends LinearLayout {
 
@@ -21,8 +26,10 @@ public class SlidingDownPanelLayout extends LinearLayout {
   private static final int MAX_ANIMATION_DURATION = 400;
   private static final int TRIGGER_VELOCITY = 1;
 
-  private LinearLayout dragView;
+  private View dragView;
   private ScrollView scrollView;
+  private int dragViewId;
+  private int scrollViewId;
 
   private boolean isAnimating = false;
   private boolean isDragViewShowing = false;
@@ -46,7 +53,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
   ArgbEvaluator bgEvaluator = new ArgbEvaluator();
   int trans = getContext().getResources().getColor(android.R.color.transparent);
-  int black = getContext().getResources().getColor(android.R.color.black);
+  int bgColor = trans;
 
   public SlidingDownPanelLayout(Context context) {
     this(context, null);
@@ -58,15 +65,37 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
   public SlidingDownPanelLayout(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+
+    TypedArray ta = null;
+    try {
+      ta = context.obtainStyledAttributes(attrs, R.styleable.SlidingDownPanelLayout, defStyleAttr, 0);
+      dragViewId = ta.getResourceId(R.styleable.SlidingDownPanelLayout_drag_view_id, -1);
+      scrollViewId = ta.getResourceId(R.styleable.SlidingDownPanelLayout_scroll_view_id, -1);
+    } finally {
+      ta.recycle();
+    }
+
     ViewConfiguration vc = ViewConfiguration.get(context);
     mMaxVelocity = vc.getScaledMaximumFlingVelocity();
     mTouchSlop = Math.min(vc.getScaledTouchSlop(), 8);
+
+    Drawable bg = getBackground();
+    if (bg instanceof ColorDrawable) {
+      bgColor = ((ColorDrawable) bg).getColor();
+    }
   }
 
   @Override protected void onFinishInflate() {
     super.onFinishInflate();
-    dragView = (LinearLayout) getChildAt(1);
-    scrollView = (ScrollView) dragView.getChildAt(1);
+    dragView = findViewById(dragViewId);
+    if (dragView == null) {
+      throw new IllegalStateException("must set a valid drag_view_id");
+    }
+    View sv = findViewById(scrollViewId);
+    if (sv != null && !(sv instanceof ScrollView)) {
+      throw new IllegalStateException("scroll_view_id must be ScrollView");
+    }
+    scrollView = (ScrollView) sv;
   }
 
   @Override
@@ -164,6 +193,10 @@ public class SlidingDownPanelLayout extends LinearLayout {
   }
 
   private boolean canConsumedByScrollView(MotionEvent ev) {
+    if (scrollView == null) {
+      return false;
+    }
+
     float l = scrollView.getX() + dragView.getX();
     float t = scrollView.getY() + dragView.getY();
     float r = l + scrollView.getWidth();
@@ -330,7 +363,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
   private void updateBg() {
     float fraction = (dragView.getY() - (layoutH - dragViewH)) / dragViewH;
-    int bg = (int) bgEvaluator.evaluate(fraction, black, trans);
+    int bg = (int) bgEvaluator.evaluate(fraction, bgColor, trans);
     setBackgroundColor(bg);
   }
 
