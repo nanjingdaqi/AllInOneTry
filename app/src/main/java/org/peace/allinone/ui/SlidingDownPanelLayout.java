@@ -39,6 +39,8 @@ public class SlidingDownPanelLayout extends LinearLayout {
   private int mMaxVelocity;
   private VelocityTracker mVelocityTracker;
 
+  private StateListener stateListener;
+
   private int layoutH;
   private float firstDownY;
   private float downY;
@@ -96,6 +98,22 @@ public class SlidingDownPanelLayout extends LinearLayout {
       throw new IllegalStateException("scroll_view_id must be ScrollView");
     }
     scrollView = (ScrollView) sv;
+  }
+
+  @Override protected void onVisibilityChanged(View changedView, int visibility) {
+    super.onVisibilityChanged(changedView, visibility);
+    if (stateListener == null) {
+      return;
+    }
+    if (visibility == VISIBLE) {
+      stateListener.onShow();
+    } else if (visibility == GONE) {
+      stateListener.onHide();
+    }
+  }
+
+  public void setStateListener(StateListener listener) {
+    this.stateListener = listener;
   }
 
   @Override public void setVisibility(int visibility) {
@@ -408,5 +426,11 @@ public class SlidingDownPanelLayout extends LinearLayout {
       mVelocityTracker = null;
       yVelocity = 0;
     }
+  }
+
+  public interface StateListener {
+    void onShow();
+
+    void onHide();
   }
 }
