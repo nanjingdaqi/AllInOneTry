@@ -19,7 +19,7 @@ public class CartPopupLayout extends LinearLayout {
 
   private static final int MOVE_DISTANCE_TO_TRIGGER = 10;
   private static final int MAX_ANIMATION_DURATION = 400;
-  private static final int TRIGGER_VELOCITY = 1000;
+  private static final int TRIGGER_VELOCITY = 1;
 
   private LinearLayout dragView;
   private ScrollView scrollView;
@@ -221,7 +221,7 @@ public class CartPopupLayout extends LinearLayout {
     long duration = (long) (MAX_ANIMATION_DURATION * (layoutH - dragView.getY()) / dragViewH);
     float minSpd = fdy / duration;
     float v0 = minSpd;
-    float vy = Math.min(yVelocity / 1000, 8);
+    float vy = Math.min(yVelocity, 8);
     if (vy > minSpd) {
       v0 = vy;
       duration = (long) (fdy / v0);
@@ -338,8 +338,7 @@ public class CartPopupLayout extends LinearLayout {
   }
 
   private void computeVelocity() {
-    //units是单位表示， 1代表px/毫秒, 1000代表px/秒
-    mVelocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
+    mVelocityTracker.computeCurrentVelocity(1, mMaxVelocity);
     yVelocity = mVelocityTracker.getYVelocity();
   }
 
@@ -355,6 +354,7 @@ public class CartPopupLayout extends LinearLayout {
       mVelocityTracker.clear();
       mVelocityTracker.recycle();
       mVelocityTracker = null;
+      yVelocity = 0;
     }
   }
 }
