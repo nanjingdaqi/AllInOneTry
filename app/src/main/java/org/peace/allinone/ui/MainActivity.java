@@ -37,10 +37,10 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.toggle) public void onToggle() {
-    myLayout.displayPanel();
+    myLayout.show(true);
   }
 
   @OnClick(R.id.start_btn) public void onStartBtn() {
-
+    myLayout.hide(false);
   }
 }

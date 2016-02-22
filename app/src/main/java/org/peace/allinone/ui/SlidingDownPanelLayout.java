@@ -152,7 +152,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
     } else if (isDragViewShowing && downY > currentY) {
       isDragViewOnTouch = true;
     } else if (isDragViewShowing && downY < currentY) {
-      hidePanel();
+      hide(true);
       isDragViewOnTouch = false;
     }
     return isConsume;
@@ -223,16 +223,16 @@ public class SlidingDownPanelLayout extends LinearLayout {
     if (isDragViewShowing) {
       if (yVelocity > TRIGGER_VELOCITY) {
         if (currentY > layoutH - dragViewH + MOVE_DISTANCE_TO_TRIGGER) {
-          hidePanel();
+          hide(true);
         } else {
-          doDisplayPanel();
+          animateToShow();
         }
       } else {
         float dy = currentY - (layoutH - dragViewH);
         if (dy < dragViewH / 2) {
-          doDisplayPanel();
+          animateToShow();
         } else {
-          hidePanel();
+          hide(true);
         }
       }
     }
@@ -242,11 +242,19 @@ public class SlidingDownPanelLayout extends LinearLayout {
     deltaY = 0;
   }
 
-  private void hidePanel() {
+  public void hide(boolean hasAnimation) {
+    if (!hasAnimation) {
+      isDragViewShowing = false;
+      dragView.setY(layoutH);
+      updateBg();
+      isAnimating = false;
+      return;
+    }
+
     if (isAnimating) {
       return;
     }
-    float y0 = dragView.getY();
+    final float y0 = dragView.getY();
     float fdy = layoutH - dragView.getY();
     long duration = (long) (MAX_ANIMATION_DURATION * (layoutH - dragView.getY()) / dragViewH);
     float minSpd = fdy / duration;
@@ -298,14 +306,21 @@ public class SlidingDownPanelLayout extends LinearLayout {
     animator.start();
   }
 
-  public void displayPanel() {
-    if (layoutH == 0) {
+  public void show(boolean hasAnimation) {
+    if (!hasAnimation) {
+      isDragViewShowing = true;
+      dragView.setY(layoutH - dragViewH);
+      updateBg();
+      setVisibility(VISIBLE);
+      return;
+    }
+
+    if (getVisibility() == GONE) {
       getViewTreeObserver().addOnGlobalLayoutListener(
           new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override public void onGlobalLayout() {
               dragView.setY(layoutH);
-              doDisplayPanel();
-
+              animateToShow();
               getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
           });
@@ -313,11 +328,11 @@ public class SlidingDownPanelLayout extends LinearLayout {
     } else {
       dragView.setY(layoutH);
       setVisibility(VISIBLE);
-      doDisplayPanel();
+      animateToShow();
     }
   }
 
-  private void doDisplayPanel() {
+  private void animateToShow() {
     if (isAnimating) {
       return;
     }
