@@ -98,6 +98,19 @@ public class SlidingDownPanelLayout extends LinearLayout {
     scrollView = (ScrollView) sv;
   }
 
+  @Override public void setVisibility(int visibility) {
+    super.setVisibility(visibility);
+    if (visibility == VISIBLE) {
+      dragView.setY(layoutH - dragViewH);
+      isDragViewShowing = true;
+      updateBg();
+    } else if (visibility == GONE) {
+      dragView.setY(layoutH);
+      isDragViewShowing = false;
+      updateBg();
+    }
+  }
+
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -288,14 +301,12 @@ public class SlidingDownPanelLayout extends LinearLayout {
       @Override
       public void onAnimationEnd(Animator animation) {
         isAnimating = false;
-        isDragViewShowing = false;
         setVisibility(GONE);
       }
 
       @Override
       public void onAnimationCancel(Animator animation) {
         isAnimating = false;
-        isDragViewShowing = false;
         setVisibility(GONE);
       }
 
@@ -308,9 +319,6 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
   public void show(boolean hasAnimation) {
     if (!hasAnimation) {
-      isDragViewShowing = true;
-      dragView.setY(layoutH - dragViewH);
-      updateBg();
       setVisibility(VISIBLE);
       return;
     }
@@ -324,10 +332,9 @@ public class SlidingDownPanelLayout extends LinearLayout {
               getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
           });
-      setVisibility(VISIBLE);
+      super.setVisibility(VISIBLE);
     } else {
-      dragView.setY(layoutH);
-      setVisibility(VISIBLE);
+      super.setVisibility(VISIBLE);
       animateToShow();
     }
   }
