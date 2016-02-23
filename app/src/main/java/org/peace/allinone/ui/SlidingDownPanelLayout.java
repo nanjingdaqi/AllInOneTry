@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -291,7 +292,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
       return;
     }
 
-    if (hideAnimator != null && hideAnimator.isRunning()) {
+    if (animateRunning()) {
       return;
     }
 
@@ -320,23 +321,14 @@ public class SlidingDownPanelLayout extends LinearLayout {
         updateBg();
       }
     });
-    hideAnimator.addListener(new Animator.AnimatorListener() {
-      @Override
-      public void onAnimationStart(Animator animation) {
-      }
-
+    hideAnimator.addListener(new AnimatorListenerAdapter() {
       @Override
       public void onAnimationEnd(Animator animation) {
         setVisibility(GONE);
       }
-
       @Override
       public void onAnimationCancel(Animator animation) {
         setVisibility(GONE);
-      }
-
-      @Override
-      public void onAnimationRepeat(Animator animation) {
       }
     });
     hideAnimator.start();
@@ -364,8 +356,13 @@ public class SlidingDownPanelLayout extends LinearLayout {
     }
   }
 
+  private boolean animateRunning() {
+    return (showAnimator != null && showAnimator.isRunning())
+        || (hideAnimator != null && hideAnimator.isRunning());
+  }
+
   private void animateToShow() {
-    if (showAnimator != null && showAnimator.isRunning()) {
+    if (animateRunning()) {
       return;
     }
 
@@ -381,25 +378,6 @@ public class SlidingDownPanelLayout extends LinearLayout {
         float value = (float) animation.getAnimatedValue();
         dragView.setY(value);
         updateBg();
-      }
-    });
-    showAnimator.addListener(new Animator.AnimatorListener() {
-      @Override
-      public void onAnimationStart(Animator animation) {
-      }
-
-      @Override
-      public void onAnimationEnd(Animator animation) {
-        setVisibility(VISIBLE);
-      }
-
-      @Override
-      public void onAnimationCancel(Animator animation) {
-        setVisibility(VISIBLE);
-      }
-
-      @Override
-      public void onAnimationRepeat(Animator animation) {
       }
     });
     showAnimator.start();
