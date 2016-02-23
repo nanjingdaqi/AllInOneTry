@@ -210,7 +210,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
     computeVelocity();
 
-    if (!isDragging && Math.abs(event.getY() - firstDownY) > mTouchSlop) {
+    if (!isDragging && event.getY() - firstDownY > mTouchSlop) {
       isDragging = true;
       downY = event.getY();
     }
