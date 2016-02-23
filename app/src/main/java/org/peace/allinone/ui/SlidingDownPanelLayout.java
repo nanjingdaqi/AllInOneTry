@@ -18,6 +18,9 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import java.util.LinkedList;
+import java.util.List;
+import me.ele.commons.CollectionsUtils;
 import org.peace.allinone.R;
 
 public class SlidingDownPanelLayout extends LinearLayout {
@@ -31,15 +34,12 @@ public class SlidingDownPanelLayout extends LinearLayout {
   private int dragViewId;
   private int scrollViewId;
 
-  private boolean isAnimating = false;
-  private boolean isDragViewShowing = false;
-
   private float yVelocity;
   private float mTouchSlop;
   private int mMaxVelocity;
   private VelocityTracker mVelocityTracker;
 
-  private StateListener stateListener;
+  private List<StateListener> stateListeners = new LinkedList<>();
 
   private int layoutH;
   private float firstDownY;
@@ -50,6 +50,8 @@ public class SlidingDownPanelLayout extends LinearLayout {
   private float dragViewH;
   private boolean isDragViewOnTouch = false;
 
+  private ValueAnimator showAnimator;
+  private ValueAnimator hideAnimator;
   private Interpolator mOpenAnimationInterpolator = new AccelerateInterpolator();
   private Interpolator mCloseAnimationInterpolator = new LinearInterpolator();
 
@@ -70,7 +72,8 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
     TypedArray ta = null;
     try {
-      ta = context.obtainStyledAttributes(attrs, R.styleable.SlidingDownPanelLayout, defStyleAttr, 0);
+      ta = context.obtainStyledAttributes(attrs, R.styleable.SlidingDownPanelLayout, defStyleAttr,
+          0);
       dragViewId = ta.getResourceId(R.styleable.SlidingDownPanelLayout_drag_view_id, -1);
       scrollViewId = ta.getResourceId(R.styleable.SlidingDownPanelLayout_scroll_view_id, -1);
     } finally {
@@ -102,29 +105,35 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
   @Override protected void onVisibilityChanged(View changedView, int visibility) {
     super.onVisibilityChanged(changedView, visibility);
-    if (stateListener == null) {
+    if (CollectionsUtils.isEmpty(stateListeners)) {
       return;
     }
     if (visibility == VISIBLE) {
-      stateListener.onShow();
+      for (StateListener stateListener : stateListeners) {
+        stateListener.onShow();
+      }
     } else if (visibility == GONE) {
-      stateListener.onHide();
+      for (StateListener stateListener : stateListeners) {
+        stateListener.onHide();
+      }
     }
   }
 
-  public void setStateListener(StateListener listener) {
-    this.stateListener = listener;
+  public void addStateListener(StateListener listener) {
+    stateListeners.add(listener);
+  }
+
+  public void removeStateListener(StateListener listener) {
+    stateListeners.remove(listener);
   }
 
   @Override public void setVisibility(int visibility) {
     super.setVisibility(visibility);
     if (visibility == VISIBLE) {
       dragView.setY(layoutH - dragViewH);
-      isDragViewShowing = true;
       updateBg();
     } else if (visibility == GONE) {
       dragView.setY(layoutH);
-      isDragViewShowing = false;
       updateBg();
     }
   }
@@ -175,6 +184,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
     boolean isConsume = false;
     firstDownY = downY = event.getY();
     float currentY = dragView.getY();
+    boolean isDragViewShowing = getVisibility() == VISIBLE;
     if (!isDragViewShowing && downY > layoutH) {
       isDragViewOnTouch = true;
       isConsume = true;
@@ -194,7 +204,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
       return;
     }
 
-    if (!isDragging && isDragViewShowing && canConsumedByScrollView(event)) {
+    if (!isDragging && getVisibility() == VISIBLE && canConsumedByScrollView(event)) {
       return;
     }
 
@@ -251,7 +261,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
     float currentY = dragView.getY();
 
-    if (isDragViewShowing) {
+    if (getVisibility() == VISIBLE) {
       if (yVelocity > TRIGGER_VELOCITY) {
         if (currentY > layoutH - dragViewH + MOVE_DISTANCE_TO_TRIGGER) {
           hide(true);
@@ -275,16 +285,16 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
   public void hide(boolean hasAnimation) {
     if (!hasAnimation) {
-      isDragViewShowing = false;
       dragView.setY(layoutH);
       updateBg();
-      isAnimating = false;
+      setVisibility(GONE);
       return;
     }
 
-    if (isAnimating) {
+    if (hideAnimator != null && hideAnimator.isRunning()) {
       return;
     }
+
     final float y0 = dragView.getY();
     float fdy = layoutH - dragView.getY();
     long duration = (long) (MAX_ANIMATION_DURATION * (layoutH - dragView.getY()) / dragViewH);
@@ -296,11 +306,11 @@ public class SlidingDownPanelLayout extends LinearLayout {
       duration = (long) (fdy / v0);
     }
     final float finalV = v0;
-    ValueAnimator animator = ValueAnimator.ofFloat(0, duration);
-    animator.setInterpolator(mCloseAnimationInterpolator);
-    animator.setTarget(dragView);
-    animator.setDuration(duration);
-    animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    hideAnimator = ValueAnimator.ofFloat(0, duration);
+    hideAnimator.setInterpolator(mCloseAnimationInterpolator);
+    hideAnimator.setTarget(dragView);
+    hideAnimator.setDuration(duration);
+    hideAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override
       public void onAnimationUpdate(ValueAnimator animation) {
         float t = (float) animation.getAnimatedValue();
@@ -310,21 +320,18 @@ public class SlidingDownPanelLayout extends LinearLayout {
         updateBg();
       }
     });
-    animator.addListener(new Animator.AnimatorListener() {
+    hideAnimator.addListener(new Animator.AnimatorListener() {
       @Override
       public void onAnimationStart(Animator animation) {
-        isAnimating = true;
       }
 
       @Override
       public void onAnimationEnd(Animator animation) {
-        isAnimating = false;
         setVisibility(GONE);
       }
 
       @Override
       public void onAnimationCancel(Animator animation) {
-        isAnimating = false;
         setVisibility(GONE);
       }
 
@@ -332,7 +339,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
       public void onAnimationRepeat(Animator animation) {
       }
     });
-    animator.start();
+    hideAnimator.start();
   }
 
   public void show(boolean hasAnimation) {
@@ -358,18 +365,17 @@ public class SlidingDownPanelLayout extends LinearLayout {
   }
 
   private void animateToShow() {
-    if (isAnimating) {
+    if (showAnimator != null && showAnimator.isRunning()) {
       return;
     }
 
     float currentY = dragView.getY();
     long duration =
         (long) ((currentY - (layoutH - dragViewH)) / dragViewH * MAX_ANIMATION_DURATION);
-    ValueAnimator animator =
-        ValueAnimator.ofFloat(currentY, layoutH - dragViewH).setDuration(duration);
-    animator.setTarget(dragView);
-    animator.setInterpolator(mOpenAnimationInterpolator);
-    animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    showAnimator = ValueAnimator.ofFloat(currentY, layoutH - dragViewH).setDuration(duration);
+    showAnimator.setTarget(dragView);
+    showAnimator.setInterpolator(mOpenAnimationInterpolator);
+    showAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override
       public void onAnimationUpdate(ValueAnimator animation) {
         float value = (float) animation.getAnimatedValue();
@@ -377,28 +383,26 @@ public class SlidingDownPanelLayout extends LinearLayout {
         updateBg();
       }
     });
-    animator.addListener(new Animator.AnimatorListener() {
+    showAnimator.addListener(new Animator.AnimatorListener() {
       @Override
       public void onAnimationStart(Animator animation) {
-        isAnimating = true;
       }
 
       @Override
       public void onAnimationEnd(Animator animation) {
-        isAnimating = false;
+        setVisibility(VISIBLE);
       }
 
       @Override
       public void onAnimationCancel(Animator animation) {
-        isAnimating = false;
+        setVisibility(VISIBLE);
       }
 
       @Override
       public void onAnimationRepeat(Animator animation) {
       }
     });
-    animator.start();
-    isDragViewShowing = true;
+    showAnimator.start();
   }
 
   private void updateBg() {
