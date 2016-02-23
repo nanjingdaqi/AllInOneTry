@@ -18,6 +18,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,8 +33,10 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
   private View dragView;
   private ScrollView scrollView;
+  private ListView listView;
   private int dragViewId;
   private int scrollViewId;
+  private int listViewId;
 
   private float yVelocity;
   private float mTouchSlop;
@@ -77,6 +80,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
           0);
       dragViewId = ta.getResourceId(R.styleable.SlidingDownPanelLayout_drag_view_id, -1);
       scrollViewId = ta.getResourceId(R.styleable.SlidingDownPanelLayout_scroll_view_id, -1);
+      listViewId = ta.getResourceId(R.styleable.SlidingDownPanelLayout_list_view_id, -1);
     } finally {
       ta.recycle();
     }
@@ -97,11 +101,18 @@ public class SlidingDownPanelLayout extends LinearLayout {
     if (dragView == null) {
       throw new IllegalStateException("must set a valid drag_view_id");
     }
+
     View sv = findViewById(scrollViewId);
     if (sv != null && !(sv instanceof ScrollView)) {
       throw new IllegalStateException("scroll_view_id must be ScrollView");
     }
     scrollView = (ScrollView) sv;
+
+    View lv = findViewById(listViewId);
+    if (lv != null && !(lv instanceof ListView)) {
+      throw new IllegalStateException("list_view_id must be ListView");
+    }
+    listView = (ListView) lv;
   }
 
   @Override protected void onVisibilityChanged(View changedView, int visibility) {
@@ -205,7 +216,8 @@ public class SlidingDownPanelLayout extends LinearLayout {
       return;
     }
 
-    if (!isDragging && getVisibility() == VISIBLE && canConsumedByScrollView(event)) {
+    if (!isDragging && getVisibility() == VISIBLE
+        && (canConsumedByScrollView(event) || canConsumedByListView(event))) {
       return;
     }
 
@@ -251,6 +263,41 @@ public class SlidingDownPanelLayout extends LinearLayout {
       return true;
     }
     return false;
+  }
+
+  private boolean canConsumedByListView(MotionEvent ev) {
+    if (listView == null) {
+      return false;
+    }
+
+    float l = listView.getX() + dragView.getX();
+    float t = listView.getY() + dragView.getY();
+    float r = l + listView.getWidth();
+    float b = t + listView.getHeight();
+    float x = ev.getX();
+    float y = ev.getY();
+    if (x >= l && x <= r && y >= t && y <= b
+        && firstDownY >= t && firstDownY <= b
+        && canListViewScroll((int) (firstDownY - y))) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean canListViewScroll(int dir) {
+    final int childCount = listView.getChildCount();
+    if (childCount == 0) {
+      return false;
+    }
+    final int firstPosition = listView.getFirstVisiblePosition();
+    if (dir > 0) {//can scroll down
+      final int lastBottom = listView.getChildAt(childCount - 1).getBottom();
+      final int lastPosition = firstPosition + childCount;
+      return lastPosition < listView.getCount() || lastBottom > listView.getHeight() - listView.getPaddingTop();
+    } else {//can scroll  up
+      final int firstTop = listView.getChildAt(0).getTop();
+      return firstPosition > 0 || firstTop < listView.getPaddingTop();
+    }
   }
 
   private void handleActionUp(MotionEvent event) {

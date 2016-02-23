@@ -3,5 +3,6 @@
   <declare-styleable name="SlidingDownPanelLayout">
     <attr name="drag_view_id" format="integer"/>
     <attr name="scroll_view_id" format="integer"/>
+    <attr name="list_view_id" format="integer"/>
   </declare-styleable>
 </resources>
