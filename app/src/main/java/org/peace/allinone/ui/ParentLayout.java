@@ -45,8 +45,8 @@ public class ParentLayout extends LinearLayout implements NestedScrollingParent 
   }
 
   @Override public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
-    AppLogger.e("get dy: " + dy);
-    consumed[1] = 1;
+    setY(getY() - dy);
+    //consumed[1] = dy;
   }
 
   @Override
