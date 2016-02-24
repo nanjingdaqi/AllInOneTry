@@ -17,7 +17,7 @@
       android:text="Start"
       />
 
-  <org.peace.allinone.ui.ParentLayout
+  <android.support.design.widget.CoordinatorLayout
       android:id="@+id/parent"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
@@ -30,15 +30,18 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:background="@android:color/holo_blue_light"
+        app:layout_behavior="android.support.design.widget.MyB"
         />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_red_light"
         app:layoutManager="LinearLayoutManager"
+        app:layout_behavior="android.support.design.widget.MyB2"
         />
 
-  </org.peace.allinone.ui.ParentLayout>
+  </android.support.design.widget.CoordinatorLayout>
 
 </LinearLayout>
