@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
@@ -28,7 +29,7 @@ import org.peace.allinone.R;
 public class SlidingDownPanelLayout extends LinearLayout {
 
   private static final int MOVE_DISTANCE_TO_TRIGGER = 10;
-  private static final int MAX_ANIMATION_DURATION = 400;
+  private static int MAX_ANIMATION_DURATION = 400;
   private static final int TRIGGER_VELOCITY = 1;
 
   private View dragView;
@@ -56,7 +57,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
   private ValueAnimator showAnimator;
   private ValueAnimator hideAnimator;
-  private Interpolator mOpenAnimationInterpolator = new AccelerateInterpolator();
+  private Interpolator mOpenAnimationInterpolator = new DecelerateInterpolator();
   private Interpolator mCloseAnimationInterpolator = new LinearInterpolator();
 
   ArgbEvaluator bgEvaluator = new ArgbEvaluator();
@@ -155,6 +156,10 @@ public class SlidingDownPanelLayout extends LinearLayout {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     layoutH = getMeasuredHeight();
     dragViewH = dragView.getMeasuredHeight();
+    if (dragViewH > 0) {
+      // use 1000px as a base in order to make speed looks like equalling
+      MAX_ANIMATION_DURATION = (int) (dragViewH / 1000 * 400);
+    }
   }
 
   @Override
