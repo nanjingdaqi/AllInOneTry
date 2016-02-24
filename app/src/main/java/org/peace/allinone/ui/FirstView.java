@@ -3,8 +3,9 @@ package org.peace.allinone.ui;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.TextView;
 
-public class FirstView extends View {
+public class FirstView extends TextView {
   public FirstView(Context context) {
     super(context);
   }

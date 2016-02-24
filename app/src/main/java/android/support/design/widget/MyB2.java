@@ -24,22 +24,25 @@ public class MyB2 extends CoordinatorLayout.Behavior<View> {
   @Override
   public boolean onLayoutChild(CoordinatorLayout parent, View child, int layoutDirection) {
     parent.onLayoutChild(child, layoutDirection);
-    List<View> dependencies = parent.getDependencies(child);
-    View firstView = dependencies.get(0);
-    AppLogger.e("onLayoutChild, firstView mh: " + firstView.getMeasuredHeight());
-    child.offsetTopAndBottom(firstView.getMeasuredHeight());
+    AppLogger.e("onLayoutChild, firstView mh: " + getDependency(parent, child).getMeasuredHeight());
+    child.offsetTopAndBottom(getDependency(parent, child).getMeasuredHeight());
     return true;
   }
 
   @Override
   public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
     AppLogger.e("onDependentViewChanged");
-    child.offsetTopAndBottom(-2);
-    parent.invalidate();
+    View depend = getDependency(parent, child);
+    child.setY(depend.getY() + depend.getMeasuredHeight());
     return true;
   }
 
   @Override public boolean layoutDependsOn(CoordinatorLayout parent, View child, View dependency) {
     return dependency instanceof FirstView;
+  }
+
+  private View getDependency(CoordinatorLayout parent, View child) {
+    List<View> dependencies = parent.getDependencies(child);
+    return dependencies.get(0);
   }
 }
