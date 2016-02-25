@@ -1,7 +1,10 @@
 package org.peace.allinone.ui;
 
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,10 +20,8 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
-  @InjectView(R.id.start_btn) Button mStartBtn;
-  RecyclerView list;
-
-  BottomSheetDialog bottomSheetDialog;
+  @InjectView(R.id.list) RecyclerView list;
+  BottomSheetBehavior behavior;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -28,19 +29,18 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.inject(this);
 
-    bottomSheetDialog = new BottomSheetDialog(this);
-    bottomSheetDialog.setContentView(R.layout.bottom_sheet_dlg_content);
-    list = (RecyclerView) bottomSheetDialog.findViewById(R.id.list);
     list.setAdapter(new Ad());
     list.setLayoutManager(new LinearLayoutManager(this));
+    behavior =
+        (BottomSheetBehavior) ((CoordinatorLayout.LayoutParams) list.getLayoutParams()).getBehavior();
   }
 
-  @OnClick(R.id.toggle) public void onToggle() {
-    bottomSheetDialog.cancel();
+  @OnClick(R.id.hide) public void onToggle() {
+    behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
   }
 
-  @OnClick(R.id.start_btn) public void onStartBtn() {
-    bottomSheetDialog.show();
+  @OnClick(R.id.show) public void onStartBtn() {
+    behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
   }
 
   static class VH extends RecyclerView.ViewHolder {
@@ -55,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
   static class Ad extends RecyclerView.Adapter<VH> {
 
     @Override public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-      View root = LayoutInflater.from(parent.getContext()).inflate(R.layout.simple_item, parent, false);
+      View root =
+          LayoutInflater.from(parent.getContext()).inflate(R.layout.simple_item, parent, false);
       return new VH(root);
     }
 
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override public int getItemCount() {
-      return 40;
+      return 2;
     }
   }
 }
