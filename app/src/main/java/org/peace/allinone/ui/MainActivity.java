@@ -15,8 +15,6 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
-  @InjectView(R.id.start_btn) Button mStartBtn;
-
   @InjectView(R.id.list) RecyclerView list;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -25,13 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.inject(this);
     list.setAdapter(new MyAdapter());
-  }
-
-  @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    int id = v.getId();
-    if (id == R.id.start_btn) {
-
-    }
   }
 
   static class VH extends RecyclerView.ViewHolder {
