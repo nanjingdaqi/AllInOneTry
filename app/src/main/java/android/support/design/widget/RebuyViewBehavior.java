@@ -11,6 +11,8 @@ import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
+import static android.view.View.GONE;
+
 public class RebuyViewBehavior extends CoordinatorLayout.Behavior<View> {
 
   private static final long FLING_VELOCITY_THRESHOlD = 1000;
@@ -32,8 +34,19 @@ public class RebuyViewBehavior extends CoordinatorLayout.Behavior<View> {
       scrollingChildHelper = new NestedScrollingChildHelper(parent);
       scrollingChildHelper.setNestedScrollingEnabled(true);
     }
+    if (child.getVisibility() == GONE) {
+      return true;
+    }
     return super.onMeasureChild(parent, child, parentWidthMeasureSpec, widthUsed,
         parentHeightMeasureSpec, heightUsed);
+  }
+
+  @Override
+  public boolean onLayoutChild(CoordinatorLayout parent, View child, int layoutDirection) {
+    if (child.getVisibility() == GONE) {
+      return true;
+    }
+    return super.onLayoutChild(parent, child, layoutDirection);
   }
 
   @Override public boolean onStartNestedScroll(CoordinatorLayout coordinatorLayout, View child,
@@ -164,7 +177,7 @@ public class RebuyViewBehavior extends CoordinatorLayout.Behavior<View> {
     return false;
   }
 
-  private void animateToShow(CoordinatorLayout parent, View child, int v) {
+  private void animateToShow(final CoordinatorLayout parent, final View child, int v) {
     float currentY = child.getY();
     if (currentY >= 0 || Math.abs(v) < FLING_VELOCITY_THRESHOlD) {
       return;
@@ -185,7 +198,7 @@ public class RebuyViewBehavior extends CoordinatorLayout.Behavior<View> {
     flingInAnim.setDuration(duration).start();
   }
 
-  private void animateToHide(CoordinatorLayout parent, View child, int v) {
+  private void animateToHide(final CoordinatorLayout parent, final View child, int v) {
     float currentY = child.getY();
     if (currentY <= -child.getMeasuredHeight() || Math.abs(v) < FLING_VELOCITY_THRESHOlD) {
       return;
