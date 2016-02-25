@@ -10,16 +10,18 @@ import android.support.v4.view.NestedScrollingChildHelper;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
+import me.ele.commons.AppLogger;
 
 import static android.view.View.GONE;
 
 public class RebuyViewBehavior extends CoordinatorLayout.Behavior<View> {
 
-  private static final long FLING_VELOCITY_THRESHOlD = 1000;
+  private static final long FLING_VELOCITY_BASE = 3000;
+  private static final long FLING_ANIM_DISTANCE_BASE = 200;
 
   private ObjectAnimator flingOutAnim;
   private ObjectAnimator flingInAnim;
-  private long maxAnimDuration = 400;
+  private long maxAnimDuration = 200;
   private NestedScrollingChildHelper scrollingChildHelper;
   private boolean skipNestedPreScroll;
 
@@ -154,7 +156,7 @@ public class RebuyViewBehavior extends CoordinatorLayout.Behavior<View> {
   public boolean onNestedPreFling(CoordinatorLayout coordinatorLayout, View child, View target,
       float velocityX, float velocityY) {
     scrollingChildHelper.dispatchNestedPreFling(velocityX, velocityY);
-
+    AppLogger.e("vy: " + velocityY);
     if (velocityY > 0 && !isHidden(child)) {
       // fling up
       animateToHide(coordinatorLayout, child, (int) velocityY);
@@ -179,7 +181,7 @@ public class RebuyViewBehavior extends CoordinatorLayout.Behavior<View> {
 
   private void animateToShow(final CoordinatorLayout parent, final View child, int v) {
     float currentY = child.getY();
-    if (currentY >= 0 || Math.abs(v) < FLING_VELOCITY_THRESHOlD) {
+    if (currentY >= 0) {
       return;
     }
     flingInAnim = ObjectAnimator.ofFloat(child, "y", currentY, 0);
@@ -194,13 +196,14 @@ public class RebuyViewBehavior extends CoordinatorLayout.Behavior<View> {
       }
     });
     long distance = (long) Math.abs(currentY);
-    long duration = distance * maxAnimDuration / 1000;
+    long duration = distance * maxAnimDuration / FLING_ANIM_DISTANCE_BASE;
+    duration = duration * FLING_VELOCITY_BASE / Math.abs(v);
     flingInAnim.setDuration(duration).start();
   }
 
   private void animateToHide(final CoordinatorLayout parent, final View child, int v) {
     float currentY = child.getY();
-    if (currentY <= -child.getMeasuredHeight() || Math.abs(v) < FLING_VELOCITY_THRESHOlD) {
+    if (currentY <= -child.getMeasuredHeight()) {
       return;
     }
     flingOutAnim = ObjectAnimator.ofFloat(child, "y", currentY, -child.getMeasuredHeight());
@@ -215,7 +218,9 @@ public class RebuyViewBehavior extends CoordinatorLayout.Behavior<View> {
       }
     });
     long distance = (long) Math.abs(-child.getMeasuredHeight() - currentY);
-    long duration = distance * maxAnimDuration / 1000;
+    long duration = distance * maxAnimDuration / FLING_ANIM_DISTANCE_BASE;
+    duration = duration * FLING_VELOCITY_BASE / Math.abs(v);
+    AppLogger.e("duration: " + duration);
     flingOutAnim.setDuration(duration).start();
   }
 
