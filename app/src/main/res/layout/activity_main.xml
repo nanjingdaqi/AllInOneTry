@@ -35,48 +35,4 @@
 
   </LinearLayout>
 
-  <org.peace.allinone.ui.SL2
-      android:id="@+id/list_view_container"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:background="@android:color/black"
-      android:gravity="bottom"
-      android:orientation="vertical"
-      app:drag_view_id="@+id/drag_view"
-      app:list_view_id="@+id/list"
-      >
-
-    <Space
-        android:id="@+id/space"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        />
-
-    <LinearLayout
-        android:id="@+id/drag_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
-
-      <View
-          android:id="@+id/head"
-          android:layout_width="match_parent"
-          android:layout_height="46dp"
-          android:background="@android:color/holo_red_light"
-          android:clickable="true"
-          />
-
-      <ListView
-          android:id="@+id/list"
-          android:layout_width="match_parent"
-          android:layout_height="300dp"
-          android:background="@android:color/white"
-          android:divider="@drawable/divider_15_0"
-          />
-
-    </LinearLayout>
-
-  </org.peace.allinone.ui.SL2>
-
 </LinearLayout>

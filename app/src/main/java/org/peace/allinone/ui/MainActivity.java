@@ -1,22 +1,26 @@
 package org.peace.allinone.ui;
 
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ArrayAdapter;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import org.peace.allinone.R;
 
-import static android.view.View.GONE;
-
 public class MainActivity extends AppCompatActivity {
 
-  @InjectView(R.id.show) Button mStartBtn;
-  @InjectView(R.id.list_view_container) SL2 myLayout;
-  @InjectView(R.id.list) ListView listView;
+  @InjectView(R.id.start_btn) Button mStartBtn;
+  RecyclerView list;
+
+  BottomSheetDialog bottomSheetDialog;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -24,20 +28,43 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.inject(this);
 
-    ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1);
+    bottomSheetDialog = new BottomSheetDialog(this);
+    bottomSheetDialog.setContentView(R.layout.bottom_sheet_dlg_content);
+    list = (RecyclerView) bottomSheetDialog.findViewById(R.id.list);
+    list.setAdapter(new Ad());
+    list.setLayoutManager(new LinearLayoutManager(this));
+  }
 
-    for (int i = 0; i < 60; i++) {
-      adapter.add("Item " + i);
+  @OnClick(R.id.toggle) public void onToggle() {
+    bottomSheetDialog.cancel();
+  }
+
+  @OnClick(R.id.start_btn) public void onStartBtn() {
+    bottomSheetDialog.show();
+  }
+
+  static class VH extends RecyclerView.ViewHolder {
+    @InjectView(R.id.tv) TextView tv;
+
+    public VH(View itemView) {
+      super(itemView);
+      ButterKnife.inject(this, itemView);
+    }
+  }
+
+  static class Ad extends RecyclerView.Adapter<VH> {
+
+    @Override public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+      View root = LayoutInflater.from(parent.getContext()).inflate(R.layout.simple_item, parent, false);
+      return new VH(root);
     }
 
-    listView.setAdapter(adapter);
-  }
+    @Override public void onBindViewHolder(VH holder, int position) {
+      holder.tv.setText("Item " + position);
+    }
 
-  @OnClick(R.id.show) public void show() {
-    myLayout.show();
-  }
-
-  @OnClick(R.id.hide) public void hide() {
-    myLayout.hide();
+    @Override public int getItemCount() {
+      return 40;
+    }
   }
 }
