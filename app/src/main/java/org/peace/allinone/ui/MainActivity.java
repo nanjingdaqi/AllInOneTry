@@ -4,9 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -16,8 +14,8 @@ import static android.view.View.GONE;
 
 public class MainActivity extends AppCompatActivity {
 
-  @InjectView(R.id.start_btn) Button mStartBtn;
-  @InjectView(R.id.list_view_container) SlidingDownPanelLayout myLayout;
+  @InjectView(R.id.show) Button mStartBtn;
+  @InjectView(R.id.list_view_container) SL2 myLayout;
   @InjectView(R.id.list) ListView listView;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -33,15 +31,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     listView.setAdapter(adapter);
-
-    myLayout.setVisibility(GONE);
   }
 
-  @OnClick(R.id.toggle) public void onToggle() {
-    myLayout.show(true);
+  @OnClick(R.id.show) public void show() {
+    myLayout.show();
   }
 
-  @OnClick(R.id.start_btn) public void onStartBtn() {
-    myLayout.hide(false);
+  @OnClick(R.id.hide) public void hide() {
+    myLayout.hide();
   }
 }
