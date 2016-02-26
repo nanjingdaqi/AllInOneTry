@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
@@ -14,10 +15,8 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
@@ -29,8 +28,8 @@ import org.peace.allinone.R;
 public class SlidingDownPanelLayout extends LinearLayout {
 
   private static final int MOVE_DISTANCE_TO_TRIGGER = 10;
-  private static int MAX_ANIMATION_DURATION = 400;
   private static final int TRIGGER_VELOCITY = 1;
+  private static final int ANIM_DURATION_UP_LIMIT = 300;
 
   private View dragView;
   private ScrollView scrollView;
@@ -55,14 +54,15 @@ public class SlidingDownPanelLayout extends LinearLayout {
   private float dragViewH;
   private boolean isDragViewOnTouch = false;
 
+  private int animDurationBase = 400;
   private ValueAnimator showAnimator;
   private ValueAnimator hideAnimator;
   private Interpolator mOpenAnimationInterpolator = new DecelerateInterpolator();
-  private Interpolator mCloseAnimationInterpolator = new LinearInterpolator();
+  private Interpolator mCloseAnimationInterpolator = new DecelerateInterpolator();
 
-  ArgbEvaluator bgEvaluator = new ArgbEvaluator();
-  int trans = getContext().getResources().getColor(android.R.color.transparent);
-  int bgColor = trans;
+  private ArgbEvaluator bgEvaluator = new ArgbEvaluator();
+  private int trans = getContext().getResources().getColor(android.R.color.transparent);
+  private int bgColor = trans;
 
   public SlidingDownPanelLayout(Context context) {
     this(context, null);
@@ -158,7 +158,7 @@ public class SlidingDownPanelLayout extends LinearLayout {
     dragViewH = dragView.getMeasuredHeight();
     if (dragViewH > 0) {
       // use 1000px as a base in order to make speed looks like equalling
-      MAX_ANIMATION_DURATION = (int) (dragViewH / 1000 * 400);
+      animDurationBase = Math.min((int) (dragViewH * 400 / 1000), 400);
     }
   }
 
@@ -177,6 +177,8 @@ public class SlidingDownPanelLayout extends LinearLayout {
       case MotionEvent.ACTION_CANCEL:
         handleActionUp(ev);
         releaseVelocityTracker();
+        break;
+      default:
         break;
     }
     return isConsume || superDispatchTouchEvent(ev);
@@ -298,7 +300,8 @@ public class SlidingDownPanelLayout extends LinearLayout {
     if (dir > 0) {//can scroll down
       final int lastBottom = listView.getChildAt(childCount - 1).getBottom();
       final int lastPosition = firstPosition + childCount;
-      return lastPosition < listView.getCount() || lastBottom > listView.getHeight() - listView.getPaddingTop();
+      return lastPosition < listView.getCount()
+          || lastBottom > listView.getHeight() - listView.getPaddingTop();
     } else {//can scroll  up
       final int firstTop = listView.getChildAt(0).getTop();
       return firstPosition > 0 || firstTop < listView.getPaddingTop();
@@ -338,8 +341,6 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
   public void hide(boolean hasAnimation) {
     if (!hasAnimation) {
-      dragView.setY(layoutH);
-      updateBg();
       setVisibility(GONE);
       return;
     }
@@ -350,7 +351,8 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
     final float y0 = dragView.getY();
     float fdy = layoutH - dragView.getY();
-    long duration = (long) (MAX_ANIMATION_DURATION * (layoutH - dragView.getY()) / dragViewH);
+    long duration = Math.min((long) (animDurationBase * (layoutH - dragView.getY()) / dragViewH),
+        ANIM_DURATION_UP_LIMIT);
     float minSpd = fdy / duration;
     float v0 = minSpd;
     float vy = Math.min(yVelocity, 8);
@@ -358,16 +360,16 @@ public class SlidingDownPanelLayout extends LinearLayout {
       v0 = vy;
       duration = (long) (fdy / v0);
     }
-    final float finalV = v0;
+    final float fv0 = v0;
     hideAnimator = ValueAnimator.ofFloat(0, duration);
     hideAnimator.setInterpolator(mCloseAnimationInterpolator);
     hideAnimator.setTarget(dragView);
     hideAnimator.setDuration(duration);
-    hideAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    hideAnimator.addUpdateListener(new AnimatorUpdateListener() {
       @Override
       public void onAnimationUpdate(ValueAnimator animation) {
         float t = (float) animation.getAnimatedValue();
-        float dy = finalV * t;
+        float dy = fv0 * t;
         float y = y0 + dy;
         dragView.setY(Math.min(y, layoutH));
         updateBg();
@@ -377,12 +379,16 @@ public class SlidingDownPanelLayout extends LinearLayout {
       @Override
       public void onAnimationEnd(Animator animation) {
         setVisibility(GONE);
+        dragView.setLayerType(LAYER_TYPE_NONE, null);
       }
+
       @Override
       public void onAnimationCancel(Animator animation) {
         setVisibility(GONE);
+        dragView.setLayerType(LAYER_TYPE_NONE, null);
       }
     });
+    dragView.setLayerType(LAYER_TYPE_HARDWARE, null);
     hideAnimator.start();
   }
 
@@ -420,11 +426,12 @@ public class SlidingDownPanelLayout extends LinearLayout {
 
     float currentY = dragView.getY();
     long duration =
-        (long) ((currentY - (layoutH - dragViewH)) / dragViewH * MAX_ANIMATION_DURATION);
+        Math.min((long) ((currentY - (layoutH - dragViewH)) / dragViewH * animDurationBase),
+            ANIM_DURATION_UP_LIMIT);
     showAnimator = ValueAnimator.ofFloat(currentY, layoutH - dragViewH).setDuration(duration);
     showAnimator.setTarget(dragView);
     showAnimator.setInterpolator(mOpenAnimationInterpolator);
-    showAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    showAnimator.addUpdateListener(new AnimatorUpdateListener() {
       @Override
       public void onAnimationUpdate(ValueAnimator animation) {
         float value = (float) animation.getAnimatedValue();
@@ -432,6 +439,17 @@ public class SlidingDownPanelLayout extends LinearLayout {
         updateBg();
       }
     });
+    showAnimator.addListener(new AnimatorListenerAdapter() {
+      @Override public void onAnimationEnd(Animator animation) {
+        dragView.setLayerType(LAYER_TYPE_NONE, null);
+      }
+
+      @Override
+      public void onAnimationCancel(Animator animation) {
+        dragView.setLayerType(LAYER_TYPE_NONE, null);
+      }
+    });
+    dragView.setLayerType(LAYER_TYPE_HARDWARE, null);
     showAnimator.start();
   }
 
