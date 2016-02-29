@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
   @InjectView(R.id.start_btn) Button mStartBtn;
 
   @InjectView(R.id.et_1) EditText et1;
+  //@InjectView(R.id.focus) View focus;
 
   //@InjectView(R.id.et_2) EditText et2;
 
@@ -70,8 +71,9 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
-    et1.setText(before);
-    et1.setSelection(before.length());
+    //et1.setText(before);
+    //et1.setSelection(before.length());
+    //focus.setVisibility(View.GONE);
   }
 
   void format(Editable s) {

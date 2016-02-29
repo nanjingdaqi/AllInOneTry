@@ -16,8 +16,9 @@
       android:text="Start"
       />
 
-  <!--&lt;!&ndash;used to obtain focus at first&ndash;&gt;-->
+  <!--used to obtain focus at first-->
   <!--<FrameLayout-->
+      <!--android:id="@+id/focus"-->
       <!--android:layout_width="wrap_content"-->
       <!--android:layout_height="wrap_content"-->
       <!--&gt;-->
