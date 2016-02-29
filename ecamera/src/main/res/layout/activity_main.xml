@@ -1,0 +1,41 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#bb000000" >
+
+    <TextView
+        android:id="@+id/food_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:padding="15dp"
+        android:singleLine="true"
+        android:textColor="#fafafa"
+        android:textSize="20sp" />
+
+    <me.ele.ecamera.lib.ui.SquareLayout
+        android:id="@+id/fill_space_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/food_title"
+        android:background="#000000" />
+
+    <me.ele.ecamera.lib.ui.CameraView
+        android:id="@+id/camera_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/food_title"
+        android:background="#000000" />
+
+    <me.ele.ecamera.lib.ui.CameraControllerView
+        android:id="@+id/camera_controller_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/fill_space_view" />
+
+</RelativeLayout>

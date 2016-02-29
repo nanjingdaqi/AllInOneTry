@@ -1,0 +1,21 @@
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "23"
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 21
+        versionCode 3
+        versionName "1.1.0"
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs')
+    compile 'com.pnikosis:materialish-progress:1.4'
+    compile 'com.android.support:recyclerview-v7:21.0.3'
+    compile 'me.ele:commons:1.1.1'
+}

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="crop_image">裁剪照片</string>
+    <string name="fail_to_deal_image">图片处理失败，请重试</string>
+
+</resources>

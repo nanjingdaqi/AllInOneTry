@@ -20,6 +20,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="me.ele.ecamera.activity.EcameraActivity"/>
+
     </application>
 
 </manifest>

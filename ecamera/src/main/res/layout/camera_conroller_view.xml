@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<me.ele.ecamera.lib.ui.ScrollableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/camera_controller_view_internal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:orientation="horizontal"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp" >
+
+    <me.ele.ecamera.lib.ui.CameraStateButton
+        android:id="@+id/camera_gallery"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.0"
+        android:scaleType="center"
+        android:src="@drawable/camera_images" />
+
+    <me.ele.ecamera.lib.ui.CameraStateButton
+        android:id="@+id/shutter"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.0"
+        android:scaleType="center"
+        android:src="@drawable/camera_take_picture" />
+
+    <me.ele.ecamera.lib.ui.CameraStateButton
+        android:id="@+id/camera_flash_mode"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.0"
+        android:scaleType="center"
+        android:src="@drawable/camera_lamp_open" />
+
+</me.ele.ecamera.lib.ui.ScrollableLayout>
