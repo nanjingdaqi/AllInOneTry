@@ -21,7 +21,7 @@ import android.content.Context;
 import android.view.SurfaceHolder;
 import android.view.View;
 
-public class SurfacePreviewStrategy implements SurfaceHolder.Callback {
+public class SurfacePreviewStrategy implements SurfaceHolder.Callback{
 	private CameraPreview preview;
 	private SurfaceHolder previewHolder;
 	private CameraController cameraController;
@@ -93,37 +93,10 @@ public class SurfacePreviewStrategy implements SurfaceHolder.Callback {
 	        cameraController.initFlashMode();
 	        cameraController.adjustSize(preview.getWidth());
 	        cameraController.setPreviewDisplay(previewHolder);
-				cameraController.setPreviewCallback(new Camera.PreviewCallback() {
-					@Override public void onPreviewFrame(byte[] data, Camera camera) {
-						final Camera.Size previewSize = camera.getParameters().getPreviewSize();
-						float l = computeY(data, previewSize.width, previewSize.height);
-						AppLogger.e("w: " + previewSize.width + ", h: " + previewSize.height);
-						AppLogger.e("data size: " + data.length + ", val: " + l);
-					}
-				});
 	        cameraController.startPreview();
 	        preview.setVisibility(View.VISIBLE);
 	        released = false;
 	    }
-	}
-
-	static final long SAMPLE_POINT_AMOUNT = 10000;
-
-	float computeY(byte[] data, int width, int height) {
-		long size = width * height;
-		long n = Math.min(width * height, SAMPLE_POINT_AMOUNT);
-		long step = size / n;
-		int y;
-		int num = 0;
-		long max = 0;
-		long len = data.length;
-		for (int i = 0; i < size && i < len; ) {
-			y = data[i] & 0xff;
-			max += y;
-			i += step;
-			++num;
-		}
-		return max / num;
 	}
 
 	public void stopPreview() {

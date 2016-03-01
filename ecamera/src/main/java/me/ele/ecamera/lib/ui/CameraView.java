@@ -15,6 +15,9 @@
 
 package me.ele.ecamera.lib.ui;
 
+import android.widget.FrameLayout;
+import me.ele.commons.AppLogger;
+import me.ele.commons.DimenUtil;
 import me.ele.ecamera.lib.CameraController;
 import me.ele.ecamera.lib.CameraController.OnCameraOpenedListener;
 import android.annotation.SuppressLint;
@@ -28,7 +31,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class CameraView extends ViewGroup implements OnCameraOpenedListener {
+public class CameraView extends FrameLayout implements OnCameraOpenedListener {
 	
 	private static final float DEFAULT_CAMERA_BRIGHTNESS = 0.7f;
 	static final String TAG = "CWAC-Camera";
@@ -36,6 +39,7 @@ public class CameraView extends ViewGroup implements OnCameraOpenedListener {
 	private CameraController cameraController;
 	private FocusIndicator focusIndicator;
 	private CameraPhotoView photoView;
+	private CameraLuminanceHintView luminanceHintView;
 
 	public CameraView(Context context) {
 		super(context);
@@ -67,6 +71,9 @@ public class CameraView extends ViewGroup implements OnCameraOpenedListener {
 		addView(focusIndicator);
 		photoView = new CameraPhotoView(context);
 		addView(photoView);
+		luminanceHintView = new CameraLuminanceHintView(context, cameraController);
+		addView(luminanceHintView, new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
 	}
 
 	
@@ -107,6 +114,7 @@ public class CameraView extends ViewGroup implements OnCameraOpenedListener {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		final int width = resolveSize(getSuggestedMinimumWidth(),
 				widthMeasureSpec);
 		final int height = resolveSize(getSuggestedMinimumHeight(),
@@ -118,7 +126,7 @@ public class CameraView extends ViewGroup implements OnCameraOpenedListener {
 	@SuppressLint("DrawAllocation")
     @Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (changed && getChildCount() > 0) {
+        if (getChildCount() > 0) {
             final int width = right - left;
             final int height = bottom - top;
             int previewWidth = width;
@@ -139,7 +147,19 @@ public class CameraView extends ViewGroup implements OnCameraOpenedListener {
                 right = width;
                 bottom = scaledHeight;
                 for (int i = 0; i < getChildCount(); i++) {
-                    getChildAt(i).layout(left, top, right, bottom);
+									View child = getChildAt(i);
+									if (child != luminanceHintView) {
+										getChildAt(i).layout(left, top, right, bottom);
+									} else {
+										int l = (width - child.getMeasuredWidth()) / 2;
+										int r = l + child.getMeasuredWidth();
+										int t = bottom / 2;
+										int b = t + child.getMeasuredHeight();
+										//int b = bottom - DimenUtil.dip2px(getContext(), 16);
+										//int t = b - child.getMeasuredHeight();
+										luminanceHintView.layout(l, t, r, b);
+										AppLogger.e("l: " + l + ", r: " + r + ", t: " + t + ", b: " + b);
+									}
                     Log.e(getChildAt(i).getClass().getName() + " layout", left + "," +  top + "," + right + "," + bottom);
                 }
             }

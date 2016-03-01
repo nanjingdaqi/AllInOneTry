@@ -42,6 +42,7 @@ public class CameraController {
     private PhotoOutputSize photoOutputSize;
     private OnCameraOpenedListener cameraOpened;
     private String flashMode = Camera.Parameters.FLASH_MODE_AUTO;
+    private List<Camera.PreviewCallback> previewCallbacks = new ArrayList<>();
 
     public interface OnCameraOpenedListener {
         void onOpened();
@@ -71,6 +72,14 @@ public class CameraController {
 
     public boolean inPreview() {
         return inPreview;
+    }
+
+    public void addPreviewCallback(Camera.PreviewCallback cb) {
+        previewCallbacks.add(cb);
+    }
+
+    public void removePreviewCallback(Camera.PreviewCallback cb) {
+        previewCallbacks.remove(cb);
     }
 
     public Camera getCameraInctance() {
@@ -219,7 +228,7 @@ public class CameraController {
         return camera;
     }
 
-    public void setPreviewCallback(Camera.PreviewCallback callback) {
+    private void setPreviewCallback(Camera.PreviewCallback callback) {
         try {
             if (camera != null) {
                 camera.setPreviewCallback(callback);
@@ -233,6 +242,13 @@ public class CameraController {
         try {
             if (camera != null) {
                 camera.startPreview();
+                camera.setPreviewCallback(new Camera.PreviewCallback() {
+                    @Override public void onPreviewFrame(byte[] data, Camera camera) {
+                        for (Camera.PreviewCallback previewCallback : previewCallbacks) {
+                            previewCallback.onPreviewFrame(data, camera);
+                        }
+                    }
+                });
                 inPreview = true;
             }
         } catch (Exception e) {
