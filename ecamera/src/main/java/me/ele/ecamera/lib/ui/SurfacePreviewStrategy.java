@@ -107,23 +107,23 @@ public class SurfacePreviewStrategy implements SurfaceHolder.Callback {
 	    }
 	}
 
-	static int M1 = 24;
-	static int M2 = 12;
-	static int N = 1;
+	static final long SAMPLE_POINT_AMOUNT = 10000;
 
 	float computeY(byte[] data, int width, int height) {
-		int size = width*height;
-		int offset = size;
-		int[] pixels = new int[size];
+		long size = width * height;
+		long n = Math.min(width * height, SAMPLE_POINT_AMOUNT);
+		long step = size / n;
 		int y;
-
+		int num = 0;
 		long max = 0;
-		for(int i=0; i < size; ++i) {
-			y = data[i]&0xff;
+		long len = data.length;
+		for (int i = 0; i < size && i < len; ) {
+			y = data[i] & 0xff;
 			max += y;
+			i += step;
+			++num;
 		}
-
-		return max/size;
+		return max / num;
 	}
 
 	public void stopPreview() {
