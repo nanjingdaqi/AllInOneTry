@@ -8,6 +8,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +41,9 @@ public class EcameraActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().setBackgroundDrawableResource(android.R.color.black);
         if (!CameraUtils.hasCameraPermission(this)) {
             Toast.makeText(this, "相机权限被禁用，无法打开相机", Toast.LENGTH_LONG).show();
