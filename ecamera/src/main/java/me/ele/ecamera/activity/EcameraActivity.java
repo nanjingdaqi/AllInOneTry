@@ -1,19 +1,20 @@
 package me.ele.ecamera.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import me.ele.ecamera.R;
+import me.ele.ecamera.consts.ECameraConsts;
 import me.ele.ecamera.lib.CameraUtils;
 import me.ele.ecamera.lib.ui.CameraControllerView;
 import me.ele.ecamera.lib.ui.CameraView;
@@ -59,6 +60,12 @@ public class EcameraActivity extends Activity {
 		cameraControllerView.setData(getIntent().getExtras());
 		TextView title = (TextView) findViewById(R.id.food_title);
 		title.setText(getIntent().getStringExtra(TITLE));
+
+		SharedPreferences spf = getSharedPreferences(ECameraConsts.ECAMERA_SPF, Context.MODE_PRIVATE);
+		if (!spf.getBoolean(ECameraConsts.ECAMERA_SPF_KEY_HAS_SHOW_GUIDE, false)) {
+			startActivity(new Intent(this, ECameraGuideActivity.class));
+			spf.edit().putBoolean(ECameraConsts.ECAMERA_SPF_KEY_HAS_SHOW_GUIDE, true).commit();
+		}
 	}
 	
 	@Override

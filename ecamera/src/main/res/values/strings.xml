@@ -3,5 +3,8 @@
 
     <string name="crop_image">裁剪照片</string>
     <string name="fail_to_deal_image">图片处理失败，请重试</string>
+    <string name="camera_guide_title">必过宝典</string>
+    <string name="camera_guide_hint1">包装要打开</string>
+    <string name="camera_guide_hint2">美食要完整</string>
 
 </resources>

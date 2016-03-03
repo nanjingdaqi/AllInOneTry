@@ -3,6 +3,7 @@ package me.ele.ecamera.lib.ui;
 import me.ele.ecamera.R;
 import me.ele.ecamera.activity.CropActivity;
 import me.ele.ecamera.activity.EcameraActivity;
+import me.ele.ecamera.consts.ECameraConsts;
 import me.ele.ecamera.lib.CameraController.PhotoOutputSize;
 import me.ele.ecamera.lib.ui.CameraStateButton.State;
 import me.ele.ecamera.lib.ui.CameraStateButton.State.StateChangedListener;
@@ -256,12 +257,12 @@ public class CameraControllerView extends ViewGroup implements
 	}
 	
 	private void showGuideToast() {
-	    SharedPreferences spf = getContext().getSharedPreferences("ecamera_spf", Context.MODE_PRIVATE);
-	    if (!spf.getBoolean("photo_optimize_guided", false)) {
+	    SharedPreferences spf = getContext().getSharedPreferences(ECameraConsts.ECAMERA_SPF, Context.MODE_PRIVATE);
+	    if (!spf.getBoolean(ECameraConsts.ECAMERA_SPF_KEY_PHOTO_OPTIMIZED_GUIDE, false)) {
 	        Toast guide = Toast.makeText(getActivity(), "点击中间按钮自动优化图片", Toast.LENGTH_LONG);
 	        guide .setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, ScreenUtils.dip2px(getActivity(), 150));
 	        guide.show();
-	        spf.edit().putBoolean("photo_optimize_guided", true).commit();
+	        spf.edit().putBoolean(ECameraConsts.ECAMERA_SPF_KEY_PHOTO_OPTIMIZED_GUIDE, true).commit();
 	    }
 	}
 
