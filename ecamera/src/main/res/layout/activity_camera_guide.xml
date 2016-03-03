@@ -66,14 +66,14 @@
       <ImageView
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:src="@drawable/open_wrong"
+          android:src="@drawable/camera_open_wrong"
           />
 
       <ImageView
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_marginLeft="19dp"
-          android:src="@drawable/open_right"
+          android:src="@drawable/camera_open_right"
           />
 
     </LinearLayout>
@@ -123,14 +123,14 @@
       <ImageView
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:src="@drawable/complete_wrong"
+          android:src="@drawable/camera_complete_wrong"
           />
 
       <ImageView
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_marginLeft="19dp"
-          android:src="@drawable/complete_right"
+          android:src="@drawable/camera_complete_right"
           />
 
     </LinearLayout>
@@ -140,7 +140,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="52dp"
-        android:src="@drawable/close"
+        android:src="@drawable/camera_close"
         />
 
   </LinearLayout>

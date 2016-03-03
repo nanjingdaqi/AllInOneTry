@@ -2,42 +2,76 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#bb000000" >
+    android:background="#bb000000"
+    >
+
+  <RelativeLayout
+      android:id="@+id/title_layout"
+      android:layout_width="match_parent"
+      android:layout_height="50dp"
+      android:layout_alignParentTop="true"
+      android:layout_centerHorizontal="true"
+      android:paddingLeft="15sp"
+      android:paddingRight="15sp"
+      >
+
+    <TextView
+        android:id="@+id/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:text="@string/camera_cancel"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        />
 
     <TextView
         android:id="@+id/food_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
         android:ellipsize="end"
-        android:gravity="center"
-        android:padding="15dp"
         android:singleLine="true"
-        android:textColor="#fafafa"
-        android:textSize="20sp" />
+        android:textColor="@android:color/white"
+        android:textSize="19sp"
+        tools:text="烧鸭叉烧反"
+        />
 
-    <me.ele.ecamera.lib.ui.SquareLayout
-        android:id="@+id/fill_space_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/food_title"
-        android:background="#000000" />
-
-    <me.ele.ecamera.lib.ui.CameraView
-        android:id="@+id/camera_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/food_title"
-        android:background="#000000" />
-
-    <me.ele.ecamera.lib.ui.CameraControllerView
-        android:id="@+id/camera_controller_view"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/guide"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@+id/fill_space_view" />
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/camera_guide"
+        />
 
+  </RelativeLayout>
+
+  <me.ele.ecamera.lib.ui.SquareLayout
+      android:id="@+id/fill_space_view"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_below="@+id/title_layout"
+      android:background="#000000"
+      />
+
+  <me.ele.ecamera.lib.ui.CameraView
+      android:id="@+id/camera_view"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_below="@+id/title_layout"
+      android:background="#000000"
+      />
+
+  <me.ele.ecamera.lib.ui.CameraControllerView
+      android:id="@+id/camera_controller_view"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_below="@+id/fill_space_view"
+      />
 
 
 </RelativeLayout>
