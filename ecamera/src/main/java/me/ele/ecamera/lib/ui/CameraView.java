@@ -15,11 +15,6 @@
 
 package me.ele.ecamera.lib.ui;
 
-import android.widget.FrameLayout;
-import me.ele.commons.AppLogger;
-import me.ele.commons.DimenUtil;
-import me.ele.ecamera.lib.CameraController;
-import me.ele.ecamera.lib.CameraController.OnCameraOpenedListener;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -27,9 +22,12 @@ import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import me.ele.ecamera.lib.CameraController;
+import me.ele.ecamera.lib.CameraController.OnCameraOpenedListener;
+import me.ele.ecamera.utils.ScreenUtils;
 
 public class CameraView extends FrameLayout implements OnCameraOpenedListener {
 	
@@ -72,8 +70,8 @@ public class CameraView extends FrameLayout implements OnCameraOpenedListener {
 		photoView = new CameraPhotoView(context);
 		addView(photoView);
 		luminanceHintView = new CameraLuminanceHintView(context, cameraController);
-		addView(luminanceHintView, new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-				ViewGroup.LayoutParams.WRAP_CONTENT));
+		addView(luminanceHintView,
+				new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ScreenUtils.dip2px(context, 36)));
 	}
 
 	
@@ -90,18 +88,20 @@ public class CameraView extends FrameLayout implements OnCameraOpenedListener {
 	}
 
 	public void stopPreviewAndShow(Bitmap bitmap) {
-		stopRreview();
+		stopPreview();
 		photoView.display(bitmap);
+		luminanceHintView.setVisibility(GONE);
 	}
 	
 	public void stopPreviewAndShow(Uri uri) {
-	    stopRreview();
-	    photoView.display(uri);
+		stopPreview();
+		photoView.display(uri);
+		luminanceHintView.setVisibility(GONE);
 	}
 
-    protected void stopRreview() {
-        focusIndicator.setVisibility(View.GONE);
-	    previewStrategy.stopPreview();
+    protected void stopPreview() {
+			focusIndicator.setVisibility(View.GONE);
+			previewStrategy.stopPreview();
     }
 	
 
@@ -153,14 +153,10 @@ public class CameraView extends FrameLayout implements OnCameraOpenedListener {
 									} else {
 										int l = (width - child.getMeasuredWidth()) / 2;
 										int r = l + child.getMeasuredWidth();
-										int t = bottom / 2;
+										int t = ScreenUtils.dip2px(getContext(), 200);
 										int b = t + child.getMeasuredHeight();
-										//int b = bottom - DimenUtil.dip2px(getContext(), 16);
-										//int t = b - child.getMeasuredHeight();
 										luminanceHintView.layout(l, t, r, b);
-										AppLogger.e("l: " + l + ", r: " + r + ", t: " + t + ", b: " + b);
 									}
-                    Log.e(getChildAt(i).getClass().getName() + " layout", left + "," +  top + "," + right + "," + bottom);
                 }
             }
         }
@@ -183,5 +179,4 @@ public class CameraView extends FrameLayout implements OnCameraOpenedListener {
     public void onOpened() {
 //        requestLayout();
     }
-
 }

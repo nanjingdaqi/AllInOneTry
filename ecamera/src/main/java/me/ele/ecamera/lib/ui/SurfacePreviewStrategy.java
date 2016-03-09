@@ -14,8 +14,6 @@
 
 package me.ele.ecamera.lib.ui;
 
-import android.hardware.Camera;
-import me.ele.commons.AppLogger;
 import me.ele.ecamera.lib.CameraController;
 import android.content.Context;
 import android.view.SurfaceHolder;

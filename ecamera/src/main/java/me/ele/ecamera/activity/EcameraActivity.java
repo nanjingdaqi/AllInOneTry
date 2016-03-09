@@ -15,7 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import me.ele.ecamera.R;
-import me.ele.ecamera.consts.ECameraConsts;
+import me.ele.ecamera.consts.ECameraConst;
 import me.ele.ecamera.lib.CameraUtils;
 import me.ele.ecamera.lib.ui.CameraControllerView;
 import me.ele.ecamera.lib.ui.CameraView;
@@ -74,10 +74,10 @@ public class EcameraActivity extends Activity {
 			}
 		});
 
-		SharedPreferences spf = getSharedPreferences(ECameraConsts.ECAMERA_SPF, Context.MODE_PRIVATE);
-		if (!spf.getBoolean(ECameraConsts.ECAMERA_SPF_KEY_HAS_SHOW_GUIDE, false)) {
+		SharedPreferences spf = getSharedPreferences(ECameraConst.ECAMERA_SPF, Context.MODE_PRIVATE);
+		if (!spf.getBoolean(ECameraConst.ECAMERA_SPF_KEY_HAS_SHOW_GUIDE, false)) {
 			startActivity(new Intent(this, ECameraGuideActivity.class));
-			spf.edit().putBoolean(ECameraConsts.ECAMERA_SPF_KEY_HAS_SHOW_GUIDE, true).commit();
+			spf.edit().putBoolean(ECameraConst.ECAMERA_SPF_KEY_HAS_SHOW_GUIDE, true).commit();
 		}
 	}
 	

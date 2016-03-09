@@ -228,16 +228,6 @@ public class CameraController {
         return camera;
     }
 
-    private void setPreviewCallback(Camera.PreviewCallback callback) {
-        try {
-            if (camera != null) {
-                camera.setPreviewCallback(callback);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void startPreview() {
         try {
             if (camera != null) {

@@ -24,6 +24,8 @@
 
         <activity android:name="me.ele.ecamera.activity.ECameraGuideActivity"/>
 
+        <activity android:name="me.ele.ecamera.activity.CropActivity"/>
+
     </application>
 
 </manifest>

@@ -1,11 +1,12 @@
 package me.ele.ecamera.lib.ui;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.hardware.Camera;
+import android.view.Gravity;
 import android.widget.TextView;
-import me.ele.commons.AppLogger;
+import me.ele.ecamera.R;
 import me.ele.ecamera.lib.CameraController;
+import me.ele.ecamera.utils.ScreenUtils;
 
 public class CameraLuminanceHintView extends TextView implements Camera.PreviewCallback {
 
@@ -23,10 +24,14 @@ public class CameraLuminanceHintView extends TextView implements Camera.PreviewC
   private void init(Context context, CameraController cameraController) {
     this.cameraController = cameraController;
 
-    setTextSize(20);
-    setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
-    setText("请使用闪光灯");
-    //setVisibility(GONE);
+    setTextSize(14);
+    setTextColor(getResources().getColor(android.R.color.white));
+    setBackgroundResource(R.drawable.light_dark_hint_bg);
+    setGravity(Gravity.CENTER);
+    int plr = ScreenUtils.dip2px(context, 11);
+    setPadding(plr, 0, plr, 0);
+    setText(R.string.light_dark_hint);
+    setVisibility(GONE);
   }
 
   @Override protected void onAttachedToWindow() {
@@ -50,19 +55,17 @@ public class CameraLuminanceHintView extends TextView implements Camera.PreviewC
   @Override public void onPreviewFrame(byte[] data, Camera camera) {
     final Camera.Size previewSize = camera.getParameters().getPreviewSize();
     long l = computeY(data, previewSize.width, previewSize.height);
-    AppLogger.e("data size: " + data.length + ", val: " + l);
     if (l < SHOW_HINT_LUMINANCE_BOUND) {
-      //setVisibility(VISIBLE);
-      requestLayout();
+      setVisibility(VISIBLE);
     } else {
-      //setVisibility(GONE);
+      setVisibility(GONE);
     }
-
-    setText("Y val: " + l);
   }
 
+  // Calculate Y value of YUV format image since Y represents Luminance of one pixel.
   private long computeY(byte[] data, int width, int height) {
     long size = width * height;
+    // We only calculate some pixels, not all.
     long n = Math.min(width * height, SAMPLE_POINT_AMOUNT);
     long step = size / n;
     int y;

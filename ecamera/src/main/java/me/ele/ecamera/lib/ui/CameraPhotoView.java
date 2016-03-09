@@ -1,18 +1,5 @@
 package me.ele.ecamera.lib.ui;
 
-
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-
-import jp.co.cyberagent.android.gpuimage.GPUImage;
-import jp.co.cyberagent.android.gpuimage.GPUImageBrightnessFilter;
-import jp.co.cyberagent.android.gpuimage.GPUImageContrastFilter;
-import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
-import jp.co.cyberagent.android.gpuimage.GPUImageFilterGroup;
-import jp.co.cyberagent.android.gpuimage.GPUImageGammaFilter;
-import jp.co.cyberagent.android.gpuimage.GPUImageSaturationFilter;
-import jp.co.cyberagent.android.gpuimage.GPUImageSharpenFilter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,6 +15,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
+import java.io.FileNotFoundException;
+import jp.co.cyberagent.android.gpuimage.GPUImage;
 
 public class CameraPhotoView extends SurfaceView implements Callback {
 
@@ -35,20 +24,6 @@ public class CameraPhotoView extends SurfaceView implements Callback {
 	private Bitmap filtedPhoto;
 	private GPUImage gpuImage;
 	private Paint paint;
-	private final List<GPUImageFilter> filters = new ArrayList<GPUImageFilter>() {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 8741176838422845670L;
-
-		{
-			add(new GPUImageGammaFilter(1.15f));
-			add(new GPUImageSharpenFilter(0.15f));
-			add(new GPUImageContrastFilter(1.15f));
-			add(new GPUImageSaturationFilter(1.3f));
-			add(new GPUImageBrightnessFilter(0.14f));
-		}
-	};
 
 	public CameraPhotoView(Context context) {
 		super(context);
@@ -60,8 +35,10 @@ public class CameraPhotoView extends SurfaceView implements Callback {
 			return;
 		}
 		this.paint = new Paint();
+
 		gpuImage = new GPUImage(context);
-		gpuImage.setFilter(new GPUImageFilterGroup(filters));
+		GPUImageFilterHelper.applyFilter(gpuImage);
+
 		getHolder().setKeepScreenOn(true);
 		getHolder().setFormat(PixelFormat.TRANSPARENT);
 		getHolder().addCallback(this);

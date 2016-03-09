@@ -1,61 +1,63 @@
 package me.ele.ecamera.lib.ui;
 
+import android.graphics.Bitmap;
 import me.ele.ecamera.R;
 import me.ele.ecamera.activity.CropActivity;
 import me.ele.ecamera.activity.EcameraActivity;
-import me.ele.ecamera.consts.ECameraConsts;
 import me.ele.ecamera.lib.CameraController.PhotoOutputSize;
-import me.ele.ecamera.lib.ui.CameraStateButton.State;
-import me.ele.ecamera.lib.ui.CameraStateButton.State.StateChangedListener;
 import me.ele.ecamera.utils.ImageDecoder;
 import me.ele.ecamera.utils.LimitedDiscCache;
-import me.ele.ecamera.utils.ScreenUtils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 public class CameraControllerView extends ViewGroup implements
-		View.OnClickListener {
+		View.OnClickListener, CameraFilterPreviewView.FilterSelectedListener {
 	
 	public static final int REQUEST_PICK_IMAGE = 1;
 	public static final int REQUEST_CROP_IMAGE = 2;
 	private static final int SMOOTH_SCROLL_DURATION = 400;
+
+	// record flash state during the whole app life
+	private static CameraStateButton.State flashState;
+
+	private CameraStateButton.State autoFlashState = new CameraStateButton.State(R.drawable.camera_lamp_auto) {
+		@Override
+		public void apply() {
+			cameraView.getCameraController().setAutoFlash();
+		}
+	};
+	private CameraStateButton.State closeFlashState = new CameraStateButton.State(R.drawable.camera_lamp_close) {
+		@Override
+		public void apply() {
+			cameraView.getCameraController().setCloseFlash();
+		}
+	};
+	private CameraStateButton.State openFlashState = new CameraStateButton.State(R.drawable.camera_lamp_open) {
+		@Override public void apply() {
+			cameraView.getCameraController().setOpenFlash();
+		}
+	};
+
 	private CameraStateButton shutter;
 	private CameraStateButton gallery;
 	private CameraStateButton flashMode;
 	private CameraStateButton photoDelete;
 	private CameraStateButton photoOk;
-	private CameraStateButton photoFilter;
+
+	private CameraFilterPreviewView photoFilter;
+
 	private CameraView cameraView;
 	private ScrollableLayout cameraControllerScrollableLayout;
 	private ScrollableLayout photoOptimizingScrollableLayout;
-	private CameraStateButton.State autoFlashMode = new CameraStateButton.State(
-			R.drawable.camera_lamp_open, new StateChangedListener() {
-
-				@Override
-				public void stateChanged(State preState) {
-					cameraView.getCameraController().setAutoFlash();
-				}
-			});
-	private CameraStateButton.State closeFlashMode = new CameraStateButton.State(
-			R.drawable.camera_lamp_close, new StateChangedListener() {
-
-				@Override
-				public void stateChanged(State preState) {
-					cameraView.getCameraController().setCloseFlash();
-				}
-			});
 	private LimitedDiscCache discCache;
 
 	private EcameraActivity.ActionCallback actionCallback;
@@ -95,7 +97,7 @@ public class CameraControllerView extends ViewGroup implements
 		flashMode = (CameraStateButton) findViewById(R.id.camera_flash_mode);
 		photoDelete = (CameraStateButton) findViewById(R.id.photo_del);
 		photoOk = (CameraStateButton) findViewById(R.id.photo_ok);
-		photoFilter = (CameraStateButton) findViewById(R.id.photo_optimize);
+		photoFilter = (CameraFilterPreviewView) findViewById(R.id.photo_optimize);
 	}
 
 	@Override
@@ -130,15 +132,28 @@ public class CameraControllerView extends ViewGroup implements
 		super.onAttachedToWindow();
 		Activity activity = getActivity();
 		this.cameraView = (CameraView) activity.findViewById(R.id.camera_view);
-		flashMode.changeState(autoFlashMode);
+		if (flashState == null) {
+			flashState = closeFlashState;
+		}
+		flashMode.changeState(flashState);
 		flashMode.setOnClickListener(this);
 		gallery.setOnClickListener(this);
 		shutter.setOnClickListener(this);
 		photoOk.setOnClickListener(this);
 		photoDelete.setOnClickListener(this);
-		photoFilter.setOnClickListener(this);
+		photoFilter.setFilterSelectedListener(this);
 	}
 
+	@Override public void onSelected(boolean hasFilter) {
+		if (hasFilter) {
+			cameraView.filter();
+			if (actionCallback != null) {
+				actionCallback.onPhotoOptimize(data);
+			}
+		} else {
+			cameraView.reset();
+		}
+	}
 
 	@Override
 	public void onClick(View v) {
@@ -146,48 +161,33 @@ public class CameraControllerView extends ViewGroup implements
 			return;
 		}
 		int id = v.getId();
-        if (id == R.id.shutter) {
+		if (id == R.id.shutter) {
 			if (actionCallback != null) {
 				actionCallback.onTakePhoto(data);
 			}
-            takePicture();
-        } else if (id == R.id.camera_gallery) {
+			takePicture();
+		} else if (id == R.id.camera_gallery) {
 			if (actionCallback != null) {
 				actionCallback.onSwitchGallery(data);
 			}
-            gotGallery();
-        } else if (id == R.id.camera_flash_mode) {
+			gotGallery();
+		} else if (id == R.id.camera_flash_mode) {
 			if (actionCallback != null) {
 				actionCallback.onToggleFlashMode(data);
 			}
-            toggleFlashMode();
-        } else if (id == R.id.photo_del) {
+			toggleFlashMode();
+		} else if (id == R.id.photo_del) {
 			if (actionCallback != null) {
 				actionCallback.onPhotoCancel(data);
 			}
-            deletePhoto();
-        } else if (id == R.id.photo_ok) {
+			deletePhoto();
+		} else if (id == R.id.photo_ok) {
 			if (actionCallback != null) {
 				actionCallback.onPhotoConfirm(data);
 			}
-            submitPhoto();
-        } else if (id == R.id.photo_optimize) {
-			if (actionCallback != null) {
-				actionCallback.onPhotoOptimize(data);
-			}
-            optimizePhoto(v);
-        }
+			submitPhoto();
+		}
 	}
-
-    protected void optimizePhoto(View v) {
-        if (!v.isSelected()) {
-            v.setSelected(true);
-            cameraView.filter();
-        } else {
-            v.setSelected(false);
-            cameraView.reset();
-        }
-    }
 
     protected void submitPhoto() {
         try {
@@ -208,16 +208,18 @@ public class CameraControllerView extends ViewGroup implements
     }
 
     protected void toggleFlashMode() {
-        int imageResource = flashMode.getImageResource();
-        if (imageResource == R.drawable.camera_lamp_open) {
-            flashMode.changeState(closeFlashMode);
-        } else if (imageResource == R.drawable.camera_lamp_close) {
-            flashMode.changeState(autoFlashMode);
-        }
-    }
+			if (flashState == openFlashState) {
+				flashState = autoFlashState;
+			} else if (flashState == closeFlashState) {
+				flashState = openFlashState;
+			} else if (flashState == autoFlashState) {
+				flashState = closeFlashState;
+			}
+			flashMode.changeState(flashState);
+		}
 
     protected void gotGallery() {
-        Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);;
+        Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
         photoPickerIntent.setType("image/*");
         getActivity().startActivityForResult(photoPickerIntent, REQUEST_PICK_IMAGE);
     }
@@ -227,12 +229,15 @@ public class CameraControllerView extends ViewGroup implements
         	
         	@Override
         	public void onPictureTaken(byte[] data, Camera camera) {
-        	    PhotoOutputSize photoOutputSize = cameraView.getCameraController().getAdjustedPhotoOutputSize();
-        		cameraView.stopPreviewAndShow(ImageDecoder.decodeByteArrayAndCropSquare(getContext()
-        		        , data
-        		        , photoOutputSize.width, photoOutputSize.height));
-        		showPhotoOptimizingLayout();
-        	}
+						PhotoOutputSize photoOutputSize =
+								cameraView.getCameraController().getAdjustedPhotoOutputSize();
+						Bitmap bitmap =
+								ImageDecoder.decodeByteArrayAndCropSquare(getContext(), data, photoOutputSize.width,
+										photoOutputSize.height);
+						cameraView.stopPreviewAndShow(bitmap);
+						photoFilter.stopPreviewAndShow(bitmap);
+						showPhotoOptimizingLayout();
+					}
         });
     }
 
@@ -253,17 +258,6 @@ public class CameraControllerView extends ViewGroup implements
 				SMOOTH_SCROLL_DURATION);
 		cameraControllerScrollableLayout.smoothScrollBy(0,
 				-getMeasuredHeight(), SMOOTH_SCROLL_DURATION);
-		showGuideToast();
-	}
-	
-	private void showGuideToast() {
-	    SharedPreferences spf = getContext().getSharedPreferences(ECameraConsts.ECAMERA_SPF, Context.MODE_PRIVATE);
-	    if (!spf.getBoolean(ECameraConsts.ECAMERA_SPF_KEY_PHOTO_OPTIMIZED_GUIDE, false)) {
-	        Toast guide = Toast.makeText(getActivity(), "点击中间按钮自动优化图片", Toast.LENGTH_LONG);
-	        guide .setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, ScreenUtils.dip2px(getActivity(), 150));
-	        guide.show();
-	        spf.edit().putBoolean(ECameraConsts.ECAMERA_SPF_KEY_PHOTO_OPTIMIZED_GUIDE, true).commit();
-	    }
 	}
 
 	public void hidePhotoOptimizingLayout() {
@@ -275,9 +269,8 @@ public class CameraControllerView extends ViewGroup implements
 		cameraControllerScrollableLayout.smoothScrollBy(0, getMeasuredHeight(),
 				SMOOTH_SCROLL_DURATION);
 	}
-	
-    public void handleActivityResult(final int requestCode,
-            final int resultCode, final Intent data) {
+
+    public void handleActivityResult(final int requestCode, final int resultCode, final Intent data) {
         if (cameraView == null) {
             return;
         }
@@ -287,19 +280,20 @@ public class CameraControllerView extends ViewGroup implements
         }
         switch (requestCode) {
         case CameraControllerView.REQUEST_PICK_IMAGE:
-            cameraView.stopRreview();
+            cameraView.stopPreview();
             gotoCropImage(data);
             break;
         case CameraControllerView.REQUEST_CROP_IMAGE:
             showPhotoOptimizingLayout();
             cameraView.stopPreviewAndShow(data.getData());
+            photoFilter.stopPreviewAndShow(data.getData());
             break;
         default:
             cameraView.startPreview();
             break;
         }
     }
-    
+
     private void gotoCropImage(Intent data) {
         Intent intent = new Intent(getContext(), CropActivity.class);
         intent.setData(data.getData());

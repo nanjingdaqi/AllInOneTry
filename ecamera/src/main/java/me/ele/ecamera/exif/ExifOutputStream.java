@@ -48,7 +48,7 @@ import android.util.Log;
  *     } finally {
  *         if (os != null) {
  *             try {
- *                 os.camera_close();
+ *                 os.close();
  *             } catch (IOException e) {
  *                 e.printStackTrace();
  *             }

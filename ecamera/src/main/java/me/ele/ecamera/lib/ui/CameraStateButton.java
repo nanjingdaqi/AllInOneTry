@@ -24,7 +24,7 @@ public class CameraStateButton extends ImageView {
 	
 	public void changeState(State state) {
 		setImageDrawable(getResources().getDrawable(state.imageId));
-		state.stateChangedListener.stateChanged(state);
+		state.apply();
 		this.state = state;
 	}
 	
@@ -40,19 +40,15 @@ public class CameraStateButton extends ImageView {
 		return -1;
 	}
 	
-	public static class State {
+	public abstract static class State {
 		int imageId;
-		public interface StateChangedListener {
-			void stateChanged(State preState);
-		}
-		StateChangedListener stateChangedListener;
 
-		public State(int imageId, StateChangedListener stateChangedListener) {
+		public State(int imageId) {
 			super();
-			this.stateChangedListener = stateChangedListener;
 			this.imageId = imageId;
 		}
-		
+
+		public abstract void apply();
 	}
 
 	/**
