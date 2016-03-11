@@ -17,12 +17,12 @@
 package me.ele.ecamera.exif;
 
 public class ExifInvalidFormatException extends Exception {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1862275565749293693L;
+  /**
+   *
+   */
+  private static final long serialVersionUID = 1862275565749293693L;
 
-	public ExifInvalidFormatException(String meg) {
-		super(meg);
-	}
+  public ExifInvalidFormatException(String meg) {
+    super(meg);
+  }
 }

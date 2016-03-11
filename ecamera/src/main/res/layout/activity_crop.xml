@@ -1,91 +1,102 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    >
 
-    <me.ele.ecamera.lib.ui.photoview.PhotoView
-        android:id="@+id/iv_photo"
+  <me.ele.ecamera.lib.ui.photoview.PhotoView
+      android:id="@+id/iv_photo"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:scaleType="centerCrop"
+      />
+
+  <TextView
+      android:id="@+id/title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentTop="true"
+      android:layout_centerHorizontal="true"
+      android:background="#bb000000"
+      android:gravity="center"
+      android:padding="15dp"
+      android:text="@string/crop_image"
+      android:textColor="#fafafa"
+      android:textSize="20sp"
+      />
+
+  <me.ele.ecamera.lib.ui.SquareLayout
+      android:id="@+id/square_ayout"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_below="@+id/title"
+      >
+
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:src="@drawable/crop_iv_bg"
+        />
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
+    <me.ele.ecamera.lib.ui.ContentLoadingProgressBar
+        android:id="@+id/loading"
+        style="@android:style/Widget.ProgressBar"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:background="#bb000000"
-        android:gravity="center"
-        android:padding="15dp"
-        android:text="@string/crop_image"
-        android:textColor="#fafafa"
-        android:textSize="20sp" />
+        android:layout_gravity="center"
+        android:background="@drawable/loading_logo"
+        android:indeterminateDrawable="@drawable/progress_bar_loading"
+        />
+  </me.ele.ecamera.lib.ui.SquareLayout>
 
-    <me.ele.ecamera.lib.ui.SquareLayout
-        android:id="@+id/square_ayout"
-        android:layout_width="match_parent"
+  <LinearLayout
+      android:id="@+id/operation_bar"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_below="@+id/square_ayout"
+      android:layout_alignParentBottom="true"
+      android:background="#bb000000"
+      android:orientation="horizontal"
+      >
+
+    <FrameLayout
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_below="@+id/title" >
+        android:layout_weight="1.0"
+        >
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/crop_iv_bg" />
+      <me.ele.ecamera.lib.ui.CameraStateButton
+          android:id="@+id/crop_cancel"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:padding="15dp"
+          android:scaleType="center"
+          android:src="@drawable/camera_del"
+          />
+    </FrameLayout>
 
-        <me.ele.ecamera.lib.ui.ContentLoadingProgressBar
-            android:id="@+id/loading"
-            style="@android:style/Widget.ProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/loading_logo"
-            android:indeterminateDrawable="@drawable/progress_bar_loading" />
-    </me.ele.ecamera.lib.ui.SquareLayout>
-
-    <LinearLayout
-        android:id="@+id/operation_bar"
-        android:layout_width="match_parent"
+    <View
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_below="@+id/square_ayout"
-        android:layout_alignParentBottom="true"
-        android:background="#bb000000"
-        android:orientation="horizontal" >
+        android:layout_weight="1.0"
+        />
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1.0" >
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.0"
+        >
 
-            <me.ele.ecamera.lib.ui.CameraStateButton
-                android:id="@+id/crop_cancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="15dp"
-                android:scaleType="center"
-                android:src="@drawable/camera_del" />
-        </FrameLayout>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1.0" />
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1.0" >
-
-            <me.ele.ecamera.lib.ui.CameraStateButton
-                android:id="@+id/crop_ok"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="15dp"
-                android:scaleType="center"
-                android:src="@drawable/camera_ok" />
-        </FrameLayout>
-    </LinearLayout>
+      <me.ele.ecamera.lib.ui.CameraStateButton
+          android:id="@+id/crop_ok"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:padding="15dp"
+          android:scaleType="center"
+          android:src="@drawable/camera_ok"
+          />
+    </FrameLayout>
+  </LinearLayout>
 
 </RelativeLayout>

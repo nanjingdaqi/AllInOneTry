@@ -35,18 +35,18 @@
           android:layout_height="1px"
           android:layout_weight="1"
           android:background="#7affffff"
-        />
+          />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:text="@string/camera_guide_hint1"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        />
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:paddingLeft="8dp"
+          android:paddingRight="8dp"
+          android:text="@string/camera_guide_hint1"
+          android:textColor="@android:color/white"
+          android:textSize="16sp"
+          />
 
       <View
           android:layout_width="0dp"

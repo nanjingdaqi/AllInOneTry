@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="crop_image">裁剪照片</string>
-    <string name="fail_to_deal_image">图片处理失败，请重试</string>
-    <string name="camera_guide_title">如何拍美食</string>
-    <string name="camera_guide_hint1">包装要打开</string>
-    <string name="camera_guide_hint2">美食要完整</string>
-    <string name="camera_cancel">取消</string>
-    <string name="light_dark_hint">光线太暗,请开灯或者使用闪光灯试试</string>
-    <string name="camera_filter_original_image">原图</string>
-    <string name="camera_filter_filtered_image">智能优化</string>
+  <string name="crop_image">裁剪照片</string>
+  <string name="fail_to_deal_image">图片处理失败，请重试</string>
+  <string name="camera_guide_title">如何拍美食</string>
+  <string name="camera_guide_hint1">包装要打开</string>
+  <string name="camera_guide_hint2">美食要完整</string>
+  <string name="camera_cancel">取消</string>
+  <string name="light_dark_hint">光线太暗,请开灯或者使用闪光灯试试</string>
+  <string name="camera_filter_original_image">原图</string>
+  <string name="camera_filter_filtered_image">智能优化</string>
 
 </resources>

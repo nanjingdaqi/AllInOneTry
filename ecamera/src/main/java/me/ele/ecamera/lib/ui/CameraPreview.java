@@ -7,14 +7,14 @@ import android.view.SurfaceView;
 
 public class CameraPreview extends SurfaceView {
 
-	public CameraPreview(Context context) {
-		super(context);
-	}
+  public CameraPreview(Context context) {
+    super(context);
+  }
 
-	public Bitmap toBitmap() {
-		Bitmap bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-		Canvas bitCanvas = new Canvas(bitmap);
-		draw(bitCanvas);
-		return bitmap;
-	}
+  public Bitmap toBitmap() {
+    Bitmap bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+    Canvas bitCanvas = new Canvas(bitmap);
+    draw(bitCanvas);
+    return bitmap;
+  }
 }
