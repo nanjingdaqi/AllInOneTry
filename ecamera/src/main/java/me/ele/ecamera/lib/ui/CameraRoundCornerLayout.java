@@ -37,7 +37,7 @@ public class CameraRoundCornerLayout extends FrameLayout {
   private void init(Context context, AttributeSet attrs, int defStyle) {
     TypedArray ta =
         context.obtainStyledAttributes(attrs, R.styleable.CameraRoundCornerLayout, defStyle, 0);
-    cornerRadius = ta.getDimensionPixelSize(R.styleable.CameraRoundCornerLayout_radius, 4);
+    cornerRadius = ta.getDimensionPixelSize(R.styleable.CameraRoundCornerLayout_camera_round_corner_layout_radius, 4);
     ta.recycle();
 
     paint = new Paint(Paint.ANTI_ALIAS_FLAG);

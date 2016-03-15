@@ -12,7 +12,7 @@
       android:id="@+id/original"
       android:layout_width="60dp"
       android:layout_height="60dp"
-      app:radius="2dp"
+      app:camera_round_corner_layout_radius="2dp"
       >
 
     <ImageView
@@ -53,7 +53,7 @@
       android:layout_width="60dp"
       android:layout_height="60dp"
       android:layout_marginLeft="25dp"
-      app:radius="2dp"
+      app:camera_round_corner_layout_radius="2dp"
       >
 
     <ImageView
