@@ -49,6 +49,17 @@ public class CameraStateButton extends ImageView {
     }
 
     public abstract void apply();
+
+    @Override public boolean equals(Object o) {
+      if (!(o instanceof State)) {
+        return false;
+      }
+      return this.imageId == ((State) o).imageId;
+    }
+
+    @Override public int hashCode() {
+      return imageId;
+    }
   }
 
   /**

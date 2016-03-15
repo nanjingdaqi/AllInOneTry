@@ -211,11 +211,11 @@ public class CameraControllerView extends ViewGroup implements
   }
 
   protected void toggleFlashMode() {
-    if (flashState == openFlashState) {
+    if (flashState.equals(openFlashState)) {
       flashState = autoFlashState;
-    } else if (flashState == closeFlashState) {
+    } else if (flashState.equals(closeFlashState)) {
       flashState = openFlashState;
-    } else if (flashState == autoFlashState) {
+    } else if (flashState.equals(autoFlashState)) {
       flashState = closeFlashState;
     }
     flashMode.changeState(flashState);
