@@ -233,8 +233,12 @@ public class CameraController {
         camera.startPreview();
         camera.setPreviewCallback(new Camera.PreviewCallback() {
           @Override public void onPreviewFrame(byte[] data, Camera camera) {
-            for (Camera.PreviewCallback previewCallback : previewCallbacks) {
-              previewCallback.onPreviewFrame(data, camera);
+            try {
+              for (Camera.PreviewCallback previewCallback : previewCallbacks) {
+                previewCallback.onPreviewFrame(data, camera);
+              }
+            } catch (Exception e) {
+              e.printStackTrace();
             }
           }
         });
