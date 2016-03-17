@@ -5,22 +5,22 @@
     android:background="#bb000000"
     >
 
-  <RelativeLayout
+  <LinearLayout
       android:id="@+id/title_layout"
       android:layout_width="match_parent"
       android:layout_height="50dp"
       android:layout_alignParentTop="true"
       android:layout_centerHorizontal="true"
+      android:orientation="horizontal"
       android:paddingLeft="15sp"
       android:paddingRight="15sp"
+      android:gravity="center_vertical"
       >
 
     <TextView
         android:id="@+id/cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
         android:text="@string/camera_cancel"
         android:textColor="@android:color/white"
         android:textSize="16sp"
@@ -28,26 +28,27 @@
 
     <TextView
         android:id="@+id/food_title"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_weight="1"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
         android:ellipsize="end"
         android:singleLine="true"
         android:textColor="@android:color/white"
         android:textSize="19sp"
-        tools:text="烧鸭叉烧反"
+        android:gravity="center"
+        tools:text="烧鸭叉烧反烧鸭叉烧反烧鸭叉烧反烧鸭叉烧反烧鸭叉烧反"
         />
 
     <ImageView
         android:id="@+id/guide"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
         android:src="@drawable/camera_guide"
         />
 
-  </RelativeLayout>
+  </LinearLayout>
 
   <me.ele.ecamera.lib.ui.SquareLayout
       android:id="@+id/fill_space_view"

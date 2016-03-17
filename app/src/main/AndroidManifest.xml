@@ -22,7 +22,9 @@
 
         <activity android:name="me.ele.ecamera.activity.EcameraActivity"/>
 
-        <activity android:name="me.ele.ecamera.activity.ECameraGuideActivity"/>
+        <activity android:name="me.ele.ecamera.activity.ECameraGuideActivity"
+            android:theme="@style/TransTheme"/>
+        <!--/>-->
 
         <activity android:name="me.ele.ecamera.activity.CropActivity"/>
 

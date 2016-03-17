@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import java.io.FileNotFoundException;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import me.ele.ecamera.R;
@@ -19,6 +20,9 @@ public class CameraFilterPreviewView extends FrameLayout {
 
   private FrameLayout orgView;
   private FrameLayout filteredView;
+
+  private TextView orgTitleView;
+  private TextView filteredTitleView;
 
   private View orgIndicator;
   private View filteredIndicator;
@@ -56,6 +60,9 @@ public class CameraFilterPreviewView extends FrameLayout {
     orgIndicator = findViewById(R.id.org_indicator);
     filteredIndicator = findViewById(R.id.filter_indicator);
 
+    orgTitleView = (TextView) findViewById(R.id.org_title);
+    filteredTitleView = (TextView) findViewById(R.id.filter_title);
+
     orgView = (FrameLayout) findViewById(R.id.original);
     orgView.setOnClickListener(new OnClickListener() {
       @Override public void onClick(View v) {
@@ -64,6 +71,10 @@ public class CameraFilterPreviewView extends FrameLayout {
         if (filterSelectedListener != null) {
           filterSelectedListener.onSelected(false);
         }
+        orgImageView.setAlpha(1.0f);
+        orgTitleView.setAlpha(1.0f);
+        filteredImageView.setAlpha(0.7f);
+        filteredTitleView.setAlpha(0.7f);
       }
     });
 
@@ -75,6 +86,10 @@ public class CameraFilterPreviewView extends FrameLayout {
         if (filterSelectedListener != null) {
           filterSelectedListener.onSelected(true);
         }
+        orgImageView.setAlpha(0.7f);
+        orgTitleView.setAlpha(0.7f);
+        filteredImageView.setAlpha(1.0f);
+        filteredTitleView.setAlpha(1.0f);
       }
     });
   }

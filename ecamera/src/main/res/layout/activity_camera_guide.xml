@@ -3,6 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#d8000000"
+    android:overScrollMode="never"
+    android:scrollbars="none"
     >
 
   <LinearLayout
@@ -12,128 +14,12 @@
       android:orientation="vertical"
       >
 
-    <TextView
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="67dp"
-        android:text="@string/camera_guide_title"
-        android:textColor="@android:color/white"
-        android:textSize="23sp"
+        android:src="@drawable/camera_guide_content"
         />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="62dp"
-        android:paddingLeft="60dp"
-        android:paddingRight="60dp"
-        android:gravity="center_vertical"
-        >
-
-      <View
-          android:layout_width="0dp"
-          android:layout_height="1px"
-          android:layout_weight="1"
-          android:background="#7affffff"
-          />
-
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_gravity="center"
-          android:paddingLeft="8dp"
-          android:paddingRight="8dp"
-          android:text="@string/camera_guide_hint1"
-          android:textColor="@android:color/white"
-          android:textSize="16sp"
-          />
-
-      <View
-          android:layout_width="0dp"
-          android:layout_height="1px"
-          android:layout_weight="1"
-          android:background="#7affffff"
-          />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="17dp"
-        >
-
-      <ImageView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:src="@drawable/camera_open_wrong"
-          />
-
-      <ImageView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginLeft="19dp"
-          android:src="@drawable/camera_open_right"
-          />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="33dp"
-        android:paddingLeft="60dp"
-        android:paddingRight="60dp"
-        android:gravity="center_vertical"
-        >
-
-      <View
-          android:layout_width="0dp"
-          android:layout_height="1px"
-          android:layout_weight="1"
-          android:background="#7affffff"
-          />
-
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_gravity="center"
-          android:paddingLeft="8dp"
-          android:paddingRight="8dp"
-          android:text="@string/camera_guide_hint2"
-          android:textColor="@android:color/white"
-          android:textSize="16sp"
-          />
-
-      <View
-          android:layout_width="0dp"
-          android:layout_height="1px"
-          android:layout_weight="1"
-          android:background="#7affffff"
-          />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="17dp"
-        >
-
-      <ImageView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:src="@drawable/camera_complete_wrong"
-          />
-
-      <ImageView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginLeft="19dp"
-          android:src="@drawable/camera_complete_right"
-          />
-
-    </LinearLayout>
 
     <ImageView
         android:id="@+id/close"
