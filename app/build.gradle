@@ -52,3 +52,15 @@ dependencies {
   apt "com.jakewharton:butterknife-compiler:8.3.0"
 
 }
+
+preBuild.doFirst {
+  println 'doFirst'
+}
+
+assembleDebug.doLast {
+  println 'doLast'
+}
+
+task cleanA << {
+  clean.execute()
+}
