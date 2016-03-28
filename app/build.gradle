@@ -64,3 +64,7 @@ assembleDebug.doLast {
 task cleanA << {
   clean.execute()
 }
+
+task foo << {
+  println 'app doLast'
+}
