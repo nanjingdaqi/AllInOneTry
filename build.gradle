@@ -6,10 +6,20 @@ buildscript {
     maven {
       url "http://172.16.10.156:8081/nexus/content/groups/mobile"
     }
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+    maven {
+      url 'https://maven.fabric.io/public'
+    }
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:1.5.0'
     classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
+    classpath 'me.ele:eradle:1.5.4'
+    classpath 'com.android.tools.build:gradle:1.5.0'
+    classpath "gradle.plugin.com.tmiyamon:gradle-config:0.2.1"
+    classpath 'commons-net:commons-net:2.0'
+    classpath 'io.fabric.tools:gradle:1.+'
     classpath 'net.wequick.tools.build:gradle-small:0.3.5'
 
     // NOTE: Do not place your application dependencies here; they belong
@@ -17,26 +27,19 @@ buildscript {
   }
 }
 
-allprojects {
-  repositories {
-    jcenter()
-    maven {
-      url "${server}/nexus/content/groups/mobile"
-      credentials {
-        username nexusUsername
-        password nexusPassword
-      }
-    }
-    maven {
-      url "https://jitpack.io"
-    }
-  }
-}
-
 apply plugin: 'net.wequick.small'
 
 small {
   aarVersion = '0.6.0'
+}
+
+subprojects {
+  repositories {
+    jcenter()
+    maven {
+      url "http://172.16.10.156:8081/nexus/content/groups/mobile"
+    }
+  }
 }
 
 def cleans = new ArrayList()
