@@ -34,6 +34,6 @@ dependencies {
 
     compile 'com.android.support:appcompat-v7:23.2.1'
 
-    provided 'com.jakewharton:butterknife:6.0.0'
+    provided 'com.jakewharton:butterknife:6.1.0'
 }
 
