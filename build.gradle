@@ -13,6 +13,7 @@ buildscript {
 allprojects {
   repositories {
     jcenter()
+    maven { url "https://jitpack.io" }
     maven {
       url "https://dl.bintray.com/peacepassion/maven"
     }
@@ -23,5 +24,6 @@ apply plugin: 'net.wequick.small'
 
 small {
   aarVersion = '0.6.0'
+  strictSplitResources = false
 }
 
