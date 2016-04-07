@@ -24,6 +24,6 @@ apply plugin: 'net.wequick.small'
 
 small {
   aarVersion = '0.6.0'
-  strictSplitResources = false
+//  strictSplitResources = false
 }
 

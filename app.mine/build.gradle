@@ -35,9 +35,9 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.2.1'
 
     // 如果plugin依赖一个带有资源的aar,buildBundle在处理资源时就会报错
-    compile('com.github.afollestad.material-dialogs:core:0.8.5.6@aar') {
-        transitive = true
-    }
+//    compile('com.github.afollestad.material-dialogs:core:0.8.5.6@aar') {
+//        transitive = true
+//    }
 
     // 如果plugin依赖一个不含资源的aar,buildBundle就会将此aar依赖的jar给打进bundle.so里面
 //    compile 'org.peacepassion:slidingtablayout:0.2.4'
