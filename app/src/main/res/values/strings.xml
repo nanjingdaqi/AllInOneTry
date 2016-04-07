@@ -4,5 +4,7 @@
   <string name="app_name">All In One Try</string>
   <string name="hello_world">Hello world!</string>
   <string name="action_settings">Settings</string>
+  <string name="agent_fee_change_dialog_title">配送费从%1$s变为%2$s</string>
+  <string name="agent_fee_change_dialog_content">使用该地址，配送费将发生变化\n确认使用该地址下单吗?</string>
 
 </resources>
