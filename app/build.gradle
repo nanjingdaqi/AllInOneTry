@@ -68,8 +68,13 @@ android {
     }
 }
 
-task run(type: Exec, dependsOn: 'installDebug') {
-    commandLine 'adb', 'shell', 'am', 'start', '-n', 'com.linuxclub.cdcfan/com.linuxclub.cdcfan.ui.StartActivity', '-a', 'android.intent.action.MAIN', '-c', 'android.intent.category.LAUNCHER'
+task testVariant << {
+    project.android.applicationVariants.all {
+        println it.name
+        StringBuilder sb = new StringBuilder(it.name.length())
+        sb.append(Character.toUpperCase(it.name.charAt(0))).append(it.name.substring(1))
+        println sb.toString()
+    }
 }
 
 dependencies {
