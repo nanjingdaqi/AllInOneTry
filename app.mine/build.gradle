@@ -19,6 +19,12 @@ android {
         }
     }
 
+    productFlavors {
+        a {}
+
+        b {}
+    }
+
     signingConfigs {
         release {
             storeFile file("./doc/debug.keystore")
