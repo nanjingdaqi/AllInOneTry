@@ -36,6 +36,27 @@ android {
     }
   }
 
+  productFlavors {
+    production {
+      manifestPlaceholders = [ELEME_CHANNEL_VALUE: "eleme",
+                              GeTuiAppId         : "YVW7uHGkNb6nb1F9WD5PjA",
+                              GeTuiAppKey        : "ozFCj1gZO78oCGDqZOU65A",
+                              GeTuiAppSecret     : "fZfmbrd8p77PfroGgB1xp2"]
+      ndk {
+        abiFilters "armeabi-v7a", "x86"
+      }
+    }
+    dev {
+      manifestPlaceholders = [ELEME_CHANNEL_VALUE: "dev",
+                              GeTuiAppId         : "YVW7uHGkNb6nb1F9WD5PjA",
+                              GeTuiAppKey        : "ozFCj1gZO78oCGDqZOU65A",
+                              GeTuiAppSecret     : "fZfmbrd8p77PfroGgB1xp2"]
+      ndk {
+        abiFilters "armeabi-v7a", "x86"
+      }
+    }
+  }
+
   signingConfigs {
     release {
       storeFile file("./doc/debug.keystore")
