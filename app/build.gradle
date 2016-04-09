@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-=======
-cbuildscript {
-  repositories {
-    jcenter()
-  }
-  dependencies {
-    classpath 'com.android.tools.build:gradle:1.2.3'
-    classpath 'me.tatarka:gradle-retrolambda:3.2.0'
-  }
-}
->>>>>>> try using butterknife in lib module
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
@@ -26,6 +14,8 @@ android {
     targetSdkVersion 25
     versionCode 1
     versionName "1.0"
+
+    buildConfigField 'int', 'foo', '2'
   }
 
   buildTypes {}
