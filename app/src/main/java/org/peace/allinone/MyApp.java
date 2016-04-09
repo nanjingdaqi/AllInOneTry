@@ -38,7 +38,7 @@ public class MyApp extends Application {
           .build());
     }
 
-    hookInstrumentation();
+    //hookInstrumentation();
   }
 
   private void hookInstrumentation() {
