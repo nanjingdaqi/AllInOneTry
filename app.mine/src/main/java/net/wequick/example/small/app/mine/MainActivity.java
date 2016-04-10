@@ -19,6 +19,11 @@ public class MainActivity extends AppCompatActivity {
 
         String pkgName = getPackageName();
         Log.e("app.min", "package name: " + pkgName);
+
+        String[] arr = getResources().getStringArray(R.array.my_arr);
+        for (String s : arr) {
+            Log.e("MainActivity", "arr: " + s);
+        }
     }
 
     private void handleToolbar() {
