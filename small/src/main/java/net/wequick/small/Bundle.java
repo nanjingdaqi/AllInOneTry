@@ -21,15 +21,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-
-import net.wequick.small.util.BundleParser;
-import net.wequick.small.util.FileUtils;
-import net.wequick.small.webkit.WebViewPool;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -43,6 +34,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import net.wequick.small.util.BundleParser;
+import net.wequick.small.util.FileUtils;
+import net.wequick.small.webkit.WebViewPool;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This class consists exclusively of methods that operate on apk plugin.
@@ -114,7 +111,7 @@ public class Bundle {
     }
 
     public static String getUserBundlesPath() {
-        return Small.getContext().getApplicationInfo().dataDir + "/lib/";
+        return Small.getContext().getApplicationInfo().dataDir + "/bundle/";
     }
 
     /**
@@ -317,11 +314,14 @@ public class Bundle {
     }
 
     private void initWithMap(JSONObject map) throws JSONException {
+        String bundlePath = getUserBundlesPath();
+        FileUtils.ensureDir(bundlePath);
         String pkg = map.getString("pkg");
         if (pkg != null && !pkg.equals(HOST_PACKAGE)) {
-            String soName = "lib" + pkg.replaceAll("\\.", "_") + ".so";
-            mBuiltinFile = new File(Bundle.getUserBundlesPath(), soName);
-            mPatchFile = new File(FileUtils.getDownloadBundlePath(), soName);
+            String bundleName = "lib" + pkg.replaceAll("\\.", "_") + ".bundle";
+            mBuiltinFile = new File(bundlePath, bundleName);
+            FileUtils.copyAsset(bundleName, mBuiltinFile);
+            mPatchFile = new File(FileUtils.getDownloadBundlePath(), bundleName);
             mPackageName = pkg;
         }
 
