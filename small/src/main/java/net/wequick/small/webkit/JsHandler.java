@@ -13,26 +13,18 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package net.wequick.gradle
 
-import org.gradle.api.Project
-import org.gradle.api.Task
+package net.wequick.small.webkit;
 
-public class AndroidExtension extends BaseExtension {
+import android.content.Context;
 
-    /** File of release variant output */
-    protected File outputFile
+import java.util.Map;
 
-    /** Task of android packager */
-    Task aapt
-
-    /** Task of R.class jar */
-    Task jar
-
-    /** Tasks of aar exploder */
-    Set<File> explodeAarDirs
-
-    AndroidExtension(Project project) {
-        super(project)
-    }
+/**
+ * This class do the native stuff for the registered Javascript method.
+ *
+ * @see net.wequick.small.Small#registerJsHandler(String, JsHandler)
+ */
+public interface JsHandler {
+    void handle(Context context, Map<String, Object> parameters, JsResult result);
 }

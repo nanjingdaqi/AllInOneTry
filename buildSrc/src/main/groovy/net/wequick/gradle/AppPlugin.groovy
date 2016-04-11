@@ -19,6 +19,7 @@ import groovy.io.FileType
 import net.wequick.gradle.aapt.Aapt
 import net.wequick.gradle.aapt.SymbolParser
 import net.wequick.gradle.util.DependenciesUtils
+import net.wequick.gradle.util.JNIUtils
 import org.gradle.api.Project
 
 class AppPlugin extends BundlePlugin {
@@ -143,25 +144,48 @@ class AppPlugin extends BundlePlugin {
         super.configureReleaseVariant(variant)
 
         // Fill extensions
-        def newDexTaskName = 'transformClassesWithDexFor' + variant.name.capitalize()
-        println newDexTaskName
+        def variantName = variant.name.capitalize()
+        def newDexTaskName = 'transformClassesWithDexFor' + variantName
         def dexTask = project.hasProperty(newDexTaskName) ? project[newDexTaskName] : variant.dex
+
+        // Collect dependent AARs
+        RootExtension rootExt = project.rootProject.small
+        def libAars = new HashSet() // the aars compiled in host or lib.*
+        rootExt.preLinkAarDir.listFiles().each { file ->
+            if (!file.name.endsWith('D.txt')) return
+            file.eachLine { line ->
+                def module = line.split(':')
+                libAars.add(group: module[0], name: module[1], version: module[2])
+            }
+        }
+        def prjAars = new HashSet() // normal modules who's name does not match Small way - `*.*'
+        project.rootProject.subprojects {
+            if (it.name.startsWith('lib.')) {
+                libAars.add(group: it.group, name: it.name, version: it.version)
+            } else if (it.name != 'app' && it.name != 'small' && it.name.indexOf('.') < 0) {
+                prjAars.add(group: it.group, name: it.name, version: it.version)
+            }
+        }
+
         small.with {
             javac = variant.javaCompile
             dex = dexTask
-            processManifest = project['process' + variant.name.capitalize() + 'Manifest']
+            processManifest = project['process' + variantName + 'Manifest']
 
             packagePath = variant.applicationId.replaceAll('\\.', '/')
             classesDir = javac.destinationDir
             bkClassesDir = new File(classesDir.parentFile, "${classesDir.name}~")
 
-            aapt = project['process' + variant.name.capitalize() +'Resources']
+            aapt = project['process' + variantName + 'Resources']
             apFile = aapt.packageOutputFile
 
             symbolFile = new File(aapt.textSymbolOutputDir, 'R.txt')
             rJavaFile = new File(aapt.sourceOutputDir, "${packagePath}/R.java")
 
             mergerXml = new File(variant.mergeResources.incrementalFolder, 'merger.xml')
+
+            splitAars = libAars
+            retainedAars = prjAars
         }
 
         hookVariantTask()
@@ -174,44 +198,35 @@ class AppPlugin extends BundlePlugin {
         def idsFile = small.symbolFile
         if (!idsFile.exists()) return
 
-        RootExtension rootExt = (RootExtension) project.rootProject.small
+        RootExtension rootExt = project.rootProject.small
 
-        // Check if have any vendor aar dependencies who contain resources.
-        def libAars = [] // the aars compiled in host or lib.*
-        rootExt.preLinkAarDir.listFiles().each { file ->
-            if (!file.name.endsWith('D.txt')) return
-            file.eachLine { line ->
-                def module = line.split(':')
-                libAars.add(group: module[0], name: module[1], version: module[2])
-            }
-        }
-        def bundleAars = [] // the aars compiling in current bundle
+        def vendorAars = [] // the vendor aars compiling in current bundle
         project.configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.each {
             def group = it.moduleGroup,
                 name = it.moduleName,
                 version = it.moduleVersion
 
-            if (name.startsWith('lib.')) {
-                // Ignore the dependency refer to sub project like `compile project(':lib.xx')`
-                return
-            }
-            if (libAars.find { aar -> group == aar.group && name == aar.name } != null) {
+            if (small.splitAars.find { aar -> group == aar.group && name == aar.name } != null) {
                 // Ignore the dependency which has declared in host or lib.*
                 return
             }
+            if (small.retainedAars.find { aar -> group == aar.group && name == aar.name } != null) {
+                // Ignore the dependency of normal modules
+                return
+            }
             def resDir = new File(small.aarDir, "$group/$name/$version/res")
-            if (resDir.listFiles().size() == 0) {
+            if (!resDir.exists() || resDir.list().size() == 0) {
                 // Ignored the dependency which does not have any resources
                 return
             }
 
-            bundleAars.add("$group:$name:$version")
+            vendorAars.add("$group:$name:$version")
         }
-        if (bundleAars.size() > 0) {
+        if (vendorAars.size() > 0) {
             if (rootExt.strictSplitResources) {
                 def err = new StringBuilder('In strict mode, we do not allow vendor aars, ')
                 err.append('please declare them in host build.gradle:\n')
-                bundleAars.each {
+                vendorAars.each {
                     err.append("    - compile('${it}')\n")
                 }
                 err.append('or turn off the strict mode in root build.gradle:\n')
@@ -220,7 +235,7 @@ class AppPlugin extends BundlePlugin {
                 err.append('    }')
                 throw new UnsupportedOperationException(err.toString())
             } else {
-                Log.warn("Using vendor aar(s): ${bundleAars.join('; ')}")
+                Log.warn("Using vendor aar(s): ${vendorAars.join('; ')}")
             }
         }
 
@@ -429,12 +444,35 @@ class AppPlugin extends BundlePlugin {
         small.retainedStyleables = retainedStyleables
     }
 
+    protected int getABIFlag() {
+        def abis = []
+
+        def jniDirs = project.android.sourceSets.main.jniLibs.srcDirs
+        if (jniDirs == null) jniDirs = []
+        // Collect ABIs from AARs
+        small.explodeAarDirs.each { dir ->
+            File jniDir = new File(dir, 'jni')
+            if (!jniDir.exists()) return
+            jniDirs.add(jniDir)
+        }
+        jniDirs.each { dir ->
+            dir.listFiles().each {
+                if (it.isDirectory() && !abis.contains(it.name)) {
+                    abis.add(it.name)
+                }
+            }
+        }
+
+        return JNIUtils.getABIFlag(abis)
+    }
+
     protected void hookVariantTask() {
         // Hook process-manifest task to remove the `android:icon' and `android:label' attribute
         // which declared in the plugin `AndroidManifest.xml' application node  (for #11)
         small.processManifest.doLast {
             File manifestFile = it.manifestOutputFile
             def sb = new StringBuilder()
+            def enteredApplicationNode = false
             def needsFilter = true
             manifestFile.eachLine { line ->
                 if (needsFilter) {
@@ -444,12 +482,24 @@ class AppPlugin extends BundlePlugin {
                         // So if we meet them, just ignored the whole line.
                         return
                     }
-                    if (line.indexOf('<activity') > 0) needsFilter = false
+                    if (line.indexOf('<application') > 0) {
+                        // To support plugin JNI, we overwrite the `android:label' attribute with
+                        // the ABIs flag here. So that at the runtime we can fast extract the
+                        // exact JNIs in the supported ABI. (#87, #79)
+                        int flag = getABIFlag()
+                        if (flag != 0) {
+                            line += "\n        android:label=\"$flag\""
+                        }
+                        enteredApplicationNode = true
+                    }
+                    if (enteredApplicationNode && line.indexOf('>') > 0) {
+                        needsFilter = false
+                    }
                 }
 
                 sb.append(line).append(System.lineSeparator())
             }
-            manifestFile.write(sb.toString())
+            manifestFile.write(sb.toString(), 'utf-8')
         }
 
         // Hook aapt task to slice asset package and resolve library resource ids
@@ -512,11 +562,20 @@ class AppPlugin extends BundlePlugin {
 
         // Hook dex task to split all aar classes.jar
         small.dex.doFirst {
-            small.aarDir.renameTo(small.bkAarDir)
+            small.bkAarDir.mkdir()
+            small.splitAars.each {
+                String path = "${it.group}/${it.name}/${it.version}"
+                File dir = new File(small.aarDir, path)
+                if (dir.exists()) {
+                    File todir = new File(small.bkAarDir, path)
+                    project.ant.move(file: dir, tofile: todir)
+                }
+            }
             Log.success "[${project.name}] split aar classes..."
         }
         small.dex.doLast {
-            small.bkAarDir.renameTo(small.aarDir)
+            project.ant.move(file: small.bkAarDir, tofile: small.aarDir)
+            small.bkAarDir.delete()
         }
 
         // Hook clean task to unset package id
@@ -528,8 +587,9 @@ class AppPlugin extends BundlePlugin {
     @Override
     protected void tidyUp() {
         super.tidyUp()
-        if (!small.aarDir.exists()) {
-            small.bkAarDir.renameTo(small.aarDir)
+        if (small.bkAarDir.exists()) {
+            project.ant.move(file: small.bkAarDir, tofile: small.aarDir)
+            small.bkAarDir.delete()
         }
     }
 
