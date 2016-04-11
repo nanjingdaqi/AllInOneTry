@@ -4,6 +4,10 @@
     {
       "uri": "mine",
       "pkg": "net.wequick.example.small.app.mine"
+    },
+    {
+      "uri": "lib.style",
+      "pkg": "com.example.mysmall.lib.style"
     }
   ]
 }

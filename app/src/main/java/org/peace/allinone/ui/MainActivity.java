@@ -18,6 +18,12 @@ public class MainActivity extends AppCompatActivity {
         Small.openUri("mine", MainActivity.this);
       }
     });
+
+    findViewById(R.id.start_btn2).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+
+      }
+    });
   }
 
   @Override protected void onStart() {

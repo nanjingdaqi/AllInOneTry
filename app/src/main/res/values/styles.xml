@@ -6,4 +6,6 @@
     <!-- Customize your theme here. -->
   </style>
 
+  <style name="HostTheme" parent="AppTheme"/>
+
 </resources>

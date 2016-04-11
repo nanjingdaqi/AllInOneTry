@@ -8,6 +8,11 @@ android {
         abortOnError false
     }
 
+    aaptOptions {
+//        additionalParameters '-S /Users/peacepassion/Dev/Android/Src/Try/AllInOneTry/app/src/main/res'
+//        additionalParameters '-I',  '/Users/peacepassion/Dev/Android/Src/Try/AllInOneTry/app/build/outputs/apk/app-aa-release.apk'
+    }
+
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 23
@@ -41,6 +46,8 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    compile project(':lib.style')
 
     compile 'com.android.support:appcompat-v7:23.2.1'
 
