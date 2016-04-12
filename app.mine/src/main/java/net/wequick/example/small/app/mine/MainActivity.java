@@ -25,7 +25,13 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.bundle_start).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         //Toast.makeText(MainActivity.this, com.example.mysmall.lib.style.R.string.style_hello, Toast.LENGTH_SHORT).show();
-        Toast.makeText(MainActivity.this, org.peace.allinone.R.string.host_str, Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "New source code string", Toast.LENGTH_SHORT).show();
+      }
+    });
+
+    findViewById(R.id.upgrade).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+
       }
     });
   }
