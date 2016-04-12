@@ -46,6 +46,5 @@ proguard/
 # Log Files
 *.log
 
-*.so
 *.bundle
 

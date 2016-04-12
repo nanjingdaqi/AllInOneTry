@@ -7,9 +7,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-/**
- * Created by galen on 15/11/11.
- */
 public class MainActivity extends AppCompatActivity {
 
   @Override
@@ -31,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     findViewById(R.id.upgrade).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-
+        new WeiboApi(getApplication());
       }
     });
   }
