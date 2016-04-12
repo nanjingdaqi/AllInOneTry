@@ -1,3 +1,18 @@
+/*
+ * Copyright 2015-present wequick.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 package net.wequick.small.util;
 
 import android.os.Build;
@@ -6,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class
+ * This class consists exclusively of static methods that operate on JNI.
  */
 public final class JNIUtils {
 
@@ -36,6 +51,10 @@ public final class JNIUtils {
             String[] abis;
             if (Build.VERSION.SDK_INT >= 21) {
                 abis = Build.SUPPORTED_ABIS;
+                // FIXME: seems the emulator no support 64bit JNI?
+                if (abis[0].equals("x86_64")) {
+                    abis = Build.SUPPORTED_32_BIT_ABIS;
+                }
             } else if (Build.CPU_ABI2.equals(Build.UNKNOWN)) {
                 abis = new String[] { Build.CPU_ABI };
             } else {

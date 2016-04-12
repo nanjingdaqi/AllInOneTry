@@ -27,13 +27,16 @@ import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.IBinder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Window;
 
+import net.wequick.small.internal.InstrumentationInternal;
 import net.wequick.small.util.BundleParser;
 import net.wequick.small.util.FileUtils;
 import net.wequick.small.util.JNIUtils;
@@ -69,6 +72,7 @@ public class ApkBundleLauncher extends SoBundleLauncher {
 
     private static final String PACKAGE_NAME = ApkBundleLauncher.class.getPackage().getName();
     private static final String STUB_ACTIVITY_PREFIX = PACKAGE_NAME + ".A";
+    private static final String STUB_ACTIVITY_TRANSLUCENT = STUB_ACTIVITY_PREFIX + '1';
     private static final String TAG = "ApkBundleLauncher";
     private static final String FD_STORAGE = "storage";
     private static final String FD_LIBRARY = "lib";
@@ -90,7 +94,8 @@ public class ApkBundleLauncher extends SoBundleLauncher {
     /**
      * Class for redirect activity from Stub(AndroidManifest.xml) to Real(Plugin)
      */
-    private static class InstrumentationWrapper extends Instrumentation {
+    private static class InstrumentationWrapper extends Instrumentation
+            implements InstrumentationInternal {
 
         private static final char REDIRECT_FLAG = '>';
         private static final int STUB_ACTIVITIES_COUNT = 4;
@@ -229,7 +234,15 @@ public class ApkBundleLauncher extends SoBundleLauncher {
         private String dequeueStubActivity(ActivityInfo ai, String realActivityClazz) {
             if (ai.launchMode == ActivityInfo.LAUNCH_MULTIPLE) {
                 // In standard mode, the stub activity is reusable.
-                return STUB_ACTIVITY_PREFIX;
+                // Cause the `windowIsTranslucent' attribute cannot be dynamically set,
+                // We should choose the STUB activity with translucent or not here.
+                Resources.Theme theme = Small.getContext().getResources().newTheme();
+                theme.applyStyle(ai.getThemeResource(), true);
+                TypedArray sa = theme.obtainStyledAttributes(
+                        new int[] { android.R.attr.windowIsTranslucent });
+                boolean translucent = sa.getBoolean(0, false);
+                sa.recycle();
+                return translucent ? STUB_ACTIVITY_TRANSLUCENT : STUB_ACTIVITY_PREFIX;
             }
 
             int availableId = -1;
@@ -438,28 +451,35 @@ public class ApkBundleLauncher extends SoBundleLauncher {
         super.prelaunchBundle(bundle);
         Intent intent = new Intent();
         bundle.setIntent(intent);
+
         // Intent extras - class
         String activityName = bundle.getPath();
         if (activityName == null || activityName.equals("")) {
             activityName = bundle.getEntrance();
-        } else if (activityName.startsWith(".")) {
-            activityName = bundle.getPackageName() + activityName;
-        }
-        if (!sLoadedActivities.containsKey(activityName)) {
-            if (!activityName.endsWith("Activity")) {
-                throw new ActivityNotFoundException("Unable to find explicit activity class { " +
-                        activityName + " }");
+        } else {
+            char c = activityName.charAt(0);
+            if (c == '.') {
+                activityName = bundle.getPackageName() + activityName;
+            } else if (c >= 'A' && c <= 'Z') {
+                activityName = bundle.getPackageName() + '.' + activityName;
             }
+            if (!sLoadedActivities.containsKey(activityName)) {
+                if (activityName.endsWith("Activity")) {
+                    throw new ActivityNotFoundException("Unable to find explicit activity class " +
+                            "{ " + activityName + " }");
+                }
 
-            String tempActivityName = activityName + "Activity";
-            if (!sLoadedActivities.containsKey(tempActivityName)) {
-                throw new ActivityNotFoundException("Unable to find explicit activity class { " +
-                        activityName + " or " + tempActivityName + " }");
+                String tempActivityName = activityName + "Activity";
+                if (!sLoadedActivities.containsKey(tempActivityName)) {
+                    throw new ActivityNotFoundException("Unable to find explicit activity class " +
+                            "{ " + activityName + "(Activity) }");
+                }
+
+                activityName = tempActivityName;
             }
-
-            activityName = tempActivityName;
         }
         intent.setComponent(new ComponentName(Small.getContext(), activityName));
+
         // Intent extras - params
         String query = bundle.getQuery();
         if (query != null) {
@@ -508,8 +528,10 @@ public class ApkBundleLauncher extends SoBundleLauncher {
         // Apply plugin theme
         ReflectAccelerator.setTheme(activity, null);
         activity.setTheme(ai.getThemeResource());
-        // Apply plugin softInputMode
-        activity.getWindow().setSoftInputMode(ai.softInputMode);
+
+        // Apply window attributes
+        Window window = activity.getWindow();
+        window.setSoftInputMode(ai.softInputMode);
         activity.setRequestedOrientation(ai.screenOrientation);
     }
 

@@ -37,6 +37,7 @@ class HostPlugin extends AndroidPlugin {
     protected void createTask() {
         super.createTask()
 
+        project.task('cleanLib', dependsOn: 'clean')
         project.task('buildLib')
     }
 

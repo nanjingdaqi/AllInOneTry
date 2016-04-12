@@ -17,16 +17,19 @@
 package net.wequick.small.util;
 
 import android.content.Context;
+
+import java.nio.channels.FileChannel;
+import net.wequick.small.Small;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import net.wequick.small.Small;
 
 /**
  * This class consists exclusively of static methods that operate on file.
@@ -99,6 +102,7 @@ public final class FileUtils {
     public static File getDownloadBundlePath() {
         return getInternalFilesPath(DOWNLOAD_PATH);
     }
+
 
     public static void ensureDir(String dirPath) {
         File file = new File(dirPath);

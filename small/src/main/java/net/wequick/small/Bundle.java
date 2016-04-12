@@ -21,6 +21,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+
+import net.wequick.small.util.BundleParser;
+import net.wequick.small.util.FileUtils;
+import net.wequick.small.webkit.WebViewPool;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,12 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import net.wequick.small.util.BundleParser;
-import net.wequick.small.util.FileUtils;
-import net.wequick.small.webkit.WebViewPool;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * This class consists exclusively of methods that operate on apk plugin.
