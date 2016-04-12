@@ -47,3 +47,5 @@ proguard/
 *.log
 
 *.so
+*.bundle
+
