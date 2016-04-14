@@ -1,5 +1,6 @@
 package net.wequick.example.small.app.mine;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -22,7 +23,9 @@ public class SubActivity extends AppCompatActivity {
     findViewById(R.id.bundle_start).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         //Toast.makeText(MainActivity.this, com.example.mysmall.lib.style.R.string.style_hello, Toast.LENGTH_SHORT).show();
-        Toast.makeText(SubActivity.this, "New source code string", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(SubActivity.this, "New source code string", Toast.LENGTH_SHORT).show();
+
+        startActivity(new Intent(SubActivity.this, org.peace.allinone.ui.MainActivity.class));
       }
     });
 

@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
         //Toast.makeText(MainActivity.this, com.example.mysmall.lib.style.R.string.style_hello, Toast.LENGTH_SHORT).show();
         //Toast.makeText(MainActivity.this, "New source code string", Toast.LENGTH_SHORT).show();
 
-        startActivity(new Intent(MainActivity.this, org.peace.allinone.ui.MainActivity.class));
       }
     });
 

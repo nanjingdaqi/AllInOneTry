@@ -450,6 +450,8 @@ public class ApkBundleLauncher extends SoBundleLauncher {
     public void prelaunchBundle(Bundle bundle) {
         super.prelaunchBundle(bundle);
         Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         bundle.setIntent(intent);
 
         // Intent extras - class
