@@ -1,3 +1,5 @@
-include ':app', ':app.mine'//, ':lib.utils'
+include ':app'
+include ':app.mine'
+//include ':lib.utils'
 include ':lib.style'
 include ':small'

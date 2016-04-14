@@ -3,7 +3,10 @@
   "bundles": [
     {
       "uri": "mine",
-      "pkg": "net.wequick.example.small.app.mine"
+      "pkg": "net.wequick.example.small.app.mine",
+      "rules": {
+        "sub": "SubActivity"
+      }
     },
     {
       "uri": "lib.style",

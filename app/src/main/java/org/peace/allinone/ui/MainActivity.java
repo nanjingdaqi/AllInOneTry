@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     findViewById(R.id.start_btn).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        Small.openUri("mine", MainActivity.this);
+        Small.openUri("mine/sub", MainActivity.this);
       }
     });
 

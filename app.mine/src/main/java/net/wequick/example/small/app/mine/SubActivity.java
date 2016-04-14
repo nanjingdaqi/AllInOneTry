@@ -1,6 +1,5 @@
 package net.wequick.example.small.app.mine;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -8,7 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class SubActivity extends AppCompatActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +22,7 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.bundle_start).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         //Toast.makeText(MainActivity.this, com.example.mysmall.lib.style.R.string.style_hello, Toast.LENGTH_SHORT).show();
-        //Toast.makeText(MainActivity.this, "New source code string", Toast.LENGTH_SHORT).show();
-
-        startActivity(new Intent(MainActivity.this, org.peace.allinone.ui.MainActivity.class));
+        Toast.makeText(SubActivity.this, "New source code string", Toast.LENGTH_SHORT).show();
       }
     });
 
@@ -40,6 +37,6 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar = (Toolbar) findViewById(R.id.mine_toolbar);
     setSupportActionBar(toolbar);
 
-    getSupportActionBar().setTitle("Great Small Plugin");
+    getSupportActionBar().setTitle("SubActivity");
   }
 }
