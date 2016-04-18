@@ -92,7 +92,7 @@ public final class FileUtils {
     }
 
     public static File getInternalFilesPath(String dir) {
-        File file = Small.getContext().getDir(dir, Context.MODE_PRIVATE);
+        File file = Small.hostApplication().getDir(dir, Context.MODE_PRIVATE);
         if (!file.exists()) {
             file.mkdirs();
         }
@@ -130,7 +130,7 @@ public final class FileUtils {
             if (!dest.exists()) {
                 dest.createNewFile();
             }
-            InputStream is = Small.getContext().getAssets().open(srcFileName);
+            InputStream is = Small.hostApplication().getAssets().open(srcFileName);
             OutputStream os = new FileOutputStream(dest);
             byte[] buffer = new byte[1024];
             int len;

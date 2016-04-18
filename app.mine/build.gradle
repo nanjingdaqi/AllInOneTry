@@ -28,12 +28,6 @@ android {
         }
     }
 
-    productFlavors {
-        aa {}
-
-        bb {}
-    }
-
     signingConfigs {
         release {
             storeFile file("./doc/debug.keystore")
@@ -47,7 +41,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
-    compile project(':lib.style')
+//    compile project(':lib.style')
 
     compile 'com.android.support:appcompat-v7:23.2.1'
 

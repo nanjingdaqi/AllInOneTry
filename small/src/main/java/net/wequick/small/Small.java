@@ -30,23 +30,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import net.wequick.small.util.BundleParser;
+import java.util.concurrent.SynchronousQueue;
 import net.wequick.small.util.FileUtils;
 
 public final class Small {
 
     public static final String LOG_TAG = Small.class.getSimpleName();
-
-    public static final String BUNDLES_KEY = "bundles";
     public static final String KEY_ACTIVITY_URI = "key_activity_uri";
-
-    public static final String KEY_QUERY = "small-query";
-    public static final String EXTRAS_KEY_RET = "small-ret";
-    public static final int REQUEST_CODE_DEFAULT = 10000;
 
     private static Application hostApplication;
     private static ApkBundleLauncher apkBundleLauncher;
-    private static List<Bundle> loadedBundles = null;
+    private static List<Bundle> loadedBundles = new ArrayList<>();
     private static boolean isNewHostApp; // first launched or upgraded
 
     public static Application hostApplication() {
@@ -58,6 +52,10 @@ public final class Small {
     }
 
     public static void setup(Application application) throws SmallSetupException {
+        long setupStartTime = 0;
+        if (BuildConfig.DEBUG) {
+            setupStartTime = System.currentTimeMillis();
+        }
         hostApplication = application;
         SharedPreferenceManager.init(hostApplication);
         handleVersionChange();
@@ -67,6 +65,10 @@ public final class Small {
             loadBundles();
         } catch (Exception e) {
             throw new SmallSetupException(e);
+        }
+        if (BuildConfig.DEBUG) {
+            long setupEndTime = System.currentTimeMillis();
+            Log.d(LOG_TAG, "Small setup consumes: " + (setupEndTime - setupStartTime) + " ms");
         }
     }
 
@@ -102,8 +104,7 @@ public final class Small {
         apkBundleLauncher.setup(hostApplication);
     }
 
-    private static void loadBundles()
-        throws BundleParser.BundleParseException, Bundle.BundleLoadException {
+    private static void loadBundles() throws Exception {
         BundleManifest bundleManifest = parseBundleManifest();
         doLoadBundles(bundleManifest);
     }
@@ -111,16 +112,28 @@ public final class Small {
     // todo handle bundle.json processing
     // todo handling bundle.json upgrade
     private static BundleManifest parseBundleManifest() {
+        long parseStartTime = 0;
+        if (BuildConfig.DEBUG) {
+            parseStartTime = System.currentTimeMillis();
+        }
+
         String jsonStr = readBundlesInfo();
         // Parse manifest file
         Gson gson = new Gson();
         BundleManifest bundleManifest = gson.fromJson(jsonStr, BundleManifest.class);
+
+        if (BuildConfig.DEBUG) {
+            long parseEndTime = System.currentTimeMillis();
+            Log.d(LOG_TAG, "parse manifest consumes: " + (parseEndTime - parseStartTime) + " ms");
+        }
+
         return bundleManifest;
     }
 
     private static String readBundlesInfo() {
-        File manifestFile = new File(hostApplication.getFilesDir(), FileManager.BUNDLE_MANIFEST_NAME);
+        File manifestFile = new File(FileManager.smallBundleManifestDir(), FileManager.BUNDLE_MANIFEST_NAME);
         manifestFile.delete();
+        FileUtils.ensureFile(manifestFile.getAbsolutePath());
         String manifestJson = null;
         // Copy asset to files
         try {
@@ -130,7 +143,6 @@ public final class Small {
             is.read(buffer);
             is.close();
 
-            manifestFile.createNewFile();
             FileOutputStream os = new FileOutputStream(manifestFile);
             os.write(buffer);
             os.close();
@@ -142,20 +154,34 @@ public final class Small {
         return manifestJson;
     }
 
-    private static void doLoadBundles(BundleManifest bundleManifest)
-        throws BundleParser.BundleParseException, Bundle.BundleLoadException {
+    private static void doLoadBundles(BundleManifest bundleManifest) throws Exception {
         List<BundleManifest.BundleInfo> bundleInfoList = bundleManifest.bundleInfoList();
-        List<Bundle> bundles = new ArrayList<>(bundleInfoList.size());
+        Exception exception = null;
         for (BundleManifest.BundleInfo bundleInfo : bundleInfoList) {
-            Bundle bundle = new Bundle(bundleInfo);
-            bundle.setup(apkBundleLauncher);
-            bundles.add(bundle);
+            try {
+                long loadStartTime = 0;
+                if (BuildConfig.DEBUG) {
+                    loadStartTime = System.currentTimeMillis();
+                }
 
+                Bundle bundle = new Bundle(bundleInfo, apkBundleLauncher);
+                loadedBundles.add(bundle);
+
+                if (BuildConfig.DEBUG) {
+                    long loadEndTime = System.currentTimeMillis();
+                    Log.d(LOG_TAG, "load bundle " + bundleInfo.packageName() + " consumes: " + (loadEndTime - loadStartTime) + " ms");
+                }
+            } catch (Exception e) {
+                exception = e;
+            }
             if (BuildConfig.DEBUG) {
                 Log.d(LOG_TAG, "bundle loaded: " + bundleInfo);
             }
         }
-        loadedBundles = bundles;
+
+        if (exception != null) {
+            throw exception;
+        }
     }
 
     // todo integrate with scheme

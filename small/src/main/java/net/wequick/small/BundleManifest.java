@@ -39,8 +39,10 @@ public class BundleManifest {
       sb.append("uri: ").append(uri).append("\n")
           .append("pkg: ").append(packageName).append("\n")
           .append("rules: ").append('{').append("\n");
-      for (Map.Entry<String, String> rule : rules.entrySet()) {
-        sb.append(rule.getKey()).append(": ").append(rule.getValue()).append("\n");
+      if (rules != null) {
+        for (Map.Entry<String, String> rule : rules.entrySet()) {
+          sb.append(rule.getKey()).append(": ").append(rule.getValue()).append("\n");
+        }
       }
       sb.append('}').append("\n");
       return sb.toString();

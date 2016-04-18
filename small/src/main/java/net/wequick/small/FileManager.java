@@ -13,6 +13,10 @@ public final class FileManager {
     return Small.hostApplication().getFilesDir() + File.separator + SMALL_DIR;
   }
 
+  public static String smallBundleManifestDir() {
+    return smallDir();
+  }
+
   public static String smallBundlesDir() {
     return smallDir() + File.separator + SMALL_BUNDLE_DIR;
   }

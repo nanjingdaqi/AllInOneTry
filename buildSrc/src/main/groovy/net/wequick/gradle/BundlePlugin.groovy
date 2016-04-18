@@ -129,7 +129,7 @@ abstract class BundlePlugin extends AndroidPlugin {
         def appId = variant.applicationId
         if (appId == null) return null
 
-        def bundle = "lib${appId.replaceAll('\\.', '_')}.bundle"
+        def bundle = "${appId.replaceAll('\\.', '_')}.bundle"
         RootExtension rootExt = project.rootProject.small
         def outputDir = rootExt.outputBundleDir
         if (!outputDir.exists()) {

@@ -34,13 +34,16 @@ public class Bundle {
     private BundleParser bundleParser;
     private BundleManifest.BundleInfo bundleInfo;
     private LoadedApk loadedApk;
+    private ApkBundleLauncher apkBundleLauncher;
 
-    public Bundle(BundleManifest.BundleInfo bundleInfo) {
+    public Bundle(BundleManifest.BundleInfo bundleInfo, ApkBundleLauncher apkBundleLauncher)
+        throws BundleLoadException, BundleParser.BundleParseException {
         this.bundleInfo = bundleInfo;
+        this.apkBundleLauncher = apkBundleLauncher;
         init();
     }
 
-    private void init() {
+    private void init() throws BundleLoadException, BundleParser.BundleParseException {
         String bundleUri = bundleInfo.uri();
         if (TextUtils.isEmpty(bundleUri)) {
             throw new IllegalArgumentException("bundle uri in Bundle.json cannot be empty");
@@ -62,17 +65,15 @@ public class Bundle {
         if (Small.isNewHostApp()) {
             FileUtils.copyAsset(bundleName, bundleFile);
         }
-    }
 
-    public void setup(ApkBundleLauncher apkBundleLauncher) throws BundleParser.BundleParseException, BundleLoadException {
         bundleParser = new BundleParser(bundleFile, bundleInfo.packageName());
         bundleParser.parsePackage();
-        load(apkBundleLauncher);
+        load();
         // Record version code for upgrade
         SharedPreferenceManager.setBundleVersionCode(bundleInfo.packageName(), bundleParser.getPackageInfo().versionCode);
     }
 
-    private void load(ApkBundleLauncher apkBundleLauncher) throws BundleLoadException {
+    private void load() throws BundleLoadException {
         String packageName = bundleParser.getPackageInfo().packageName;
 
         bundleParser.collectActivities();
@@ -129,7 +130,7 @@ public class Bundle {
         if (splashIndex != -1) {
             host = uriStr.substring(0, splashIndex);
         }
-        return host == bundleInfo.uri();
+        return host.equals(bundleInfo.uri());
     }
 
     public Class getTargetClass(String uriStr) throws ClassNotFoundException {

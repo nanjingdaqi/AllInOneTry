@@ -1,5 +1,6 @@
 package org.peace.allinone.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -33,15 +34,17 @@ public class MainActivity extends AppCompatActivity {
 
     findViewById(R.id.start_btn).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        Small.openUri("mine/sub", MainActivity.this);
+        Intent intent = new Intent();
+        intent.putExtra(Small.KEY_ACTIVITY_URI, "mine");
+        Small.launchBundleActivity(intent, MainActivity.this);
       }
     });
 
-    findViewById(R.id.start_btn2).setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
-        startUpgrade();
-      }
-    });
+    //findViewById(R.id.start_btn2).setOnClickListener(new View.OnClickListener() {
+    //  @Override public void onClick(View v) {
+    //    startUpgrade();
+    //  }
+    //});
   }
 
   private void startUpgrade() {
@@ -55,32 +58,26 @@ public class MainActivity extends AppCompatActivity {
       }
 
       @Override public void onResponse(Call call, Response response) throws IOException {
-        String pkgName = "net.wequick.example.small.app.mine";
-        net.wequick.small.Bundle bundle = net.wequick.small.Bundle.findByName(pkgName);
-        File destFile = bundle.getPatchFile();
-        if (destFile.exists()) {
-          destFile.delete();
-        }
-        destFile.createNewFile();
-
-        Log.e(TAG, "patch file path: " + destFile.getPath());
-
-        Source source = response.body().source();
-        BufferedSink sink = Okio.buffer(Okio.sink(destFile));
-        sink.writeAll(source);
-        sink.flush();
-        sink.close();
-
-        bundle.upgrade();
-
-        Log.e(TAG, "download succ");
+        //String pkgName = "net.wequick.example.small.app.mine";
+        //net.wequick.small.Bundle bundle = net.wequick.small.Bundle.findByName(pkgName);
+        //File destFile = bundle.getPatchFile();
+        //if (destFile.exists()) {
+        //  destFile.delete();
+        //}
+        //destFile.createNewFile();
+        //
+        //Log.e(TAG, "patch file path: " + destFile.getPath());
+        //
+        //Source source = response.body().source();
+        //BufferedSink sink = Okio.buffer(Okio.sink(destFile));
+        //sink.writeAll(source);
+        //sink.flush();
+        //sink.close();
+        //
+        //bundle.upgrade();
+        //
+        //Log.e(TAG, "download succ");
       }
     });
-  }
-
-  @Override protected void onStart() {
-    super.onStart();
-    Small.setUp(this, null);
-    Toast.makeText(MainActivity.this, "set up OK", Toast.LENGTH_SHORT).show();
   }
 }

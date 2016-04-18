@@ -24,16 +24,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
+import android.text.TextUtils;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.wequick.small.util.BundleParser;
 import net.wequick.small.util.ReflectAccelerator;
 
 public class ApkBundleLauncher {
 
-    private ConcurrentHashMap<String, LoadedApk> loadedApks;
-    private ConcurrentHashMap<String, ActivityInfo> loadedActivities;
-    private ConcurrentHashMap<String, List<IntentFilter>> loadedIntentFilters;
+    private Map<String, LoadedApk> loadedApks = new HashMap<>();
+    private Map<String, ActivityInfo> loadedActivities = new HashMap<>();
+    private Map<String, List<IntentFilter>> loadedIntentFilters = new HashMap<>();
 
     private Instrumentation hostInstrumentation;
     private InstrumentationWrapper instrumentationWrapper;
@@ -53,21 +56,21 @@ public class ApkBundleLauncher {
         storeActivities(parser.getPackageInfo());
         storeIntentFilters(parser);
         storeApk(parser.getPackageInfo().packageName, loadedApk);
-        createApplication(parser.getPackageInfo().applicationInfo.className);
+
+        String bundleApplicationName = parser.getPackageInfo().applicationInfo.className;
+        if (!TextUtils.isEmpty(bundleApplicationName)) {
+            createApplication(bundleApplicationName);
+        }
     }
 
     private void storeActivities(PackageInfo pluginInfo) {
         // Record activities for intent redirection
-        if (loadedActivities == null) loadedActivities = new ConcurrentHashMap<>();
         for (ActivityInfo ai : pluginInfo.activities) {
             loadedActivities.put(ai.name, ai);
         }
     }
 
     private void storeApk(String packageName, LoadedApk loadedApk) {
-        if (loadedApks == null) {
-            loadedApks = new ConcurrentHashMap<>();
-        }
         loadedApks.put(packageName, loadedApk);
     }
 
@@ -75,9 +78,6 @@ public class ApkBundleLauncher {
         // Record intent-filters for implicit action
         ConcurrentHashMap<String, List<IntentFilter>> filters = parser.getIntentFilters();
         if (filters != null) {
-            if (loadedIntentFilters == null) {
-                loadedIntentFilters = new ConcurrentHashMap<>();
-            }
             loadedIntentFilters.putAll(filters);
         }
     }
@@ -95,15 +95,15 @@ public class ApkBundleLauncher {
         return hostInstrumentation;
     }
 
-    public ConcurrentHashMap<String, ActivityInfo> loadedActivities() {
+    public Map<String, ActivityInfo> loadedActivities() {
         return loadedActivities;
     }
 
-    public ConcurrentHashMap<String, LoadedApk> loadedApks() {
+    public Map<String, LoadedApk> loadedApks() {
         return loadedApks;
     }
 
-    public ConcurrentHashMap<String, List<IntentFilter>> loadedIntentFilters() {
+    public Map<String, List<IntentFilter>> loadedIntentFilters() {
         return loadedIntentFilters;
     }
 
