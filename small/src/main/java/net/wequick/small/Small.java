@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.SynchronousQueue;
 import net.wequick.small.util.FileUtils;
 
 public final class Small {
@@ -61,7 +60,7 @@ public final class Small {
         handleVersionChange();
         // todo handle bundle update here
         try {
-            setupBundleLaunchers();
+            apkBundleLauncher = ApkBundleLauncher.setup(hostApplication);
             loadBundles();
         } catch (Exception e) {
             throw new SmallSetupException(e);
@@ -98,18 +97,11 @@ public final class Small {
         FileUtils.deleteFile(file);
     }
 
-    private static void setupBundleLaunchers() throws ApkBundleLauncher.LauncherSetupException {
-        apkBundleLauncher = new ApkBundleLauncher();
-        // todo consider remove this step
-        apkBundleLauncher.setup(hostApplication);
-    }
-
     private static void loadBundles() throws Exception {
         BundleManifest bundleManifest = parseBundleManifest();
         doLoadBundles(bundleManifest);
     }
 
-    // todo handle bundle.json processing
     // todo handling bundle.json upgrade
     private static BundleManifest parseBundleManifest() {
         long parseStartTime = 0;
@@ -168,14 +160,13 @@ public final class Small {
                 loadedBundles.add(bundle);
 
                 if (BuildConfig.DEBUG) {
+                    Log.d(LOG_TAG, "bundle loaded: " + bundleInfo);
                     long loadEndTime = System.currentTimeMillis();
                     Log.d(LOG_TAG, "load bundle " + bundleInfo.packageName() + " consumes: " + (loadEndTime - loadStartTime) + " ms");
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 exception = e;
-            }
-            if (BuildConfig.DEBUG) {
-                Log.d(LOG_TAG, "bundle loaded: " + bundleInfo);
             }
         }
 

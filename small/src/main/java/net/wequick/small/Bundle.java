@@ -101,8 +101,8 @@ public class Bundle {
         loadedApk.dexFile = optDexFile;
 
         // Expand the native library directories if plugin has any JNIs. (#79)
-        int abiFlags = pluginInfo.applicationInfo.labelRes;
-        String abiPath = JNIUtils.getExtractABI(abiFlags);
+        int abiFlags = bundleParser.getABIFlags();
+        String abiPath = JNIUtils.getExtractABI(abiFlags, FileManager.libDir().contains("64"));
         if (abiPath != null) {
             String libDir = FileManager.libDir() + File.separator + abiPath + File.separator;
             FileUtils.ensureDir(libDir);
@@ -118,7 +118,7 @@ public class Bundle {
         }
 
         try {
-            apkBundleLauncher.initBundle(bundleParser, loadedApk);
+            apkBundleLauncher.registerBundle(bundleParser, loadedApk);
         } catch (Exception e) {
             throw new BundleLoadException("fail to load bundle: " + bundleInfo, e);
         }

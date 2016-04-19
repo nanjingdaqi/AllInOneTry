@@ -7,18 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.content.res.AssetManager;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.IBinder;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Window;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.wequick.small.util.ReflectAccelerator;
 
 public class InstrumentationWrapper extends Instrumentation {
@@ -58,19 +54,6 @@ public class InstrumentationWrapper extends Instrumentation {
   }
 
   @Override
-  /** Unwrap activity from STUB to REAL */
-  public Activity newActivity(ClassLoader cl, String className, Intent intent)
-      throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-    // Stub -> Real
-    if (!className.startsWith(STUB_ACTIVITY_PREFIX)) {
-      return super.newActivity(cl, className, intent);
-    }
-    className = unwrapIntent(intent, className);
-    Activity activity = super.newActivity(cl, className, intent);
-    return activity;
-  }
-
-  @Override
   /** Prepare resources for REAL */
   public void callActivityOnCreate(Activity activity, android.os.Bundle icicle) {
     do {
@@ -79,7 +62,6 @@ public class InstrumentationWrapper extends Instrumentation {
       ActivityInfo ai = loadedActivities.get(activity.getClass().getName());
       if (ai == null) break;
 
-      ensureAddAssetPath(activity);
       applyActivityInfo(activity, ai);
     } while (false);
 
@@ -92,33 +74,10 @@ public class InstrumentationWrapper extends Instrumentation {
    * @param ai
    */
   public void applyActivityInfo(Activity activity, ActivityInfo ai) {
-    // Apply plugin theme
-    ReflectAccelerator.setTheme(activity, null);
-    activity.setTheme(ai.getThemeResource());
-
     // Apply window attributes
     Window window = activity.getWindow();
     window.setSoftInputMode(ai.softInputMode);
     activity.setRequestedOrientation(ai.screenOrientation);
-  }
-
-  /**
-   * Try to get plugin resource, if failed, add plugin asset path
-   * @param activity
-   */
-  public void ensureAddAssetPath(Activity activity) {
-    Context appBase = activity.getApplication().getBaseContext();
-    Resources appRes = appBase.getResources();
-    Resources activityRes = activity.getResources();
-    if (appRes instanceof ResourcesMerger) {
-      // Synchronize resources from application
-      if (!activityRes.equals(appRes)) ReflectAccelerator.setResources(activity, appRes);
-    } else {
-      // Replace resources for application and activity
-      ResourcesMerger rm = ResourcesMerger.merge(activity.getBaseContext(), apkBundleLauncher);
-      ReflectAccelerator.setResources(activity.getApplication(), rm);
-      ReflectAccelerator.setResources(activity, rm);
-    }
   }
 
   @Override
@@ -159,24 +118,6 @@ public class InstrumentationWrapper extends Instrumentation {
     intent.addCategory(REDIRECT_FLAG + realClazz);
     String stubClazz = dequeueStubActivity(ai, realClazz);
     intent.setComponent(new ComponentName(Small.hostApplication(), stubClazz));
-  }
-
-  private String unwrapIntent(Intent intent, String className) {
-    Set<String> categories = intent.getCategories();
-    if (categories == null) return className;
-
-    // Get plugin activity class name from categories
-    Iterator<String> it = categories.iterator();
-    String realClazz = null;
-    while (it.hasNext()) {
-      String category = it.next();
-      if (category.charAt(0) == REDIRECT_FLAG) {
-        realClazz = category.substring(1);
-        break;
-      }
-    }
-    if (realClazz == null) return className;
-    return realClazz;
   }
 
   private String resolveActivity(Intent intent) {
@@ -262,28 +203,6 @@ public class InstrumentationWrapper extends Instrumentation {
         mStubQueue[i + offset] = null;
         break;
       }
-    }
-  }
-
-  private static class ResourcesMerger extends Resources {
-    public ResourcesMerger(AssetManager assets,
-        DisplayMetrics metrics, Configuration config) {
-      super(assets, metrics, config);
-    }
-
-    public static ResourcesMerger merge(Context context, ApkBundleLauncher apkBundleLauncher) {
-      AssetManager assets = ReflectAccelerator.newAssetManager();
-
-      // Add plugin asset paths
-      for (LoadedApk apk : apkBundleLauncher.loadedApks().values()){
-        ReflectAccelerator.addAssetPath(assets, apk.assetPath);
-      }
-      // Add host asset path
-      ReflectAccelerator.addAssetPath(assets, context.getPackageResourcePath());
-
-      Resources base = context.getResources();
-      return new ResourcesMerger(assets,
-          base.getDisplayMetrics(), base.getConfiguration());
     }
   }
 }

@@ -26,6 +26,6 @@ public final class FileManager {
   }
 
   public static String libDir() {
-    return Small.hostApplication().getFilesDir().getParent() + File.separator + "lib";
+    return Small.hostApplication().getApplicationInfo().nativeLibraryDir;
   }
 }

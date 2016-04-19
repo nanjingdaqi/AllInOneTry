@@ -24,7 +24,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
+import android.os.Handler;
 import android.text.TextUtils;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,47 +38,80 @@ import net.wequick.small.util.ReflectAccelerator;
 
 public class ApkBundleLauncher {
 
+    public static final char REDIRECT_FLAG = '>';
+
     private Map<String, LoadedApk> loadedApks = new HashMap<>();
     private Map<String, ActivityInfo> loadedActivities = new HashMap<>();
     private Map<String, List<IntentFilter>> loadedIntentFilters = new HashMap<>();
 
     private Instrumentation hostInstrumentation;
-    private InstrumentationWrapper instrumentationWrapper;
 
-    public void setup(Context context) throws LauncherSetupException {
+    private ApkBundleLauncher() {
+    }
+
+    public static ApkBundleLauncher setup(Context context) throws LauncherSetupException {
+        ApkBundleLauncher apkBundleLauncher;
         try {
-            hostInstrumentation = ReflectAccelerator.hostInstrumentation();
-            instrumentationWrapper = new InstrumentationWrapper(this);
-            ReflectAccelerator.hookInstrumentation(instrumentationWrapper, context);
+            apkBundleLauncher = new ApkBundleLauncher();
+            apkBundleLauncher.hook(context);
         } catch (Exception e) {
           throw new LauncherSetupException("fail to setup launcher", e);
         }
+        return apkBundleLauncher;
     }
 
-    public void initBundle(BundleParser parser, LoadedApk loadedApk)
+    private void hook(Context context)
+        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException,
+        NoSuchFieldException, ClassNotFoundException {
+        final Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+        final Method method = activityThreadClass.getMethod("currentActivityThread");
+        Object thread = method.invoke(null, (Object[]) null);
+        Field field = activityThreadClass.getDeclaredField("mInstrumentation");
+        field.setAccessible(true);
+        hostInstrumentation = (Instrumentation) field.get(thread);
+        Instrumentation wrapper = new InstrumentationWrapper(this);
+        field.set(thread, wrapper);
+
+        field = activityThreadClass.getDeclaredField("mH");
+        field.setAccessible(true);
+        Handler ah = (Handler) field.get(thread);
+        field = Handler.class.getDeclaredField("mCallback");
+        field.setAccessible(true);
+        field.set(ah, new ActivityThreadHandlerCallback(this));
+    }
+
+    public void registerBundle(BundleParser parser, LoadedApk loadedApk)
         throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        storeActivities(parser.getPackageInfo());
-        storeIntentFilters(parser);
-        storeApk(parser.getPackageInfo().packageName, loadedApk);
+        registerActivities(parser.getPackageInfo());
+        registerIntentFilters(parser);
+        registerApk(parser.getPackageInfo().packageName, loadedApk);
 
         String bundleApplicationName = parser.getPackageInfo().applicationInfo.className;
         if (!TextUtils.isEmpty(bundleApplicationName)) {
             createApplication(bundleApplicationName);
         }
+
+        // Merge all the resources in bundles and replace the host one
+        Application app = Small.hostApplication();
+        ResourcesMerger rm = ResourcesMerger.merge(app.getBaseContext(), this);
+        ReflectAccelerator.setResources(app, rm);
     }
 
-    private void storeActivities(PackageInfo pluginInfo) {
+    private void registerActivities(PackageInfo pluginInfo) {
         // Record activities for intent redirection
+        if (pluginInfo.activities == null) {
+            return;
+        }
         for (ActivityInfo ai : pluginInfo.activities) {
             loadedActivities.put(ai.name, ai);
         }
     }
 
-    private void storeApk(String packageName, LoadedApk loadedApk) {
+    private void registerApk(String packageName, LoadedApk loadedApk) {
         loadedApks.put(packageName, loadedApk);
     }
 
-    private void storeIntentFilters(BundleParser parser) {
+    private void registerIntentFilters(BundleParser parser) {
         // Record intent-filters for implicit action
         ConcurrentHashMap<String, List<IntentFilter>> filters = parser.getIntentFilters();
         if (filters != null) {
@@ -106,35 +143,6 @@ public class ApkBundleLauncher {
     public Map<String, List<IntentFilter>> loadedIntentFilters() {
         return loadedIntentFilters;
     }
-
-    //
-    ///** Incubating */
-    //private void unloadBundle(String packageName) {
-    //    if (loadedApks == null) return;
-    //    LoadedApk apk = loadedApks.get(packageName);
-    //    if (apk == null) return;
-    //
-    //    if (loadedActivities != null && apk.activities != null) {
-    //        for (ActivityInfo ai : apk.activities) {
-    //            loadedActivities.remove(ai.name);
-    //        }
-    //    }
-    //    loadedApks.remove(packageName);
-    //
-    //    // Remove asset path from application (Reset resources merger)
-    //    Context appContext = ((ContextWrapper) Small.hostApplication()).getBaseContext();
-    //    ResourcesMerger rm = ResourcesMerger.merge(appContext);
-    //    ReflectAccelerator.setResources(appContext, rm);
-    //    // TODO: Remove asset path from launching activities
-    //
-    //    // Remove dexElement from ClassLoader?
-    //    for (LoadedApk a : loadedApks.values()) {
-    //        if (a.dexElementIndex > apk.dexElementIndex) a.dexElementIndex--;
-    //    }
-    //    ReflectAccelerator.removeDexPathList(
-    //            appContext.getClassLoader(), apk.dexElementIndex);
-    //    if (apk.dexFile.exists()) apk.dexFile.delete();
-    //}
 
     public void launchActivity(Class target, Intent intent, Context context) {
         intent.setComponent(new ComponentName(context, target));
