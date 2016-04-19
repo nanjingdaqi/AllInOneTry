@@ -1,6 +1,9 @@
 package net.wequick.example.small.app.mine;
 
+import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -27,6 +30,14 @@ public class MainActivity extends AppCompatActivity {
 
       }
     });
+
+    ApplicationInfo appInfo = getApplicationInfo();
+    Log.e("app.mine", "app info: " + appInfo);
+    Application app = getApplication();
+    Log.e("app.mine", "app: " + app);
+    Context ctx = getApplicationContext();
+    Log.e("app.mine", "app ctx: " + ctx);
+
 
     findViewById(R.id.upgrade).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
