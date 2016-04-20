@@ -29,11 +29,11 @@ android {
   }
 
   signingConfigs {
-    release {
+    debug {
       storeFile file("./doc/debug.keystore")
-      storePassword "5mall@ndro!d"
-      keyAlias "small"
-      keyPassword "5mall@ndro!d"
+      keyAlias 'androiddebugkey'
+      keyPassword 'android'
+      storePassword 'android'
     }
   }
 }

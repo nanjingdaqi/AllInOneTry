@@ -104,16 +104,14 @@ public final class FileUtils {
     }
 
 
-    public static void ensureDir(String dirPath) {
-        File file = new File(dirPath);
-        if (!file.exists()) {
-            file.mkdirs();
+    public static void ensureDir(File dir) {
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
     }
 
-    public static void ensureFile(String filePath) {
+    public static void ensureFile(File file) {
         try {
-            File file = new File(filePath);
             if (!file.exists()) {
                 if (!file.getParentFile().exists()) {
                     file.getParentFile().mkdirs();
@@ -123,6 +121,15 @@ public final class FileUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String readFile(File file) throws IOException {
+        FileInputStream is = new FileInputStream(file);
+        byte[] buffer = new byte[is.available()];
+        is.read(buffer);
+        is.close();
+        String str = new String(buffer);
+        return str;
     }
 
     public static void copyAsset(String srcFileName, File dest) {
