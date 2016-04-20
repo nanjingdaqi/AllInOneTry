@@ -35,11 +35,35 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.start_btn).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         Intent intent = new Intent();
+        intent.putExtra(Small.KEY_ACTIVITY_URI, "main");
+        Small.launchBundleActivity(intent, MainActivity.this);
+      }
+    });
+
+
+    findViewById(R.id.start_btn2).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        Intent intent = new Intent();
+        intent.putExtra(Small.KEY_ACTIVITY_URI, "home");
+        Small.launchBundleActivity(intent, MainActivity.this);
+      }
+    });
+
+    findViewById(R.id.mine).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        Intent intent = new Intent();
         intent.putExtra(Small.KEY_ACTIVITY_URI, "mine");
         Small.launchBundleActivity(intent, MainActivity.this);
       }
     });
 
+    findViewById(R.id.detail).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        Intent intent = new Intent();
+        intent.putExtra(Small.KEY_ACTIVITY_URI, "detail");
+        Small.launchBundleActivity(intent, MainActivity.this);
+      }
+    });
     //findViewById(R.id.start_btn2).setOnClickListener(new View.OnClickListener() {
     //  @Override public void onClick(View v) {
     //    startUpgrade();
