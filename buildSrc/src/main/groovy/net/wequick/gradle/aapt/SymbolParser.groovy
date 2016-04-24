@@ -101,4 +101,20 @@ public final class SymbolParser {
         }
         return es
     }
+
+    public static def logEntry(e) {
+      println "${e.getKey()}"
+    }
+
+    public static def logEntries(Map es) {
+        es.each {
+            logEntry(it)
+        }
+    }
+
+    public static def logEntries(List es) {
+        es.each {
+            println "${it.type}/${it.key}"
+        }
+    }
 }

@@ -1,2 +1,4 @@
 include ':app'
+include ':small'
 include ':lib.style'
+include ':app.b1'

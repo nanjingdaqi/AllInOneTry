@@ -18,7 +18,6 @@ package net.wequick.gradle
 import groovy.io.FileType
 import net.wequick.gradle.aapt.Aapt
 import net.wequick.gradle.aapt.SymbolParser
-import net.wequick.gradle.util.DependenciesUtils
 import net.wequick.gradle.util.JNIUtils
 import org.gradle.api.Project
 
@@ -29,6 +28,7 @@ class AppPlugin extends BundlePlugin {
     private static final int UNSET_ENTRYID = -1
 
     protected def compileLibs
+    protected def generatedRFile;
 
     void apply(Project project) {
         super.apply(project)
@@ -125,6 +125,9 @@ class AppPlugin extends BundlePlugin {
         def appcompat = compile.dependencies.find {
             it.group.equals('com.android.support') && it.name.startsWith('appcompat')
         }
+        compile.dependencies.each {
+            println it.name
+        }
         if (appcompat == null) {
             // Pre-split classes and resources.
             project.rootProject.small.preApDir.listFiles().each {
@@ -148,6 +151,13 @@ class AppPlugin extends BundlePlugin {
         def newDexTaskName = 'transformClassesWithDexFor' + variantName
         def dexTask = project.hasProperty(newDexTaskName) ? project.tasks[newDexTaskName] : variant.dex
         File mergerDir = variant.mergeResources.incrementalFolder
+
+        // Remove unused R.java to fix the reference of shared library resource, issue #63
+        File preLinkAarDir = project.rootProject.small.preLinkAarDir
+        def generatedRFileName = "R_java.txt";
+        if (!preLinkAarDir.exists()) preLinkAarDir.mkdirs()
+        generatedRFile = new File(preLinkAarDir, generatedRFileName);
+        if (!generatedRFile.exists()) generatedRFile.createNewFile();
 
         small.with {
             javac = variant.javaCompile
@@ -226,7 +236,9 @@ class AppPlugin extends BundlePlugin {
 
         // Prepare id maps (bundle resource id -> library resource id)
         def libEntries = [:]
+        println 'ready to parse files'
         rootExt.preIdsDir.listFiles().each {
+            println "parsing file: ${it.name}"
             if (it.name.endsWith('R.txt') && !it.name.startsWith(project.name)) {
                 libEntries += SymbolParser.getResourceEntries(it)
             }
@@ -240,6 +252,11 @@ class AppPlugin extends BundlePlugin {
         def retainedStyleables = []
         def reservedKeys = getReservedResourceKeys()
         def overwriteKeys = []
+
+        println 'public symbol file: ' + small.publicSymbolFile.getAbsolutePath()
+        println 'dump public entries size: ' + publicEntries.size()
+        println 'dump bundle entries size: ' + bundleEntries.size()
+        SymbolParser.logEntries(bundleEntries)
 
         bundleEntries.each { k, Map be ->
             be._typeId = UNSET_TYPEID // for sort
@@ -257,12 +274,14 @@ class AppPlugin extends BundlePlugin {
 
             le = libEntries.get(k)
             def hasDeclaredInLib = (le != null)
+            // 处理自己定义的资源
             if (reservedKeys.contains(k)) {
                 be.isStyleable ? retainedStyleables.add(be) : retainedEntries.add(be)
                 if (hasDeclaredInLib) overwriteKeys.add(k)
                 return
             }
 
+            // 处理第三方依赖的
             if (hasDeclaredInLib) {
                 // Add static id maps to host or library resources and map it later at
                 // compile-time with the aapt-generated `resources.arsc' and `R.java' file
@@ -278,6 +297,12 @@ class AppPlugin extends BundlePlugin {
 //            }
             be.isStyleable ? retainedStyleables.add(be) : retainedEntries.add(be)
         }
+
+        println 'dump lib entries size: ' + libEntries.size()
+        SymbolParser.logEntries(libEntries)
+        println 'dump static id maps size: ' + staticIdMaps.size()
+        println 'dump retainedEntries size: ' + retainedEntries.size()
+        SymbolParser.logEntries(retainedEntries)
 
         // TODO: retain deleted public entries
         if (publicEntries.size() > 0) {
@@ -334,6 +359,8 @@ class AppPlugin extends BundlePlugin {
         retainedEntries.sort { a, b ->
             a.typeId <=> b.typeId ?: a.entryId <=> b.entryId
         }
+
+        println "retainedEntries size: ${retainedEntries.size()}"
 
         // Reassign resource type id (_typeId) and entry id (_entryId)
         def lastEntryIds = [:]
@@ -567,7 +594,7 @@ class AppPlugin extends BundlePlugin {
             // Modify assets
             prepareSplit()
             File symbolFile = (small.type == PluginType.Library) ?
-                    new File(it.textSymbolOutputDir, 'R.txt') : null
+                new File(it.textSymbolOutputDir, 'R.txt') : null
             File sourceOutputDir = it.sourceOutputDir
             File rJavaFile = new File(sourceOutputDir, "${small.packagePath}/R.java")
             def rev = project.android.buildToolsRevision
@@ -577,21 +604,26 @@ class AppPlugin extends BundlePlugin {
                 Log.success "[${project.name}] split library res files..."
 
                 aapt.filterPackage(small.retainedTypes, small.packageId, small.idMaps,
-                        small.retainedStyleables)
+                    small.retainedStyleables)
 
                 String pkg = small.packageName
                 if (small.allTypes == null) {
                     // Overwrite the aapt-generated R.java with split edition
                     aapt.generateRJava(small.rJavaFile, pkg,
-                            small.retainedTypes, small.retainedStyleables)
+                        small.retainedTypes, small.retainedStyleables)
                 } else {
                     // Overwrite the aapt-generated R.java with full edition
                     aapt.generateRJava(small.rJavaFile, pkg, small.allTypes, small.allStyleables)
 
                     // Also generate a split edition for later re-compiling
                     aapt.generateRJava(small.splitRJavaFile, pkg,
-                            small.retainedTypes, small.retainedStyleables)
+                        small.retainedTypes, small.retainedStyleables)
                 }
+
+                def fPW = new PrintWriter(generatedRFile.newWriter(true))
+                fPW.println pkg
+                fPW.flush()
+                fPW.close()
 
                 Log.success "[${project.name}] slice asset package and reset package id..."
             } else {
@@ -599,16 +631,37 @@ class AppPlugin extends BundlePlugin {
                 Log.success "[${project.name}] reset resource package id..."
             }
 
-            // Remove unused R.java to fix the reference of shared library resource, issue #63
+
             sourceOutputDir.eachFileRecurse(FileType.FILES) { file ->
                 if (file != rJavaFile) {
+                    def i = file.absolutePath.indexOf('R.java')
+                    def pkg2 = file.absolutePath.substring(sourceOutputDir.absolutePath.length() + 1, i - 1).replace('/', '.')
+                    println 'pkg: ' + pkg2
+                    def found = false;
+                    generatedRFile.eachLine {
+                        println 'dump R_java.txt: ' + '_' + it + '_'
+                        if (it.equals(pkg2)) {
+                            // has already generate the R.java in other project
+                            println 'the R has already generated'
+                            found = true;
+                            return;
+                        }
+                    }
                     file.delete()
+                    if (!found) {
+                        println 'generating R for: ' + pkg2
+                        aapt.generateRJava(file, pkg2, small.retainedTypes, small.retainedStyleables)
+                        def fPW = new PrintWriter(generatedRFile.newWriter(true))
+                        fPW.println pkg2
+                        fPW.flush()
+                        fPW.close()
+                    }
                 }
-            }
-            Log.success "[${project.name}] split library R.java files..."
+                Log.success "[${project.name}] split library R.java files..."
 
-            // Repack resources.ap_
-            project.ant.zip(baseDir: unzipApDir, destFile: apFile)
+                // Repack resources.ap_
+                project.ant.zip(baseDir: unzipApDir, destFile: apFile)
+            }
         }
 
         // Hook javac task to split libraries' R.class
@@ -618,17 +671,18 @@ class AppPlugin extends BundlePlugin {
             File classesDir = it.destinationDir
             File dstDir = new File(classesDir, small.packagePath)
 
+            // delete the original generated R$xx.class
+            dstDir.listFiles().each { f ->
+                if (f.name.startsWith('R$')) {
+                    println 'deleting file: ' + f.absolutePath
+                    f.delete()
+                }
+            }
             // Re-compile the split R.java to R.class
             project.ant.javac(srcdir: small.splitRJavaFile.parentFile,
                     source: it.sourceCompatibility,
                     target: it.targetCompatibility,
                     destdir: classesDir)
-            // Also needs to delete the original generated R$xx.class
-            dstDir.listFiles().each { f ->
-                if (f.name.startsWith('R$')) {
-                    f.delete()
-                }
-            }
 
             Log.success "[${project.name}] re-generate(slice) R.class..."
         }

@@ -3,7 +3,5 @@ int color colorAccent 0x79030000
 int color colorLight 0x79030001
 int color colorPrimary 0x79030002
 int color colorPrimaryDark 0x79030003
-int dimen activity_horizontal_margin 0x79040000
-int dimen activity_vertical_margin 0x79040001
 int dimen fab_margin 0x79040002
 int string lib_str 0x79050000

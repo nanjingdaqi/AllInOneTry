@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <attr name="attr_foo" format="dimension"/>
+
+  <declare-styleable name="styleable_bar">
+    <attr name="attr_bar" format="dimension"/>
+  </declare-styleable>
+</resources>

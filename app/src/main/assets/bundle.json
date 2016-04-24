@@ -1,0 +1,14 @@
+{
+  "version_name": "1.0.0",
+  "version_code": 1,
+  "bundles": [
+    {
+      "uri": "lib.style",
+      "pkg": "com.example.mysmall.lib.style"
+    },
+    {
+      "uri": "app.b1",
+      "pkg": "app.b1"
+    }
+  ]
+}
