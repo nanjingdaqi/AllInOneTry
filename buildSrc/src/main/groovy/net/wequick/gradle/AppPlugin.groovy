@@ -631,7 +631,6 @@ class AppPlugin extends BundlePlugin {
                 Log.success "[${project.name}] reset resource package id..."
             }
 
-
             sourceOutputDir.eachFileRecurse(FileType.FILES) { file ->
                 if (file != rJavaFile) {
                     def i = file.absolutePath.indexOf('R.java')
@@ -650,7 +649,11 @@ class AppPlugin extends BundlePlugin {
                     file.delete()
                     if (!found) {
                         println 'generating R for: ' + pkg2
-                        aapt.generateRJava(file, pkg2, small.retainedTypes, small.retainedStyleables)
+                        if (small.allTypes == null) {
+                            aapt.generateRJava(file, pkg2, small.retainedTypes, small.retainedStyleables)
+                        } else {
+                            aapt.generateRJava(file, pkg2, small.allTypes, small.allStyleables)
+                        }
                         def fPW = new PrintWriter(generatedRFile.newWriter(true))
                         fPW.println pkg2
                         fPW.flush()

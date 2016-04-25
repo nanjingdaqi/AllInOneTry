@@ -1,3 +1,0 @@
-com.example.mysmall.lib.style
-app.b1
-com.github.mmin18.flexlayout
