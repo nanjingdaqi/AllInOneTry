@@ -5,6 +5,10 @@ repositories {
 }
 
 android {
+  dataBinding {
+    enabled = true
+  }
+
   compileSdkVersion 23
   buildToolsVersion '23.0.2'
 

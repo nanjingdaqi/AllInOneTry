@@ -4,19 +4,22 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+import net.wequick.example.small.app.mine.databinding.ActivityMineMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_mine_main);
+    ActivityMineMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_mine_main);
+    //setContentView(R.layout.activity_mine_main);
 
     handleToolbar();
 
