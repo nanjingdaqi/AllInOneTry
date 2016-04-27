@@ -32,10 +32,17 @@ public final class DependenciesUtils {
             return null
         }
 
+        def depSet = configuration.dependencies
+        depSet.each {
+            println 'dep name: ' + it.name + ', ' + it.group + ', ' + it.version
+        }
+
         ResolvedConfiguration resolvedConfiguration = configuration.resolvedConfiguration
         def firstLevelDependencies = resolvedConfiguration.firstLevelModuleDependencies
+        println 'first level size: ' + firstLevelDependencies.size()
         def allDependencies = []
         firstLevelDependencies.findAll { it.parents[0].configuration == config }.each {
+            println 'node name: ' + it.name
             collectDependencies(it, allDependencies)
         }
         return allDependencies
