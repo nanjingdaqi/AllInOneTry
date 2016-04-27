@@ -18,7 +18,9 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    ActivityMineMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_mine_main);
+    ActivityMineMainBinding binding = ActivityMineMainBinding.inflate(getLayoutInflater());
+    binding.setVm(new VM());
+    setContentView(binding.getRoot());
     //setContentView(R.layout.activity_mine_main);
 
     handleToolbar();

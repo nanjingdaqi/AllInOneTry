@@ -23,6 +23,8 @@ import okio.BufferedSource;
 import okio.Okio;
 import okio.Source;
 import org.peace.allinone.R;
+import org.peace.allinone.VM;
+import org.peace.allinone.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +35,9 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     //setContentView(R.layout.activity_main);
 
-    DataBindingUtil.setContentView(this, R.layout.activity_main);
+    ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+    binding.setVm(new VM());
+
 
     findViewById(R.id.start_btn).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
