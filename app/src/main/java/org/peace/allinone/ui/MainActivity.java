@@ -5,6 +5,7 @@ import android.app.Application;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -27,18 +28,16 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    ValueAnimator anim = ValueAnimator.ofInt(0, 100);
+    ValueAnimator anim = ValueAnimator.ofInt(0, 1000);
     anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override public void onAnimationUpdate(ValueAnimator animation) {
         int val = (int) animation.getAnimatedValue();
-        int dy = val - offset;
-        AppLogger.e("dy: " + dy);
-        myView.offsetTopAndBottom(dy);
-        offset = val;
-        myView.requestLayout();
+        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) myView.getLayoutParams();
+        lp.bottomMargin = -val;
+        myView.setLayoutParams(lp);
       }
     });
-    anim.setDuration(2000).start();
+    anim.setDuration(10000).start();
   }
 
   static class Task implements Runnable {

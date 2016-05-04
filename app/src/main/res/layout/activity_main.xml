@@ -36,4 +36,12 @@
       android:layout_height="200dp"
       android:background="@android:color/holo_red_light"
       />
+
+  <FrameLayout
+      android:id="@+id/make_order_container"
+      android:layout_width="match_parent"
+      android:layout_height="100dp"
+      android:layout_gravity="bottom"
+      android:background="@android:color/holo_green_light"
+      />
 </LinearLayout>
