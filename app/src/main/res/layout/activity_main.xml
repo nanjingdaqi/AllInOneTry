@@ -36,5 +36,4 @@
       android:layout_height="200dp"
       android:background="@android:color/holo_red_light"
       />
-
 </LinearLayout>
