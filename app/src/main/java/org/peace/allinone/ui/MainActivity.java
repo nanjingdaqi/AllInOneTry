@@ -1,8 +1,7 @@
 package org.peace.allinone.ui;
 
-import android.content.res.Resources;
+import android.animation.ValueAnimator;
 import android.os.Bundle;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +13,9 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
+  @InjectView(R.id.start_btn) Button mStartBtn;
+  @InjectView(R.id.my_view) View myView;
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -22,22 +24,15 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    int id = v.getId();
-    if (id == R.id.start_btn) {
-      new Thread(new Runnable() {
-        @Override public void run() {
-          AppLogger.e("post t: " + System.currentTimeMillis());
-          for (int i = 0; i < 10; i++) {
-            ViewCompat.postOnAnimation(mStartBtn, new Task());
-            try {
-              Thread.sleep(18);
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
-          }
-        }
-      }).start();
-    }
+    ValueAnimator anim = ValueAnimator.ofFloat(0, 100);
+    anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+      @Override public void onAnimationUpdate(ValueAnimator animation) {
+        float val = (float) animation.getAnimatedValue();
+        myView.setTranslationY(val);
+        myView.requestLayout();
+      }
+    });
+    anim.setDuration(2000).start();
   }
 
   static class Task implements Runnable {

@@ -21,6 +21,6 @@ public class MyView extends View {
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-    AppLogger.e(new Exception("onMeasure"));
+    //AppLogger.e(new Exception("onMeasure"));
   }
 }
