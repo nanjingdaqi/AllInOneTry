@@ -18,7 +18,8 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    ActivityMineMainBinding binding = ActivityMineMainBinding.inflate(getLayoutInflater());
+    //ActivityMineMainBinding binding = ActivityMineMainBinding.inflate(getLayoutInflater());
+    ActivityMineMainBinding binding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.activity_mine_main, null, false);
     binding.setVm(new VM());
     setContentView(binding.getRoot());
     //setContentView(R.layout.activity_mine_main);
