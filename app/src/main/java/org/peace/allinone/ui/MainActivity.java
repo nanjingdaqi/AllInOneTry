@@ -13,7 +13,7 @@ import org.peace.allinone.R;
 public class MainActivity extends AppCompatActivity {
 
   @InjectView(R.id.start_btn) Button mStartBtn;
-  @InjectView(R.id.sub_tv) TextView subTV;
+  //@InjectView(R.id.sub_tv) TextView subTV;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     int id = v.getId();
     if (id == R.id.start_btn) {
-      subTV.setText("new text");
+      //subTV.setText("new text");
     }
   }
 }
