@@ -17,4 +17,25 @@
       android:layout_height="wrap_content"
       />
 
+  <org.peace.allinone.ui.MyView
+      android:layout_width="match_parent"
+      android:layout_height="100dp"
+      android:background="@android:color/white"
+      ></org.peace.allinone.ui.MyView>
+
+  <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="40dp"
+      >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:src="@drawable/tile"
+        android:layout_gravity="bottom"
+        />
+
+  </FrameLayout>
+
 </LinearLayout>
