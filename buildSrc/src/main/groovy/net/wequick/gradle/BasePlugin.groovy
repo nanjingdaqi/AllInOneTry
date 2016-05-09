@@ -111,7 +111,7 @@ public abstract class BasePlugin implements Plugin<Project> {
 
     }
 
-    public final class Log {
+    public static final class Log {
 
         protected static StyledTextOutput out
 
