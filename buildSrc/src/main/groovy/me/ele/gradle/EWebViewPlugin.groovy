@@ -13,7 +13,8 @@ public class EWebViewPlugin implements Plugin<Project> {
 
   @Override
   void apply(Project project) {
-    boolean smallApplied = project.plugins.findPlugin('small') != null
+    boolean smallApplied = project.rootProject.plugins.findPlugin('net.wequick.small') != null
+    println 'small applied: ' + smallApplied
     if (project.plugins.findPlugin('com.android.application')) {
       hookAppProject(project, smallApplied)
       if (smallApplied && project.name.equals("app")) {
@@ -44,6 +45,7 @@ public class EWebViewPlugin implements Plugin<Project> {
           }
         }
 
+        // in small project, db information will be collected and compiled at app aR step
         if (smallApplied) {
           return;
         }

@@ -45,9 +45,19 @@ public class Utils {
   }
 
   public static void updateAppDBFile(File appDBFile, List libDBFiles) {
-    collectSimpleContents(appDBFile)
-    collectImportContents(appDBFile, libDBFiles)
-    collectEntryInsert(appDBFile, libDBFiles)
+    List<File> dbFiles = new LinkedList<>()
+    if (appDBFile != null) {
+      dbFiles.add(appDBFile)
+    }
+    if (libDBFiles.size() != 0) {
+      dbFiles.addAll(libDBFiles)
+    }
+    if (dbFiles.size() == 0) {
+      return
+    }
+    collectSimpleContents(dbFiles.get(0))
+    collectImportContents(dbFiles)
+    collectEntryInsert(dbFiles)
 
     appDBFile.delete()
     appDBFile.createNewFile()
@@ -75,7 +85,7 @@ public class Utils {
     pw.close()
   }
 
-  private static void collectSimpleContents(File appDBFile) {
+  private static void collectSimpleContents(File dbFile) {
     Pattern p0 = Pattern.compile('''^package .*''')
     Pattern p1 = Pattern.compile('''public class EWebView\\$\\$Database implements Database.*''')
     Pattern p2 = Pattern.compile(''' +@Override *''')
@@ -86,7 +96,7 @@ public class Utils {
     Pattern p5 = Pattern.compile(''' +return classes;.*''')
     Pattern p6 = Pattern.compile(''' +}''')
     Pattern p7 = Pattern.compile('''}''')
-    appDBFile.eachLine { line ->
+    dbFile.eachLine { line ->
       if (p0.matcher(line).matches()) {
         pkg = line
       } else if (p1.matcher(line).matches()) {
@@ -107,16 +117,10 @@ public class Utils {
     }
   }
 
-  private static void collectImportContents(File appDBFile, List libDBFiles) {
+  private static void collectImportContents(List dbFiles) {
     imports = new LinkedHashSet<>()
     Pattern p = Pattern.compile('''^import .*''')
-    appDBFile.eachLine { line ->
-      if (p.matcher(line).matches()) {
-        imports.add(line)
-      }
-    }
-
-    libDBFiles.each { File dbFile ->
+    dbFiles.each { File dbFile ->
       dbFile.eachLine { line ->
         if (p.matcher(line).matches()) {
           imports.add(line)
@@ -125,16 +129,10 @@ public class Utils {
     }
   }
 
-  private static void collectEntryInsert(File appDbFile, List libDBFiles) {
+  private static void collectEntryInsert(List dbFiles) {
     entryInsert = new LinkedHashSet<>()
     Pattern p = Pattern.compile(''' +classes.put\\(.*''')
-    appDbFile.eachLine { line ->
-      if (p.matcher(line).matches()) {
-        entryInsert.add(line)
-      }
-    }
-
-    libDBFiles.each { File dbFile ->
+    dbFiles.each { File dbFile ->
       dbFile.eachLine { line ->
         if (p.matcher(line).matches()) {
           entryInsert.add(line)

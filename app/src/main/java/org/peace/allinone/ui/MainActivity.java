@@ -12,6 +12,8 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import me.ele.webview.scheme.SchemeDispatcher;
+import me.ele.webview.scheme.SchemeHandler;
 import net.wequick.small.Small;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -58,9 +60,11 @@ public class MainActivity extends AppCompatActivity {
 
     findViewById(R.id.mine).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        Intent intent = new Intent();
-        intent.putExtra(Small.KEY_ACTIVITY_URI, "mine");
-        Small.launchBundleActivity(intent, MainActivity.this);
+        //Intent intent = new Intent();
+        //intent.putExtra(Small.KEY_ACTIVITY_URI, "mine");
+        //Small.launchBundleActivity(intent, MainActivity.this);
+
+        SchemeDispatcher.getInstance().dispatch(MainActivity.this, "mine://test");
       }
     });
 
