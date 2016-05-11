@@ -12,6 +12,7 @@ buildscript {
     classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
     classpath 'me.ele:eradle:1.5.2'
     classpath 'net.wequick.tools.build:gradle-small:0.4.1'
+    classpath 'me.ele:ewebview-gradle:0.0.1-SNAPSHOT'
   }
 }
 

@@ -24,7 +24,7 @@ import org.gradle.api.artifacts.UnknownConfigurationException
 /** Class to resolve project dependencies */
 public final class DependenciesUtils {
 
-    public static List getAllDependencies(Project project, String config) {
+    public static Set<ResolvedDependency> getAllDependencies(Project project, String config) {
         Configuration configuration
         try {
             configuration = project.configurations[config]
@@ -32,23 +32,16 @@ public final class DependenciesUtils {
             return null
         }
 
-        def depSet = configuration.dependencies
-        depSet.each {
-            println 'dep name: ' + it.name + ', ' + it.group + ', ' + it.version
-        }
-
         ResolvedConfiguration resolvedConfiguration = configuration.resolvedConfiguration
         def firstLevelDependencies = resolvedConfiguration.firstLevelModuleDependencies
-        println 'first level size: ' + firstLevelDependencies.size()
-        def allDependencies = []
+        Set<ResolvedDependency> allDependencies = new HashSet<>()
         firstLevelDependencies.findAll { it.parents[0].configuration == config }.each {
-            println 'node name: ' + it.name
             collectDependencies(it, allDependencies)
         }
         return allDependencies
     }
 
-    private static def collectDependencies(ResolvedDependency node, List out) {
+    private static void collectDependencies(ResolvedDependency node, Set<ResolvedDependency> out) {
         if (out.find { addedNode -> addedNode.name == node.name } == null) {
             out.add(node)
         }

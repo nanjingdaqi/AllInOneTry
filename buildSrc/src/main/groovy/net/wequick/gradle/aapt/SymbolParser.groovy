@@ -79,7 +79,7 @@ public final class SymbolParser {
         }
 
         int typeId = Integer.parseInt(idStr.substring(4, 6), 16)
-        int entryId = Integer.parseInt(idStr.substring(7), 16)
+        int entryId = Integer.parseInt(idStr.substring(6), 16)
         int id = Integer.decode(idStr)
         return [vtype: vtype, type: type, key: key,
                 typeId: typeId, entryId: entryId, idStr: idStr, id: id, isStyleable: false]
@@ -100,5 +100,26 @@ public final class SymbolParser {
             es.put("${entry.type}/${entry.key}", entry)
         }
         return es
+    }
+
+    public static void collectResourceKeys(File file, List outEntries, List outStyleableKeys) {
+        if (!file.exists()) return
+
+        file.eachLine { str ->
+            if (str == '') return
+
+            def i = str.indexOf(' ')
+            str = str.substring(i + 1)
+            i = str.indexOf(' ')
+            def type = str.substring(0, i)
+            str = str.substring(i + 1)
+            i = str.indexOf(' ')
+            def name = str.substring(0, i)
+            if (type == 'styleable') {
+                outStyleableKeys.add(name)
+            } else {
+                outEntries.add(type: type, name: name, key: "$type/$name")
+            }
+        }
     }
 }
