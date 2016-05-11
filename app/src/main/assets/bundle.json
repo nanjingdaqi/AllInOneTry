@@ -10,8 +10,8 @@
       }
     },
     {
-      "uri": "lib.style",
-      "pkg": "com.example.mysmall.lib.style"
+      "uri": "lib.base",
+      "pkg": "com.example.mysmall.lib.base"
     }
   ]
 }

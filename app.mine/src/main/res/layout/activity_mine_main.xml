@@ -1,41 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
 
-  <data>
-    <import type="net.wequick.example.small.app.mine.VM"/>
-    <variable
-        name="vm"
-        type="VM"
-        />
-  </data>
+  <include layout="@layout/mine_toolbar"/>
 
-  <LinearLayout
+  <Button
+      android:id="@+id/bundle_start"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:orientation="vertical"
-      >
+      android:layout_height="wrap_content"
+      android:text="Bundle Start"
+      />
 
-    <include layout="@layout/mine_toolbar"/>
+  <Button
+      android:id="@+id/upgrade"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Upgrade"
+      />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@{vm.text}"
-        />
-
-    <Button
-        android:id="@+id/bundle_start"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Bundle Start"
-        />
-
-    <Button
-        android:id="@+id/upgrade"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Upgrade"
-        />
-  </LinearLayout>
-
-</layout>
+  <Button
+      android:id="@+id/aar0"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Invoke Lib AAR"
+      />
+  
+</LinearLayout>

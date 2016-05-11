@@ -6,6 +6,7 @@ buildscript {
     maven {
       url "http://172.16.10.156:8081/nexus/content/groups/mobile"
     }
+    maven { url "https://jitpack.io" }
   }
   dependencies {
     classpath 'com.android.tools.build:gradle:1.5.0'
@@ -30,6 +31,6 @@ apply plugin: 'net.wequick.small'
 
 small {
   aarVersion = '0.6.0'
-//  strictSplitResources = false
+  strictSplitResources = false
 }
 

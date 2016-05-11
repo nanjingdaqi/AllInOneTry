@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -86,9 +87,12 @@ public class ApkBundleLauncher {
         registerIntentFilters(parser);
         registerApk(parser.getPackageInfo().packageName, loadedApk);
 
-        String bundleApplicationName = parser.getPackageInfo().applicationInfo.className;
-        if (!TextUtils.isEmpty(bundleApplicationName)) {
-            createApplication(bundleApplicationName);
+        ApplicationInfo applicationInfo = parser.getPackageInfo().applicationInfo;
+        if (applicationInfo != null) {
+            String bundleApplicationName = applicationInfo.className;
+            if (!TextUtils.isEmpty(bundleApplicationName)) {
+                createApplication(bundleApplicationName);
+            }
         }
 
         // Merge all the resources in bundles and replace the host one

@@ -10,19 +10,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
-import net.wequick.example.small.app.mine.databinding.ActivityMineMainBinding;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
+import net.wequick.example.small.lib.utils.UIUtils;
 
 public class MainActivity extends AppCompatActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    ActivityMineMainBinding binding = ActivityMineMainBinding.inflate(getLayoutInflater());
-    //ActivityMineMainBinding binding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.activity_mine_main, null, false);
-    binding.setVm(new VM());
-    setContentView(binding.getRoot());
-    //setContentView(R.layout.activity_mine_main);
+    setContentView(R.layout.activity_mine_main);
+
+    ButterKnife.inject(this);
 
     handleToolbar();
 
@@ -44,12 +46,15 @@ public class MainActivity extends AppCompatActivity {
     Context ctx = getApplicationContext();
     Log.e("app.mine", "app ctx: " + ctx);
 
-
     findViewById(R.id.upgrade).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         new WeiboApi(getApplication());
       }
     });
+  }
+
+  @OnClick(R.id.aar0) public void onClick() {
+    UIUtils.alert(this, "Called by Mine module");
   }
 
   private void handleToolbar() {
