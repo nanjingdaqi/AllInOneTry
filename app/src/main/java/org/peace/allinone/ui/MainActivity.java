@@ -2,6 +2,7 @@ package org.peace.allinone.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
@@ -18,8 +19,8 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
-  @BindView(R.id.start_btn) Button mStartBtn;
 
+  @BindView(R.id.tab_layout) TabLayout tabLayout;
   @BindView(R.id.view_pager) ViewPager viewPager;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
       }
     };
     viewPager.setAdapter(adapter);
+
+    tabLayout.setupWithViewPager(viewPager);
+    tabLayout.setTabMode(TabLayout.MODE_FIXED);
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
