@@ -1,34 +1,60 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:fitsSystemWindows="true"
-    android:clipToPadding="false"
-    tools:context=".ui.MainActivity"
     >
 
-  <!--android:background="#aadddddd"-->
+  <!--<android.support.design.widget.CoordinatorLayout-->
+      <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+      <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+      <!--android:layout_width="match_parent"-->
+      <!--android:layout_height="match_parent"-->
+      <!--android:fitsSystemWindows="true"-->
+      <!--&gt;-->
 
-  <android.support.v7.widget.Toolbar
-      android:id="@+id/toolbar"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:fitsSystemWindows="true"
-      android:clipToPadding="false"
-      android:minHeight="?attr/actionBarSize"
-      android:background="?colorPrimary"
-      android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-      app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
-      />
+    <!--<android.support.design.widget.AppBarLayout-->
+        <!--android:id="@+id/app_bar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:fitsSystemWindows="true"-->
+        <!--&gt;-->
 
-  <Button
-      android:id="@+id/start_btn"
-      android:layout_width="match_parent"
-      android:layout_height="50dp"
-      android:text="Start"
-      />
-  <!--android:layout_height="?attr/testAttr"/>-->
+      <!--<android.support.design.widget.CollapsingToolbarLayout-->
+          <!--android:id="@+id/collapsing_toolbar_layout"-->
+          <!--android:layout_width="match_parent"-->
+          <!--android:layout_height="wrap_content"-->
+          <!--android:fitsSystemWindows="true"-->
+          <!--app:contentScrim="#00000000"-->
+          <!--app:layout_scrollFlags="scroll|exitUntilCollapsed"-->
+          <!--app:statusBarScrim="#00000000"-->
+          <!--&gt;-->
 
-</LinearLayout>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/tool_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/holo_red_dark"
+            app:layout_collapseMode="pin"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            >
+
+          <TextView
+              android:id="@+id/food_detail_name"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingRight="16dp"
+              android:singleLine="true"
+              android:text="Test test"
+              android:textSize="18sp"
+              />
+        </android.support.v7.widget.Toolbar>
+
+      <!--</android.support.design.widget.CollapsingToolbarLayout>-->
+    <!--</android.support.design.widget.AppBarLayout>-->
+
+  <!--</android.support.design.widget.CoordinatorLayout>-->
+
+</FrameLayout>

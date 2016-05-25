@@ -22,6 +22,12 @@
         <item name="android:colorBackground">@android:color/transparent</item>
     </style>
 
+    <style name="TransStatusBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/holo_blue_dark</item>
+        <item name="android:colorPrimaryDark">@android:color/holo_green_dark</item>
+    </style>
+
     <color name="bg">#33dddddd</color>
 
 </resources>

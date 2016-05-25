@@ -8,11 +8,12 @@
       android:allowBackup="true"
       android:icon="@drawable/ic_launcher"
       android:label="@string/app_name"
-      android:name=".MyApp">
+      android:name=".MyApp"
+      android:theme="@style/TransStatusBar">
     <activity
         android:label="@string/app_name"
         android:name=".ui.MainActivity"
-        android:theme="@style/AppTheme">
+        >
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 
