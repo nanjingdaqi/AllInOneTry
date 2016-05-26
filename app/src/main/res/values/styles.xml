@@ -2,9 +2,16 @@
 
   <!-- Base application theme. -->
   <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <item name="popupMenuStyle">@style/MyMenu</item>
+    <item name="textAppearanceLargePopupMenu">@style/MenuItem</item>
   </style>
 
   <style name="MyMenu" parent="Widget.AppCompat.ListView.DropDown">
+    <item name="android:popupBackground">@drawable/bg</item>
+  </style>
+
+  <style name="MenuItem" parent="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large">
+    <item name="android:textColor">@android:color/white</item>
   </style>
 
 </resources>

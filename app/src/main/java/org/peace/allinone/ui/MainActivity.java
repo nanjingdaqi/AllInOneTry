@@ -34,16 +34,15 @@ public class MainActivity extends AppCompatActivity {
       PopupMenu menu = new PopupMenu(this, mStartBtn, Gravity.RIGHT);
       MenuItem item = menu.getMenu().add("店内搜索");
       item.setIcon(R.drawable.__leak_canary_icon);
+      item = menu.getMenu().add("店内搜索");
+      item.setIcon(R.drawable.__leak_canary_icon);
+      item = menu.getMenu().add("店内搜索");
+      item.setIcon(R.drawable.__leak_canary_icon);
       Field field = menu.getClass().getDeclaredField("mPopup");
       field.setAccessible(true);
       MenuPopupHelper popupHelper = (MenuPopupHelper) field.get(menu);
       popupHelper.setForceShowIcon(true);
       menu.show();
-      ListPopupWindow listPopupWindow = popupHelper.getPopup();
-      field = listPopupWindow.getClass().getDeclaredField("mPopup");
-      field.setAccessible(true);
-      PopupWindow popupWindow = (PopupWindow) field.get(listPopupWindow);
-      popupWindow.getContentView().setBackgroundColor(Color.RED);
     } catch (NoSuchFieldException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
