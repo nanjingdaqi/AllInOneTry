@@ -7,7 +7,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import butterknife.BindView;
+import android.widget.FrameLayout;
 import butterknife.ButterKnife;
+import org.peace.allinone.R;
+import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
   @BindView(R.id.r_v) RecyclerView rv;
+  @BindView(R.id.container) FrameLayout container;
 
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     FoodListAdapter adapter = new FoodListAdapter(foodCategories);
     rv.setLayoutManager(new LinearLayoutManager(this));
     rv.setAdapter(adapter);
-    rv.addItemDecoration(new PinnedItemDecoration());
+    rv.addItemDecoration(new PinnedItemDecoration(container));
   }
 
 }
