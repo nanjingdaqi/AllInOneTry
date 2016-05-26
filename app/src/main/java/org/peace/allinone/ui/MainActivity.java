@@ -1,13 +1,17 @@
 package org.peace.allinone.ui;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.menu.MenuPopupHelper;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.PopupMenu;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.PopupWindow;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -35,6 +39,11 @@ public class MainActivity extends AppCompatActivity {
       MenuPopupHelper popupHelper = (MenuPopupHelper) field.get(menu);
       popupHelper.setForceShowIcon(true);
       menu.show();
+      ListPopupWindow listPopupWindow = popupHelper.getPopup();
+      field = listPopupWindow.getClass().getDeclaredField("mPopup");
+      field.setAccessible(true);
+      PopupWindow popupWindow = (PopupWindow) field.get(listPopupWindow);
+      popupWindow.getContentView().setBackgroundColor(Color.RED);
     } catch (NoSuchFieldException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
