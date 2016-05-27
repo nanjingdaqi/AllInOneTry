@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ListPopupWindow;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.PopupWindow;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -36,5 +37,7 @@ public class MainActivity extends AppCompatActivity {
     popupWindow.setModal(true);
     popupWindow.setHorizontalOffset(100);
     popupWindow.show();
+    ListView listView = popupWindow.getListView();
+    listView.setDivider(getResources().getDrawable(R.drawable.divider));
   }
 }
