@@ -2,6 +2,7 @@ package org.peace.allinone.ui;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.ListPopupWindow;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void showListPopup() {
-    ListPopupWindow popupWindow = new ListPopupWindow(this);
+    ListPopupWindow popupWindow = new ListPopupWindow(new ContextThemeWrapper(this, R.style.TestTheme), null, R.attr.popupMenuStyle);
     popupWindow.setAdapter(new MyMenuAdapter());
     popupWindow.setAnchorView(anchor);
     popupWindow.setContentWidth(500);
@@ -40,11 +41,11 @@ public class MainActivity extends AppCompatActivity {
     popupWindow.setDropDownGravity(Gravity.END);
     popupWindow.setModal(true);
     popupWindow.setHorizontalOffset(100);
-    popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg));
+    //popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg));
     popupWindow.show();
-    ListView listView = popupWindow.getListView();
-    listView.setDivider(getResources().getDrawable(R.drawable.divider));
-    listView.setOverScrollMode(ListView.OVER_SCROLL_NEVER);
-    listView.setVerticalScrollBarEnabled(false);
+    //ListView listView = popupWindow.getListView();
+    //listView.setDivider(getResources().getDrawable(R.drawable.divider));
+    //listView.setOverScrollMode(ListView.OVER_SCROLL_NEVER);
+    //listView.setVerticalScrollBarEnabled(false);
   }
 }
