@@ -1,11 +1,10 @@
 package org.peace.allinone.ui;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ListPopupWindow;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -45,5 +44,7 @@ public class MainActivity extends AppCompatActivity {
     popupWindow.show();
     ListView listView = popupWindow.getListView();
     listView.setDivider(getResources().getDrawable(R.drawable.divider));
+    listView.setOverScrollMode(ListView.OVER_SCROLL_NEVER);
+    listView.setVerticalScrollBarEnabled(false);
   }
 }
