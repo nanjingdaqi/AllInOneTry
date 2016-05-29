@@ -81,6 +81,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<RVVH>
     titleView.setText("Title");
     content.setText("content");
     PopupWindow popupWindow = new PopupWindow(contentView, 600, WRAP_CONTENT);
+    popupWindow.setAnimationStyle(R.style.MyPopAnim);
     popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     popupWindow.setOutsideTouchable(true);
     popupWindow.setFocusable(true);
