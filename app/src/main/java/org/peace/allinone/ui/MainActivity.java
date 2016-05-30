@@ -5,12 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.ViewGroup;
-import butterknife.BindView;
 import android.widget.FrameLayout;
+import butterknife.BindView;
 import butterknife.ButterKnife;
-import org.peace.allinone.R;
-import me.ele.commons.AppLogger;
+import butterknife.OnClick;
 import org.peace.allinone.R;
 
 import java.util.ArrayList;
@@ -47,6 +45,16 @@ public class MainActivity extends AppCompatActivity {
     rv.setLayoutManager(new LinearLayoutManager(this));
     rv.setAdapter(adapter);
     rv.addItemDecoration(new PinnedItemDecoration(container));
+  }
+
+  @OnClick(R.id.start_btn) public void onClickStart(View v) {
+    //rv.smoothScrollBy(0, 100);
+    LinearLayoutManager lm = (LinearLayoutManager) rv.getLayoutManager();
+    RecyclerView.Adapter adapter = rv.getAdapter();
+    View v2 = lm.findViewByPosition(10);
+    if (v2 != null) {
+      rv.smoothScrollBy(0, v2.getTop());
+    }
   }
 
 }
