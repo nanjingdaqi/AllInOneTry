@@ -89,7 +89,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<RVVH>
     int[] loc = new int[2];
     anchor.getLocationInWindow(loc);
     AppLogger.e("x: " + loc[0] + ", y: " + loc[1]);
-    popupWindow.showAtLocation(anchor, Gravity.TOP | Gravity.RIGHT, 00, loc[1]);
+    popupWindow.showAtLocation(anchor, Gravity.TOP | Gravity.RIGHT, 00, loc[1] + anchor.getMeasuredHeight() - 400);
   }
 
   @Override public int getItemViewType(int position) {
