@@ -18,6 +18,8 @@ import me.ele.commons.AppLogger;
 import me.ele.commons.CollectionsUtils;
 import org.peace.allinone.R;
 
+import static android.view.View.MeasureSpec.UNSPECIFIED;
+import static android.view.View.MeasureSpec.makeMeasureSpec;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 public class FoodListAdapter extends RecyclerView.Adapter<RVVH>
@@ -76,6 +78,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<RVVH>
 
   private void popup(Context context, View anchor) {
     View contentView = LayoutInflater.from(context).inflate(R.layout.popup_content, null);
+    contentView.measure(makeMeasureSpec(0, UNSPECIFIED), makeMeasureSpec(0, UNSPECIFIED));
     TextView titleView = (TextView) contentView.findViewById(R.id.title);
     TextView content = (TextView) contentView.findViewById(R.id.content);
     titleView.setText("Title");
@@ -89,7 +92,8 @@ public class FoodListAdapter extends RecyclerView.Adapter<RVVH>
     int[] loc = new int[2];
     anchor.getLocationInWindow(loc);
     AppLogger.e("x: " + loc[0] + ", y: " + loc[1]);
-    popupWindow.showAtLocation(anchor, Gravity.TOP | Gravity.RIGHT, 00, loc[1] + anchor.getMeasuredHeight() - 400);
+    popupWindow.showAtLocation(anchor, Gravity.TOP | Gravity.RIGHT, 00,
+        loc[1] + anchor.getMeasuredHeight() - contentView.getMeasuredHeight());
   }
 
   @Override public int getItemViewType(int position) {
