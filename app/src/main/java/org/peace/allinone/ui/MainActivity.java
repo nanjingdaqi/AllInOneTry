@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.app.Application;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -38,6 +39,11 @@ public class MainActivity extends AppCompatActivity {
       }
     });
     anim.setDuration(10000).start();
+  }
+
+  @Override public boolean dispatchKeyEvent(KeyEvent event) {
+    AppLogger.e("activity event, code: " + event.getKeyCode() + ", action: " + event.getAction());
+    return super.dispatchKeyEvent(event);
   }
 
   static class Task implements Runnable {

@@ -2,10 +2,13 @@ package org.peace.allinone.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
 import me.ele.commons.AppLogger;
 
-public class MyView extends View {
+public class MyView extends TextView {
   public MyView(Context context) {
     super(context);
   }
@@ -22,5 +25,10 @@ public class MyView extends View {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
     //AppLogger.e(new Exception("onMeasure"));
+  }
+
+  @Override public boolean dispatchKeyEvent(KeyEvent event) {
+    AppLogger.e("view event, code: " + event.getKeyCode() + ", action: " + event.getAction());
+    return super.dispatchKeyEvent(event);
   }
 }

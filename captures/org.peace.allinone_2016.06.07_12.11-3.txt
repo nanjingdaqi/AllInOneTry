@@ -1,0 +1,89 @@
+Applications Graphics Acceleration Info:
+Uptime: 364659864 Realtime: 1013855904
+
+** Graphics info for pid 12137 [org.peace.allinone] **
+
+Recent DisplayList operations
+              ClipRect
+              DrawText
+              RestoreToCount
+            DrawRenderNode
+            DrawRenderNode
+              DrawRenderNode
+                DrawRect
+            DrawRenderNode
+              DrawRenderNode
+                DrawRect
+            DrawRenderNode
+              DrawRenderNode
+                DrawRect
+              DrawRenderNode
+                Save
+                ClipRect
+                DrawRect
+                RestoreToCount
+              Save
+              ClipRect
+              Translate
+              DrawText
+              RestoreToCount
+            RestoreToCount
+        DrawRenderNode
+          DrawRenderNode
+            DrawRect
+          DrawRenderNode
+            DrawRenderNode
+              Save
+              ClipRect
+              DrawText
+              RestoreToCount
+    RestoreToCount
+  DrawRenderNode
+    DrawRenderNode
+      DrawRect
+RestoreToCount
+DrawRect
+DrawRect
+DrawRect
+DrawRect
+DrawText
+DrawShadow
+DrawRect
+DrawText
+DrawShadow
+DrawRect
+DrawRect
+DrawText
+
+Caches:
+Current memory usage / total memory usage (bytes):
+  TextureCache                0 / 83886080
+  LayerCache                  0 / 62914560 (numLayers = 0)
+  Layers total          0 (numLayers = 0)
+  RenderBufferCache           0 /  9437184
+  GradientCache               0 /  4194304
+  PathCache                   0 / 38797312
+  TessellationCache           0 /  1048576
+  TextDropShadowCache         0 /  8388608
+  PatchCache                  0 /   131072
+  FontRenderer 0 A8     1048576 /  1048576
+  FontRenderer 0 RGBA         0 /        0
+  FontRenderer 0 total  1048576 /  1048576
+Other:
+  FboCache                    0 /       30
+Total memory usage:
+  1048576 bytes, 1.00 MB
+
+Profile data in ms:
+
+	org.peace.allinone/org.peace.allinone.ui.MainActivity/android.view.ViewRootImpl@e0b9939 (visibility=0)
+View hierarchy:
+
+  org.peace.allinone/org.peace.allinone.ui.MainActivity/android.view.ViewRootImpl@e0b9939
+  18 views, 18.80 kB of display lists
+
+
+Total ViewRootImpl: 1
+Total Views:        18
+Total DisplayList:  18.80 kB
+

@@ -1,0 +1,28 @@
+TASK org.peace.allinone id=1116
+  ACTIVITY org.peace.allinone/.ui.MainActivity 26a0d2fa pid=12137
+    Local FragmentActivity 29ac6fd0 State:
+      mCreated=truemResumed=true mStopped=false mReallyStopped=false
+      mLoadersStarted=true
+    FragmentManager misc state:
+      mHost=android.support.v4.app.FragmentActivity$HostCallbacks@2a92592c
+      mContainer=android.support.v4.app.FragmentActivity$HostCallbacks@2a92592c
+      mCurState=5 mStateSaved=false mDestroyed=false
+    View Hierarchy:
+      com.android.internal.policy.impl.PhoneWindow$DecorView{1b838ff5 V.E..... ... 0,0-1536,2560}
+        android.widget.LinearLayout{195f218a V.E..... ... 0,0-1536,2560}
+          android.view.ViewStub{47583fb G.E..... ... 0,0-0,0 #1020375}
+          android.widget.FrameLayout{361dc18 V.E..... ... 0,100-1536,2560}
+            android.support.v7.widget.ActionBarOverlayLayout{144a3671 V.E..... ... 0,0-1536,2460 #7f0c0065 app:id/decor_content_parent}
+              android.support.v7.widget.ContentFrameLayout{c95cc56 V.E..... ... 0,224-1536,2460 #1020002 android:id/content}
+                android.widget.LinearLayout{208e64d7 V.E..... ... 0,0-1536,2236}
+                  android.support.v7.widget.AppCompatTextView{14a4a1c4 V.ED.... ... 64,64-359,136}
+                  android.support.v7.widget.AppCompatButton{14fac8ad VFED..C. ... 64,136-1472,328 #7f0c0076 app:id/start_btn}
+                  android.widget.ScrollView{3aba57e2 VFED.V.. ... 64,328-1472,972}
+                  org.peace.allinone.ui.MyView{22ea7773 VFED.... ... 64,972-1472,1772 #7f0c0077 app:id/my_view}
+                  android.widget.FrameLayout{242c1630 V.E..... ... 64,1772-1472,2172 #7f0c0078 app:id/make_order_container}
+              android.support.v7.widget.ActionBarContainer{2ea842a9 V.ED.... ... 0,0-1536,224 #7f0c0066 app:id/action_bar_container}
+                android.support.v7.widget.Toolbar{19aa102e V.E..... ... 0,0-1536,224 #7f0c0067 app:id/action_bar}
+                  android.widget.TextView{2feb17cf V.ED.... ... 64,58-532,165}
+                  android.support.v7.widget.ActionMenuView{174655c V.E..... ... 1536,0-1536,224}
+                android.support.v7.widget.ActionBarContextView{16996065 G.E..... ... 0,0-0,0 #7f0c0068 app:id/action_context_bar}
+        android.view.View{dcb013a V.ED.... ... 0,0-1536,100 #102002f android:id/statusBarBackground}
