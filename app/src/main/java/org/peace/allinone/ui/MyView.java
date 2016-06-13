@@ -21,6 +21,11 @@ public class MyView extends TextView {
     super(context, attrs, defStyleAttr);
   }
 
+  @Override protected void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    AppLogger.e("onAttachedToWindow");
+  }
+
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
