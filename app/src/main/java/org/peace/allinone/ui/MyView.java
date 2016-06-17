@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+import me.ele.commons.AppLogger;
+import me.ele.commons.DimenUtil;
 
 public class MyView extends View {
   public MyView(Context context, AttributeSet attrs) {
@@ -16,22 +18,30 @@ public class MyView extends View {
   @Override protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
 
-    Rect rect = new Rect(0, 0, 100, 600);
+    int pl = DimenUtil.dip2px(getContext(), 3);
+    int pt = DimenUtil.dip2px(getContext(), 3);
+    AppLogger.e("pl: " + pl);
 
-    Paint paint1 = new Paint(Paint.ANTI_ALIAS_FLAG);
-    paint1.setStyle(Paint.Style.FILL);
-    paint1.setColor(Color.RED);
-    canvas.drawRect(rect, paint1);
+    String text = "仅剩100份";
+    Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    int ts = DimenUtil.sp2px(getContext(), 9);
+    AppLogger.e("text size: " + ts);
+    paint.setTextSize(ts);
 
-    paint1.setStyle(Paint.Style.STROKE);
-    paint1.setColor(Color.BLUE);
-    paint1.setStrokeWidth(10);
-    canvas.translate(0, 200);
-    //canvas.drawRect(rect, paint1);
+    canvas.translate(100, 100);
 
-    canvas.translate(0, 200);
-    paint1.setColor(Color.GREEN);
-    rect = new Rect(5, 5, 95, 595);
-    canvas.drawRect(rect, paint1);
+    Rect rect = new Rect();
+    paint.getTextBounds(text, 0, text.length(), rect);
+    paint.setStrokeWidth(10);
+    paint.setColor(Color.BLACK);
+    rect.top -= pt;
+    rect.bottom += pt;
+    rect.left -= pl;
+    rect.right += pl;
+    rect.offset(100, 100);
+    canvas.drawRect(rect, paint);
+
+    paint.setColor(Color.WHITE);
+    canvas.drawText(text, 100, 100, paint);
   }
 }
