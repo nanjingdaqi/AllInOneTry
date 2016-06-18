@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
           "http://139.224.32.32:9110/real.m3u8?channel_idx=1&device_id=Ub0000000542866896QB&duration=3600&from_ip=180.168.39.42&is_shared=1&rate=700&user_name=1000&ver=&token=-L-izAjxbeqWjRXrYam57AY87boewetQp6eHPZjtvqorYMRtSmpG0yucKZBL7FWypW0gDMRo5jNgjUpYVFkqVA&v_width=0&v_height=0&valid_time=1466162095";
       url = "http://mobi.ulucu.com/m3u8.html?m3u8Url=" + URLEncoder.encode(m3u8, "UTF-8");
 
+      url = "http://devimages.apple.com/iphone/samples/bipbopgear1.html";
+
       init(url);
     } catch (Exception e) {
       e.printStackTrace();
