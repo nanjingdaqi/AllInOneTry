@@ -11,19 +11,3 @@ buildscript {
     // in the individual module build.gradle files
   }
 }
-
-allprojects {
-  repositories {
-    jcenter()
-    maven {
-      url "${server}/nexus/content/groups/mobile"
-      credentials {
-        username nexusUsername
-        password nexusPassword
-      }
-    }
-    maven {
-      url "https://jitpack.io"
-    }
-  }
-}
