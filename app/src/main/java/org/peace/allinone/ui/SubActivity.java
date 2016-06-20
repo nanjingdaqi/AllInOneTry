@@ -50,16 +50,19 @@ public class SubActivity extends AppCompatActivity {
     ButterKnife.inject(this);
 
     try {
-      init("http://mobi.ulucu.com/player/uluculive.html?m3u8Url=" +
+      //init("http://mobi.ulucu.com/player/uluculive.html?m3u8Url=" +
       //    init("http://mobi.ulucu.com/m3u8.html?m3u8Url=" +
-          URLEncoder.encode("http://139.224.32.32:9110/real.m3u8?channel_idx=1&device_id" +
-              "=Ub0000000542866896QB&duration=86400&from_ip=182.254.136.157&" +
-              "is_shared=1&rate=700&user_name=1000&ver=&token=CvYMQQOViAnUcmhk2" +
-              "YAnZZ8vZOgV7Q4W_8Mm2A3ioYRTJH2qTHB5DewlLqYoDSyl-m5WLsqTkIH-0" +
-              "Jf2n-42VQ&v_width=0&v_height=0&valid_time=1466242952","utf-8"));
-          //URLEncoder.encode(
-          //    "http://139.224.32.32:9110/real.m3u8?channel_idx=1&device_id=Ub0000000542866896QB&duration=86400&from_ip=182.254.136.157&is_shared=1&rate=700&user_name=1000&ver=&token=CvYMQQOViAnUcmhk2YAnZZ8vZOgV7Q4W_8Mm2A3ioYRTJH2qTHB5DewlLqYoDSyl-m5WLsqTkIH-0Jf2n-42VQ&v_width=0&v_height=0&valid_time=1466236280",
-          //    "utf-8"));
+      //    URLEncoder.encode("http://139.224.32.32:9110/real.m3u8?channel_idx=1&device_id" +
+      //        "=Ub0000000542866896QB&duration=86400&from_ip=182.254.136.157&" +
+      //        "is_shared=1&rate=700&user_name=1000&ver=&token=CvYMQQOViAnUcmhk2" +
+      //        "YAnZZ8vZOgV7Q4W_8Mm2A3ioYRTJH2qTHB5DewlLqYoDSyl-m5WLsqTkIH-0" +
+      //        "Jf2n-42VQ&v_width=0&v_height=0&valid_time=1466242952","utf-8"));
+      //URLEncoder.encode(
+      //    "http://139.224.32.32:9110/real.m3u8?channel_idx=1&device_id=Ub0000000542866896QB&duration=86400&from_ip=182.254.136.157&is_shared=1&rate=700&user_name=1000&ver=&token=CvYMQQOViAnUcmhk2YAnZZ8vZOgV7Q4W_8Mm2A3ioYRTJH2qTHB5DewlLqYoDSyl-m5WLsqTkIH-0Jf2n-42VQ&v_width=0&v_height=0&valid_time=1466236280",
+      //    "utf-8"));
+
+      init(
+          "http://mobi.ulucu.com/player/uluculive.html?m3u8Url=http%3a%2f%2fhls.kan1.live.anyan.com%2flive_%2fm3u8%3fsign%3d1466479949-810df98c6d3fd1fa9210af1570bd5c8b%26device_sn%3dUb0000000542866896QB%26video_rate%3d700%26channel_id%3d1");
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -129,11 +132,11 @@ public class SubActivity extends AppCompatActivity {
     });
 
     //WebView加载web资源
-    webView.loadUrl(url);
-    //Message msg = new Message();
-    //msg.what = START_SLEEP_URL;
-    //msg.obj = url;
-    //handler.sendMessageDelayed(msg, 10);
+    //webView.loadUrl(url);
+    Message msg = new Message();
+    msg.what = START_SLEEP_URL;
+    msg.obj = url;
+    handler.sendMessageDelayed(msg, 10);
   }
 }
 
