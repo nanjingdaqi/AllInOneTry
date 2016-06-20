@@ -20,8 +20,8 @@
       android:id="@+id/tv"
       android:layout_width="100dp"
       android:layout_height="wrap_content"
-      android:singleLine="true"
       android:ellipsize="none"
+      android:singleLine="true"
       android:text="adfjaksdjfkalsdjfkajfsdklajfkl;adfa"
       />
 
