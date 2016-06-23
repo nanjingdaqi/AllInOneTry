@@ -23,28 +23,11 @@
       android:layout_height="wrap_content"
       />
 
-  <ScrollView
+  <org.peace.allinone.ui.MyLayout
+      android:id="@+id/my_layout"
       android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      android:background="@android:color/holo_blue_light"
-      ></ScrollView>
-
-  <org.peace.allinone.ui.MyView
-      android:id="@+id/my_view"
-      android:layout_width="match_parent"
-      android:layout_height="200dp"
-      android:background="@android:color/holo_red_light"
-      android:focusable="true"
-      android:focusableInTouchMode="true"
-      android:visibility="gone"
+      android:layout_height="60dp"
+      android:divider="@android:color/holo_red_light"
       />
 
-  <FrameLayout
-      android:id="@+id/make_order_container"
-      android:layout_width="match_parent"
-      android:layout_height="100dp"
-      android:layout_gravity="bottom"
-      android:background="@android:color/holo_green_light"
-      />
 </LinearLayout>

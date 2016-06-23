@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,6 +31,18 @@ public class MyView extends TextView {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
     //AppLogger.e(new Exception("onMeasure"));
+
+    AppLogger.e("onMeasure");
+  }
+
+  @Override protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    AppLogger.e("onDraw");
+  }
+
+  @Override protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    super.onLayout(changed, left, top, right, bottom);
+    AppLogger.e("onLayout");
   }
 
   @Override public boolean dispatchKeyEvent(KeyEvent event) {
