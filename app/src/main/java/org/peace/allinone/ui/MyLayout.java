@@ -27,6 +27,9 @@ public class MyLayout extends LinearLayout {
 
     findViewById(R.id.target).setVisibility(VISIBLE);
     AppLogger.e("onMeasure");
+
+    requestLayout();
+    invalidate();
   }
 
   @Override protected void dispatchDraw(Canvas canvas) {
