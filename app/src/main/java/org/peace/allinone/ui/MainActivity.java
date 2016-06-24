@@ -27,7 +27,18 @@ public class MainActivity extends AppCompatActivity {
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     AppLogger.e("start btn clicked");
-    //myLayout.invalidate();
+    myLayout.invalidate();
+    myLayout.invalidate();
+    myLayout.invalidate();
+    myLayout.invalidate();
     myLayout.requestLayout();
+  }
+
+  @OnClick(R.id.btn) public void onClickBtn(View v) {
+    AppLogger.e("btn clicked");
+    myLayout.requestLayout();
+    myLayout.requestLayout();
+    myLayout.requestLayout();
+    myLayout.invalidate();
   }
 }
