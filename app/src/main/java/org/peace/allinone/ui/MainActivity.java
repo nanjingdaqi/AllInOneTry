@@ -1,17 +1,12 @@
 package org.peace.allinone.ui;
 
-import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Matrix;
-import android.graphics.Paint;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
+import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.BindView;
 import org.peace.allinone.R;
@@ -19,6 +14,7 @@ import org.peace.allinone.R;
 public class MainActivity extends AppCompatActivity {
 
   @BindView(R.id.icon) ImageView iconView;
+  @BindView(R.id.tv) TextView textView;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -26,20 +22,9 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
 
-    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
-    Bitmap newBitmap =
-        Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
-    Canvas canvas = new Canvas(newBitmap);
-    Paint paint = new Paint();
-    float[] src = new float[] {
-        0.5f, 0, 0, 0, 0,
-        0, 0.5f, 0, 0, 0,
-        0, 0, 0.5f, 0, 0,
-        0, 0, 0, 1, 0
-    };
-    ColorMatrix cm = new ColorMatrix(src);
-    paint.setColorFilter(new ColorMatrixColorFilter(cm));
-    canvas.drawBitmap(bitmap, new Matrix(), paint);
-    iconView.setImageBitmap(newBitmap);
+    iconView.setColorFilter(Color.TRANSPARENT);
+
+    Drawable drawable = textView.getCompoundDrawables()[0];
+    drawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
   }
 }

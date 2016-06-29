@@ -21,6 +21,15 @@
       android:id="@+id/icon"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:src="@drawable/icon"
+      />
+
+  <TextView
+      android:id="@+id/tv"
+      android:layout_width="match_parent"
+      android:layout_height="30dp"
+      android:drawableLeft="@drawable/icon"
+      android:text="发到"
       />
 
 </LinearLayout>
