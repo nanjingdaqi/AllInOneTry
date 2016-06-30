@@ -1,20 +1,30 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.peace.allinone.ui.SplashFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/holo_green_light"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".ui.MainActivity"
     >
 
-  <Button
-      android:id="@+id/start_btn"
-      android:text="Start"
+  <android.support.v7.widget.Toolbar
+      android:id="@+id/toolbar"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="?attr/actionBarSize"
+      android:background="@android:color/holo_orange_light"
+      android:fitsSystemWindows="true"
+      android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+      app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
       />
 
-</LinearLayout>
+  <Button
+      android:id="@+id/start_btn"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom"
+      android:text="Start"
+      />
+
+</org.peace.allinone.ui.SplashFrameLayout>

@@ -15,12 +15,9 @@ import me.ele.commons.AppLogger;
  */
 public class MyApp extends Application {
 
-  private RefWatcher refWatcher;
-
   @Override public void onCreate() {
     super.onCreate();
     AppLogger.debug = true;
-    refWatcher = LeakCanary.install(this);
 
     if (BuildConfig.DEBUG) {
       Stetho.initialize(Stetho.newInitializerBuilder(this)
@@ -28,11 +25,6 @@ public class MyApp extends Application {
           .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
           .build());
     }
-  }
-
-  public static RefWatcher refWatcher(Context context) {
-    MyApp app = (MyApp) context.getApplicationContext();
-    return app.refWatcher;
   }
 
   private static class MyDumperPluginsProvider implements DumperPluginsProvider {
