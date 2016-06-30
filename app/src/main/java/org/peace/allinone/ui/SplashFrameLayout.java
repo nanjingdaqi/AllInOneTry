@@ -17,8 +17,8 @@ public class SplashFrameLayout extends FrameLayout {
   static {
     final int version = Build.VERSION.SDK_INT;
     if (version >= Build.VERSION_CODES.LOLLIPOP) {
-      IMPL = new SplashLayoutCompatImplApi21();
-      //IMPL = new SplashLayoutCompatImplBase();
+      //IMPL = new SplashLayoutCompatImplApi21();
+      IMPL = new SplashLayoutCompatImplBase();
     } else {
       IMPL = new SplashLayoutCompatImplBase();
     }
@@ -41,8 +41,24 @@ public class SplashFrameLayout extends FrameLayout {
     }
   }
 
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+  @Override public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+    log("on apply window insets");
+    log("left: "
+        + insets.getSystemWindowInsetLeft()
+        + ", top: "
+        + insets.getSystemWindowInsetTop()
+        + ", right: "
+        + insets.getSystemWindowInsetRight()
+        + ", bottom: "
+        + insets.getSystemWindowInsetBottom());
+    setPadding(0, 300, 0, 0);
+    return super.onApplyWindowInsets(insets);
+  }
+
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    setPadding(0, 300, 0, 0);
     final boolean applyInsets = mLastInsets != null && ViewCompat.getFitsSystemWindows(this);
     final int count = getChildCount();
     for (int i = 0; i < count; i++) {
