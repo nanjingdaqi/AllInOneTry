@@ -2,6 +2,7 @@ package org.peace.allinone.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -20,10 +21,14 @@ import static org.peace.allinone.ui.DimenUtil.sp2px;
 
 public class FoodIconView extends View {
 
+  public static Context ctx;
+
   private List<IconBuilder> iconBuilders = new ArrayList<>();
   private Paint textPaint;
   private Paint bgPaint;
   private final float margin = dip2px(getContext(), 2);
+
+  private Paint textBorderPaint;
 
   public static IconBuilder iconBuilder(String text) {
     return new IconBuilder(text);
@@ -42,6 +47,9 @@ public class FoodIconView extends View {
     textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     textPaint.setStyle(Paint.Style.FILL);
     bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    textBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    textBorderPaint.setStyle(Paint.Style.STROKE);
+    textBorderPaint.setColor(getResources().getColor(android.R.color.holo_red_light));
   }
 
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -77,13 +85,13 @@ public class FoodIconView extends View {
     }
     float mh = getMeasuredHeight();
     float l = 0;
-    Paint.FontMetricsInt fontMetrics = textPaint.getFontMetricsInt();
-    float baselineY = (mh - fontMetrics.bottom - fontMetrics.top) / 2;
     for (IconBuilder iconBuilder : iconBuilders) {
-      int strokeWidth = iconBuilder.strokeWidth;
+      float strokeWidth = iconBuilder.strokeWidth;
       textPaint.setTextSize(iconBuilder.textSize);
       textPaint.setColor(iconBuilder.textColor);
       textPaint.setTypeface(iconBuilder.bold ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
+      Paint.FontMetricsInt fontMetrics = textPaint.getFontMetricsInt();
+      float baselineY = (mh - fontMetrics.bottom - fontMetrics.top) / 2;
 
       // bg
       int radius = iconBuilder.maxRadius ? (int) (mh / 2) : iconBuilder.radius;
@@ -91,17 +99,18 @@ public class FoodIconView extends View {
       textPaint.getTextBounds(iconBuilder.text, 0, iconBuilder.text.length(), textRect);
       float textLength = textRect.width();
 
-      float bgW = textLength + iconBuilder.paddingL + iconBuilder.paddingR + strokeWidth * 2;
+      float bgW = textLength + iconBuilder.paddingL + iconBuilder.paddingR;
       float bgH = mh;
       if (iconBuilder.bgFillColor != TRANSPARENT) {
-        RectF rect = new RectF(l, 0, l + bgW, bgH);
+        RectF rect = new RectF(l + strokeWidth, 0, l + bgW + strokeWidth, bgH);
         bgPaint.setStyle(Paint.Style.FILL);
         bgPaint.setColor(iconBuilder.bgFillColor);
         canvas.drawRoundRect(rect, radius, radius, bgPaint);
       }
-      if (iconBuilder.bgStrokeColor != TRANSPARENT) {
-        RectF rect = new RectF(l + strokeWidth / 2, strokeWidth / 2, l + bgW - strokeWidth / 2,
-            bgH - strokeWidth / 2);
+      if (strokeWidth > 0 && iconBuilder.bgStrokeColor != TRANSPARENT) {
+        RectF rect =
+            new RectF(l + strokeWidth / 2, strokeWidth / 2, l + strokeWidth + bgW + strokeWidth / 2,
+                bgH - strokeWidth / 2);
         bgPaint.setStyle(Paint.Style.STROKE);
         bgPaint.setColor(iconBuilder.bgStrokeColor);
         bgPaint.setStrokeWidth(strokeWidth);
@@ -109,8 +118,12 @@ public class FoodIconView extends View {
       }
 
       // text
-      canvas.drawText(iconBuilder.text, l + iconBuilder.paddingL + strokeWidth, baselineY,
-          textPaint);
+      float textX = l + iconBuilder.paddingL + strokeWidth - textRect.left;
+      canvas.drawText(iconBuilder.text, textX, baselineY, textPaint);
+      canvas.save();
+      canvas.translate(textX, baselineY);
+      canvas.drawRect(textRect, textBorderPaint);
+      canvas.restore();
 
       l += iconBuilder.paddingL
           + iconBuilder.paddingR
@@ -134,13 +147,11 @@ public class FoodIconView extends View {
   }
 
   public static class IconBuilder {
-    private Context ctx;
-
     @NonNull private String text;
     private int textSize = sp2px(ctx, 10);
     private int textColor = BLACK;
     private int bgFillColor = TRANSPARENT;
-    private int strokeWidth = 0;
+    private float strokeWidth = 0;
     private int bgStrokeColor = TRANSPARENT;
     private boolean bold = false;
     private int radius = dip2px(ctx, 2);
@@ -217,7 +228,7 @@ public class FoodIconView extends View {
       return this;
     }
 
-    public IconBuilder strokeWidth(int strokeWidth) {
+    public IconBuilder strokeWidth(float strokeWidth) {
       this.strokeWidth = strokeWidth;
       return this;
     }

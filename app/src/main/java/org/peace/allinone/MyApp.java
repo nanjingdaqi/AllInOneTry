@@ -9,6 +9,7 @@ import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 import java.util.ArrayList;
 import me.ele.commons.AppLogger;
+import org.peace.allinone.ui.FoodIconView;
 
 /**
  * Created by peacepassion on 15/8/11.
@@ -19,6 +20,8 @@ public class MyApp extends Application {
 
   @Override public void onCreate() {
     super.onCreate();
+    FoodIconView.ctx = this;
+
     AppLogger.debug = true;
     refWatcher = LeakCanary.install(this);
 

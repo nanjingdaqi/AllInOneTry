@@ -8,17 +8,27 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:gravity="center_horizontal"
     >
 
   <Button
       android:id="@+id/start_btn"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_marginBottom="20dp"
       android:text="Start"
       />
 
   <org.peace.allinone.ui.FoodIconView
       android:id="@+id/icon"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal"
+      android:layout_marginBottom="100dp"
+      />
+
+  <org.peace.allinone.ui.FoodIconView
+      android:id="@+id/icon2"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       />
