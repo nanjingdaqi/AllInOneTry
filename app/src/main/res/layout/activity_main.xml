@@ -17,17 +17,10 @@
       android:text="Start"
       />
 
-  <org.peace.allinone.ui.IconView
-      android:id="@+id/icon_view"
+  <org.peace.allinone.ui.FoodIconView
+      android:id="@+id/icon"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal"
-      android:layout_marginTop="20dp"
-      app:drawablePadding="2dp"
-      app:isSolid="false"
-      app:itemMargin="4dp"
-      app:itemRadius="1.5dp"
-      app:textSize="10sp"
       />
 
 </LinearLayout>
