@@ -1,0 +1,19 @@
+TASK org.peace.allinone id=2278
+  ACTIVITY org.peace.allinone/.ui.MainActivity 35086483 pid=24624
+    Local FragmentActivity 36d535e0 State:
+      mCreated=truemResumed=true mStopped=false mReallyStopped=false
+      mLoadersStarted=true
+    FragmentManager misc state:
+      mHost=android.support.v4.app.FragmentActivity$HostCallbacks@1a726099
+      mContainer=android.support.v4.app.FragmentActivity$HostCallbacks@1a726099
+      mCurState=5 mStateSaved=false mDestroyed=false
+    View Hierarchy:
+      com.android.internal.policy.impl.PhoneWindow$DecorView{2b77ef5e V.E..... ... 0,0-1536,2560}
+        android.widget.LinearLayout{db3bf3f V.E..... ... 0,0-1536,2560}
+          android.view.ViewStub{387d00c G.E..... ... 0,0-0,0 #1020375}
+          android.widget.FrameLayout{177f6d55 V.E..... ... 0,0-1536,2560}
+            android.support.v7.widget.FitWindowsLinearLayout{394fa36a V.E..... ... 0,0-1536,2560 #7f0b0060 app:id/action_bar_root}
+              android.support.v7.widget.ViewStubCompat{38af105b G.E..... ... 0,0-0,0 #7f0b0061 app:id/action_mode_bar_stub}
+              android.support.v7.widget.ContentFrameLayout{3ae7e0f8 V.E..... ... 0,0-1536,2560 #1020002 android:id/content}
+                org.peace.allinone.ui.MyFrameLayout{331689d1 V.E..... ... 0,0-1536,2560}
+                  org.peace.allinone.ui.MyView{73c8c36 V.ED.... ... 0,100-1536,900}
