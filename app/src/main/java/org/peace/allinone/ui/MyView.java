@@ -28,11 +28,10 @@ public class MyView extends TextView {
   }
 
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-    //AppLogger.e(new Exception("onMeasure"));
-
     AppLogger.e("onMeasure");
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    AppLogger.e("height spec size: " + MeasureSpec.getSize(heightMeasureSpec));
+    AppLogger.e("final height: " + getMeasuredHeight());
   }
 
   @Override protected void onDraw(Canvas canvas) {

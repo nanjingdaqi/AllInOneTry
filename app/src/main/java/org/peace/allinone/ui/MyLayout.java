@@ -24,12 +24,8 @@ public class MyLayout extends LinearLayout {
 
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-    findViewById(R.id.target).setVisibility(VISIBLE);
-    AppLogger.e("onMeasure");
-
-    requestLayout();
-    invalidate();
+    AppLogger.e("height spec size: " + MeasureSpec.getSize(heightMeasureSpec));
+    AppLogger.e("final height: " + getMeasuredHeight());
   }
 
   @Override protected void dispatchDraw(Canvas canvas) {
