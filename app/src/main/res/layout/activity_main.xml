@@ -20,6 +20,7 @@
       android:id="@+id/sv"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
+      android:fillViewport="true"
       >
 
     <LinearLayout
@@ -33,7 +34,7 @@
       <TextView
           android:id="@+id/tv"
           android:layout_width="match_parent"
-          android:layout_height="1000dp"
+          android:layout_height="100dp"
           android:gravity="bottom"
           android:text="Try"
           />
