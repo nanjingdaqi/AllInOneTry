@@ -5,6 +5,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
@@ -15,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
 
   @BindView(R.id.icon) ImageView iconView;
   @BindView(R.id.tv) TextView textView;
+  @BindView(R.id.view) View view;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -22,9 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
 
-    iconView.setColorFilter(Color.TRANSPARENT);
-
-    Drawable drawable = textView.getCompoundDrawables()[0];
-    drawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+    textView.setBackground(new MyDrawable());
+    view.setBackground(new MyDrawable());
   }
 }
