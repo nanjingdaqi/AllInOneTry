@@ -1,5 +1,7 @@
 package org.peace.allinone.ui;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -10,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.BindView;
+import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,7 +27,10 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
 
-    textView.setBackground(new MyDrawable());
-    view.setBackground(new MyDrawable());
+    Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+    AppLogger.e("bm w: " + bm.getWidth() + ", bm h: " + bm.getHeight());
+
+    textView.setBackground(new MyDrawable(bm));
+    view.setBackground(new MyDrawable(bm));
   }
 }
