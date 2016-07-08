@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
   @InjectView(R.id.start_btn) Button mStartBtn;
 
   @InjectView(R.id.my_layout) View myLayout;
+  @InjectView(R.id.logo) ShopLogoView logoView;
 
   int offset = 0;
 
@@ -23,22 +24,8 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     ButterKnife.inject(this);
+
+    logoView.getStatusView().setText("Fuck");
   }
 
-  @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    AppLogger.e("start btn clicked");
-    myLayout.invalidate();
-    myLayout.invalidate();
-    myLayout.invalidate();
-    myLayout.invalidate();
-    myLayout.requestLayout();
-  }
-
-  @OnClick(R.id.btn) public void onClickBtn(View v) {
-    AppLogger.e("btn clicked");
-    myLayout.requestLayout();
-    myLayout.requestLayout();
-    myLayout.requestLayout();
-    myLayout.invalidate();
-  }
 }
