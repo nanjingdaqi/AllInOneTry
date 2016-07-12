@@ -1,9 +1,12 @@
 package org.peace.allinone.ui;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import me.ele.commons.AppLogger;
+import org.peace.allinone.R;
 
 public class MyView2 extends View {
   public MyView2(Context context) {
@@ -18,23 +21,11 @@ public class MyView2 extends View {
     super(context, attrs, defStyleAttr);
   }
 
-  @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    AppLogger.e("height mode: " + getMode(heightMeasureSpec));
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    AppLogger.e("mh: " + getMeasuredHeight());
-  }
-
-  static String getMode(int spec) {
-    int mode = MeasureSpec.getMode(spec);
-    if (mode == MeasureSpec.EXACTLY) {
-      return "EXACTLY";
-    }
-    if (mode == MeasureSpec.AT_MOST) {
-      return "AT_MOST";
-    }
-    if (mode == MeasureSpec.UNSPECIFIED) {
-      return "UNSPECIFIED";
-    }
-    return "null";
+  @Override protected void dispatchDraw(Canvas canvas) {
+    super.dispatchDraw(canvas);
+    Drawable drawable = getResources().getDrawable(R.drawable.ic_launcher);
+    drawable.setBounds(0, getMeasuredHeight() - drawable.getIntrinsicHeight(), getMeasuredWidth(),
+        getMeasuredHeight());
+    drawable.draw(canvas);
   }
 }
