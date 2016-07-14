@@ -18,11 +18,17 @@
 
   <TextView
       android:id="@+id/tv"
-      android:layout_width="100dp"
+      android:layout_width="95dp"
       android:layout_height="wrap_content"
-      android:ellipsize="none"
-      android:singleLine="true"
-      android:text="adfjaksdjfkalsdjfkajfsdklajfkl;adfa"
+      android:background="@android:color/holo_red_light"
+      android:ellipsize="end"
+      android:gravity="left|center_vertical"
+      android:includeFontPadding="false"
+      android:maxLines="1"
+      android:textColor="@android:color/white"
+      android:textSize="13sp"
+      android:textStyle="bold"
+      android:text="上海市普陀区真北路"
       />
 
 </LinearLayout>
