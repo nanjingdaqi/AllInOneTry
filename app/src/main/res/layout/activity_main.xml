@@ -1,56 +1,79 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.peace.allinone.ui.ActivityEntranceLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:divider="@drawable/divider"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:showDividers="beginning|middle|end"
-    tools:context=".MainActivity"
+    android:orientation="horizontal"
     >
 
-  <Button
-      android:id="@+id/start_btn"
-      android:layout_width="match_parent"
+  <ImageView
+      android:id="@+id/left"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:text="Start"
+      android:layout_weight="450"
+      android:src="@drawable/left"
+      style="@style/Scale"
+      />
+
+  <View
+      android:layout_width="1px"
+      android:layout_height="match_parent"
+      android:background="@android:color/white"
       />
 
   <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="50dp"
-      android:orientation="horizontal"
-      android:paddingLeft="16dp"
-      android:paddingRight="16dp"
+      android:id="@+id/right"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="677"
+      android:orientation="vertical"
       >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:ellipsize="none"
-        android:singleLine="true"
-        android:text="送至: "
-        android:textColor="#333"
-        android:textSize="14sp"
-        android:gravity="center_vertical"
-        tools:text="送至: "
+    <ImageView
+        android:id="@+id/right_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/right_top"
+        style="@style/Scale"
         />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:singleLine="true"
-        android:ellipsize="start"
-        android:text="津贴城市广场津贴城市广场津贴城市广场津贴城市广场津贴城市广场呵呵"
-        android:textColor="#666"
-        android:textSize="14sp"
-        android:gravity="center_vertical"
-        tools:text="津贴城市广场津贴城市广场"
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@android:color/white"
         />
 
+    <LinearLayout
+        android:id="@+id/right_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+      <ImageView
+          android:id="@+id/right_left"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:src="@drawable/right_left"
+          style="@style/Scale"
+          />
+
+      <View
+          android:layout_width="1px"
+          android:layout_height="match_parent"
+          android:background="@android:color/white"
+          />
+
+      <ImageView
+          android:id="@+id/right_right"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:src="@drawable/right_right"
+          style="@style/Scale"
+          />
+
+    </LinearLayout>
   </LinearLayout>
-
-</LinearLayout>
+</org.peace.allinone.ui.ActivityEntranceLayout>
