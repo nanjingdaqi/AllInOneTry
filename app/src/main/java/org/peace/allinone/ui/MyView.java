@@ -39,6 +39,11 @@ public class MyView extends TextView {
     AppLogger.e("onDraw");
   }
 
+  @Override protected void dispatchDraw(Canvas canvas) {
+    super.dispatchDraw(canvas);
+    AppLogger.e("dispatchDraw");
+  }
+
   @Override protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
     super.onLayout(changed, left, top, right, bottom);
     AppLogger.e("onLayout");

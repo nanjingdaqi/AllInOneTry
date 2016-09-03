@@ -26,7 +26,14 @@
   <org.peace.allinone.ui.MyLayout
       android:id="@+id/my_layout"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="100dp"
+      android:background="@android:color/holo_blue_light"
+      />
+
+  <org.peace.allinone.ui.MyView
+      android:layout_width="match_parent"
+      android:layout_height="100dp"
+      android:background="@android:color/holo_blue_dark"
       />
 
   <org.peace.allinone.ui.ShopLogoView
