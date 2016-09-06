@@ -15,11 +15,17 @@ repositories {
 }
 
 android {
-  compileSdkVersion 23
+  compileSdkVersion 22
   buildToolsVersion "23"
 
   lintOptions {
     abortOnError false
+  }
+
+  sourceSets {
+    main {
+      jniLibs.srcDirs = ['src/main/libs']
+    }
   }
 
   defaultConfig {
