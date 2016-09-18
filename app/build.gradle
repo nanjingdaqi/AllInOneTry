@@ -1,9 +1,10 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'me.ele.amigo'
 
 android {
   compileSdkVersion 23
-  buildToolsVersion "23"
+  buildToolsVersion '24.0.2'
 
   lintOptions {
     abortOnError false

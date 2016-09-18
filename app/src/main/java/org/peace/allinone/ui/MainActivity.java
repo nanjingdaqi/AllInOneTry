@@ -14,6 +14,8 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     ButterKnife.inject(this);
+
+    String str = "4";
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
