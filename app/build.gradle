@@ -12,6 +12,9 @@ apply plugin: 'me.tatarka.retrolambda'
 
 repositories {
   jcenter()
+  maven {
+    url "http://172.16.10.156:8081/nexus/content/groups/mobile"
+  }
 }
 
 android {
@@ -51,6 +54,8 @@ dependencies {
   compile 'com.squareup.okhttp:okhttp:2.5.0'
   compile 'com.squareup.retrofit:retrofit:1.9.0'
   compile 'com.google.code.gson:gson:2.3.1'
+
+  compile 'me.ele:webpdecoder:1.1.0'
 
   compile 'io.reactivex:rxandroid:1.0.1'
   // Because RxAndroid releases are few and far between, it is recommended you also

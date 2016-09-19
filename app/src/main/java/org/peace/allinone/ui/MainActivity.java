@@ -14,6 +14,9 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import me.ele.webp.WebPDecoder;
+import okio.BufferedSource;
+import okio.Okio;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,7 +53,10 @@ public class MainActivity extends AppCompatActivity {
 
       @Override public void onResponse(Response response) throws IOException {
         InputStream is = response.body().byteStream();
-        Bitmap bitmap = BitmapFactory.decodeStream(is);
+        //Bitmap bitmap = BitmapFactory.decodeStream(is);
+        BufferedSource source = Okio.buffer(Okio.source(is));
+        byte[] encoded = source.readByteArray();
+        Bitmap bitmap = WebPDecoder.decode(encoded);
         runOnUiThread(new Runnable() {
           @Override public void run() {
             imageView.setImageBitmap(bitmap);
