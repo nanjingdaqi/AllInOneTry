@@ -57,8 +57,31 @@ preBuild.doFirst {
   println 'doFirst'
 }
 
-assembleDebug.doLast {
-  println 'doLast'
+import com.android.build.gradle.api.ApkVariant
+
+project.afterEvaluate {
+  project.android.applicationVariants.all { ApkVariant variant ->
+    println 'variant name: ' + variant.dirName
+
+    println 'task name: ' + "zipalign${variant.name.capitalize()}"
+    Task task = project.tasks.findByName("zipalign${variant.name.capitalize()}")
+    println 'task: ' + task
+    if (task) {
+      task.doLast {
+        println 'task: ' + task.name
+        println 'task output: ' + task.outputs
+        println 'output size: ' + task.outputs.files.size()
+        task.outputs.files.files.each { File f ->
+          println 'output file: ' + f.absolutePath
+          String branchName = 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
+          int index = f.absolutePath.lastIndexOf('/')
+          println 'new name: ' +"${f.absolutePath.substring(0, index)}/${branchName}.apk"
+          f.renameTo("${f.absolutePath.substring(0, index)}/${branchName}.apk")
+        }
+        println 'zipalign doLast'
+      }
+    }
+  }
 }
 
 task cleanA << {
