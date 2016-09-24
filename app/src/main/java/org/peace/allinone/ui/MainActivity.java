@@ -1,11 +1,14 @@
 package org.peace.allinone.ui;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import org.json.JSONObject;
@@ -18,7 +21,7 @@ import org.peace.allinone.http.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-  static String URL = "http://localhost:3000/test";
+  static String URL = "http://download.ele.me/android_53964a92fe8659aadbe27524e9520d8f-rewrite";
   static String TAG = "Peace";
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -32,15 +35,14 @@ public class MainActivity extends AppCompatActivity {
     try {
       String body = "{\"age\": 30}";
       Http.performRequest(Request.newRequest(URL)
-              .method(Method.POST)
-              .body(body.getBytes("UTF-8")),
+              .method(Method.GET),
           new Http.Callback() {
             @Override public void onStart() {
               Log.e(TAG, "onStart");
             }
 
             @Override public void onUpdate(float percent) {
-              Log.e(TAG, "onUpdate");
+              Log.e(TAG, "onUpdate, percent: " + percent);
             }
 
             @Override public void onSucc(Response response) {
@@ -48,12 +50,13 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "onSucc");
 
                 byte[] body = response.body();
-                String content = new String(body, "UTF-8");
-                Log.e(TAG, "content: " + content);
-                JSONObject object = new JSONObject(content);
-                User user = new User();
-                user.name = object.getString("name");
-                Log.e(TAG, "user name: " + user.name);
+                File apkFile = new File(Environment.getExternalStorageDirectory(), "amigo_patch.apk");
+                if (apkFile.exists()) {
+                  apkFile.delete();
+                }
+                FileOutputStream fos = new FileOutputStream(apkFile);
+                fos.write(body);
+                fos.close();
               } catch (Exception e) {
                 e.printStackTrace();
               }
@@ -67,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
               Log.e(TAG, "onComplete");
             }
           });
-    } catch (UnsupportedEncodingException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
