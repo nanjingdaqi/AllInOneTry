@@ -9,4 +9,12 @@ public class Response {
         this.code = code;
         this.body = body;
     }
+
+    public int code() {
+        return code;
+    }
+
+    public byte[] body() {
+        return body;
+    }
 }

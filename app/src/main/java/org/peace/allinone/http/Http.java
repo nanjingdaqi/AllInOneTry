@@ -65,9 +65,11 @@ public class Http {
                                 @Override
                                 public void run() {
                                     callback.onFail(new Error(-1, null));
+                                    callback.onComplete();
                                 }
                             });
                         }
+                        return;
                     }
 
                     long contentLength = connection.getContentLength();
@@ -82,10 +84,11 @@ public class Http {
                                 @Override
                                 public void run() {
                                     callback.onFail(new Error(responseCode, null));
+                                    callback.onComplete();
                                 }
                             });
-                            return;
                         }
+                      return;
                     }
 
                     long length = 0;
@@ -112,6 +115,7 @@ public class Http {
                                 @Override
                                 public void run() {
                                     callback.onSucc(new Response(responseCode, os.toByteArray()));
+                                    callback.onComplete();
                                 }
                             });
                         } else {
@@ -119,6 +123,7 @@ public class Http {
                                 @Override
                                 public void run() {
                                     callback.onFail(new Error(responseCode, os.toByteArray()));
+                                    callback.onComplete();
                                 }
                             });
                         }
@@ -130,8 +135,8 @@ public class Http {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                // // TODO: 16/9/23  
-                                callback.onFail(new Error(100, null));
+                                callback.onFail(new Error(-1, null));
+                                callback.onComplete();
                             }
                         });
                     }
