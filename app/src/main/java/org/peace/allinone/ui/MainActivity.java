@@ -8,6 +8,7 @@ import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import dalvik.system.BaseDexClassLoader;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import me.ele.commons.AppLogger;
@@ -33,14 +34,17 @@ public class MainActivity extends AppCompatActivity {
       ApplicationInfo applicationInfo = getApplicationInfo();
       AppLogger.e("app info lib path: " + applicationInfo.nativeLibraryDir);
       AppLogger.e("app info app dir: " + applicationInfo.sourceDir);
-      Field field = ApplicationInfo.class.getDeclaredField("primaryCpuAbi");
-      field.setAccessible(true);
-      String primaryCpuAbi = (String) field.get(applicationInfo);
-      AppLogger.e("app info primary abi: " + primaryCpuAbi);
+      //Field field = ApplicationInfo.class.getDeclaredField("primaryCpuAbi");
+      //field.setAccessible(true);
+      //String primaryCpuAbi = (String) field.get(applicationInfo);
+      //AppLogger.e("app info primary abi: " + primaryCpuAbi);
+      //
+      //field = Application.class.getDeclaredField("mLoadedApk");
+      //field.setAccessible(true);
+      //Object loadedApk = field.get(getApplication());
 
-      field = Application.class.getDeclaredField("mLoadedApk");
-      field.setAccessible(true);
-      Object loadedApk = field.get(getApplication());
+      File dir = getDir("lib2", MODE_PRIVATE);
+      AppLogger.e("lib dir: " + dir.getAbsolutePath());
     } catch (Exception e) {
       e.printStackTrace();
     }
