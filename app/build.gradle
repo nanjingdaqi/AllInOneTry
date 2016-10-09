@@ -44,10 +44,10 @@ android {
     release {
       debuggable true
       signingConfig signingConfigs.debug
-      //      minifyEnabled true
-      //      shrinkResources true
-      //      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-      //      zipAlignEnabled true
+      minifyEnabled true
+      shrinkResources true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      zipAlignEnabled true
     }
   }
 
