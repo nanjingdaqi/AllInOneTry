@@ -1,0 +1,7 @@
+<resources>
+    <item name="id_ptr_layout" type="id"/>
+    <item name="id_recyclerview" type="id"/>
+    <item name="id_empty" type="id"/>
+    <item name="id_progress" type="id"/>
+    <item name="id_sticky_container" type="id"/>
+</resources>

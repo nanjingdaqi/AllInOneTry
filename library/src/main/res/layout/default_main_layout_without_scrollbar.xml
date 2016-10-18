@@ -1,0 +1,30 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+  <me.ele.components.pullrefresh.MaterialPullToRefreshLayout
+      android:id="@id/id_ptr_layout"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      >
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@id/id_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+  </me.ele.components.pullrefresh.MaterialPullToRefreshLayout>
+
+  <FrameLayout
+      android:id="@id/id_empty"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="gone"/>
+
+  <ViewStub
+      android:id="@id/id_progress"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="gone"/>
+
+</RelativeLayout>

@@ -1,0 +1,11 @@
+<me.ele.components.recyclerview.ContentLoadingProgressWheel
+    xmlns:wheel="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerHorizontal="true"
+    android:layout_centerVertical="true"
+    wheel:matProg_barColor="#999999"
+    wheel:matProg_barWidth="3dp"
+    wheel:matProg_circleRadius="22dp"
+    wheel:matProg_progressIndeterminate="true"/>

@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
     rv.addHeaderView(createHead(this, H, Color.BLUE, "Head 2"));
     rv.setRefreshListener(new PullToRefresh.OnRefreshListener() {
       @Override public void onRefresh() {
-        Log.e(TAG, "onRefresh");
         rv.postDelayed(new Runnable() {
           @Override public void run() {
             rv.finishRefresh();
@@ -49,7 +48,5 @@ public class MainActivity extends AppCompatActivity {
         }, 3000);
       }
     });
-    rv.enablePullRefresh();
-
   }
 }

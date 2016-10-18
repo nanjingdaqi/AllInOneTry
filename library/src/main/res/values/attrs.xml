@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <declare-styleable name="recycler">
+    <attr format="reference" name="empty_layout"/>
+    <attr format="reference" name="load_more_layout"/>
+    <attr format="reference" name="progress_layout"/>
+    <attr format="reference" name="main_layout"/>
+  </declare-styleable>
+
+  <declare-styleable name="ptr">
+    <attr name="android:enabled"/>
+    <attr format="enum" name="ptr_mode">
+      <enum name="z_axis" value="0"/>
+      <enum name="y_axis" value="1"/>
+    </attr>
+  </declare-styleable>
+</resources>
