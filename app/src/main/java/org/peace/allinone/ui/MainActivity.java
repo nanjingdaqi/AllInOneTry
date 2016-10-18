@@ -50,9 +50,8 @@ public class MainActivity extends AppCompatActivity {
           @Override public void run() {
             rv.finishRefresh();
           }
-        }, 3000);
+        }, 30000);
       }
     });
-    rv.disablePullRefresh();
   }
 }

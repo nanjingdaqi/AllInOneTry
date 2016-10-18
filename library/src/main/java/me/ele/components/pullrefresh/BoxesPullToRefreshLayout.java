@@ -704,22 +704,28 @@ public class BoxesPullToRefreshLayout extends ViewGroup implements NestedScrolli
 
     final int dy = dyUnconsumed + mParentOffsetInWindow[1];
     if (dy < 0) { // top-bottom scroll
-      if ((mTotalConsumed == 0 || mTotalConsumed == mSpinnerFinalOffset)) {
+      //if ((mTotalConsumed == 0 || mTotalConsumed == mSpinnerFinalOffset)) {
         if (mRefreshing && !mOffsetConsumed) {
           mTotalUnconsumed += mCurrentTargetOffsetTop;
           mOffsetConsumed = true;
         }
         mTotalUnconsumed += Math.abs(dy);
         moveTarget(mTotalUnconsumed, false);
-      } else { // bottom - top - bottom
 
-      }
+      //} else { // bottom - top - bottom
+      //
+      //}
     }
   }
 
   @Override public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
-    boolean consumed = mCurrentTargetOffsetTop > 0;
-    return dispatchNestedPreFling(velocityX, velocityY) || consumed;
+    if (dispatchNestedPreFling(velocityX, velocityY)) {
+      return true;
+    }
+    if (mRefreshing && velocityY > 0) {
+      return true;
+    }
+    return false;
   }
 
   @Override

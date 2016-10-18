@@ -421,6 +421,10 @@ public class EMRecyclerView extends FrameLayout {
     pullToRefresh.getLayout().setEnabled(false);
   }
 
+  public PullToRefresh.OnRefreshListener getRefreshListener() {
+    return onRefreshListener;
+  }
+
   public void setRefreshListener(PullToRefresh.OnRefreshListener listener) {
     this.onRefreshListener = listener;
     pullToRefresh.setOnRefreshListener(listener);

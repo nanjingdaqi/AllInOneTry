@@ -2,6 +2,7 @@ package org.peace.allinone.ui;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.view.NestedScrollingChildHelper;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ScrollerCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,14 +18,31 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
 
   static final String TAG = ToolbarBehavior.class.getSimpleName();
 
-  EMRecyclerView emRecyclerView;
+  private EMRecyclerView emRecyclerView;
+  private NestedScrollingChildHelper scrollingChildHelper;
+  private ScrollerCompat mScroller;
+  private FlingRunnable mFlingRunnable;
 
   public ToolbarBehavior(EMRecyclerView emRecyclerView) {
     this.emRecyclerView = emRecyclerView;
   }
 
+  @Override
+  public boolean onMeasureChild(CoordinatorLayout parent, View child, int parentWidthMeasureSpec,
+      int widthUsed, int parentHeightMeasureSpec, int heightUsed) {
+    if (scrollingChildHelper == null) {
+      scrollingChildHelper = new NestedScrollingChildHelper(parent);
+      scrollingChildHelper.setNestedScrollingEnabled(true);
+    }
+    return super.onMeasureChild(parent, child, parentWidthMeasureSpec, widthUsed,
+        parentHeightMeasureSpec, heightUsed);
+  }
+
   @Override public boolean onStartNestedScroll(CoordinatorLayout coordinatorLayout, View child,
       View directTargetChild, View target, int nestedScrollAxes) {
+    if (scrollingChildHelper.startNestedScroll(nestedScrollAxes)) {
+      return true;
+    }
     return target instanceof RecyclerView && nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL;
   }
 
@@ -33,7 +51,15 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
       int dx, int dy, int[] consumed) {
     Log.e(TAG, "onNestedPreScroll, dy: " + dy);
 
-    consumed[0] = 0;
+    scrollingChildHelper.dispatchNestedPreScroll(dx, dy, consumed, new int[2]);
+
+    Log.e(TAG, "consumed[1]: " + consumed[1]);
+    if (consumed[1] == dy) {
+      return;
+    }
+
+    dy -= consumed[1];
+
     // up scroll
     if (dy > 0) {
       ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
@@ -42,8 +68,6 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
 
       Log.e(TAG, "onNestedPreScroll, consume dy: " + (h - lp.height));
       consumed[1] = h - lp.height;
-    } else {
-      consumed[1] = 0;
     }
   }
 
@@ -54,21 +78,24 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     // down scroll
     if (dyUnconsumed < 0) {
       ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
+      int h = lp.height;
       setHeight(child, lp.height - dyUnconsumed);
+      dyUnconsumed += lp.height - h;
+      Log.e(TAG, "onNestedScroll to parent, dyUn: " + dyUnconsumed);
+      scrollingChildHelper.dispatchNestedScroll(0, 0, 0, dyUnconsumed, new int[2]);
     }
   }
-
-  private ScrollerCompat mScroller;
-  private FlingRunnable mFlingRunnable;
 
   @Override
   public boolean onNestedPreFling(CoordinatorLayout coordinatorLayout, View child, View target,
       float velocityX, float velocityY) {
-    Log.e(TAG, "onNestedPreFling, vy: " + velocityY);
+    Log.e(TAG, "onNestedPreFling, vy: " + velocityY + ", cor top: " + coordinatorLayout.getTop());
     if (mScroller == null) {
       mScroller = ScrollerCompat.create(child.getContext());
     }
-    // up fling
+    if (coordinatorLayout.getTop() > 0 && scrollingChildHelper.dispatchNestedPreFling(velocityX, velocityY)) {
+      return true;
+    }
     if (velocityY > 0 && child.getLayoutParams().height > dip2px(child.getContext(), 40)) {
       mScroller.fling(0, (int) target.getY(), 0, (int) (-velocityY), 0, 0,
           dip2px(child.getContext(), 40), dip2px(child.getContext(), 300));
@@ -108,16 +135,16 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     return false;
   }
 
+  @Override
+  public void onStopNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target) {
+    scrollingChildHelper.stopNestedScroll();
+  }
+
   public void setHeight(View child, int height) {
     Context ctx = child.getContext();
     ViewGroup.LayoutParams lp = child.getLayoutParams();
     lp.height = Math.min(dip2px(ctx, 300), Math.max(dip2px(ctx, 40), height));
     child.setLayoutParams(lp);
-    if (lp.height == dip2px(ctx, 300)) {
-      emRecyclerView.enablePullRefresh();
-    } else {
-      emRecyclerView.disablePullRefresh();
-    }
   }
 
   private class FlingRunnable implements Runnable {
