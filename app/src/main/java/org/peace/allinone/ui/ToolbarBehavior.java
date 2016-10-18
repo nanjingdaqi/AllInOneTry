@@ -4,21 +4,23 @@ import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ScrollerCompat;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import me.ele.commons.DimenUtil;
+import me.ele.components.recyclerview.EMRecyclerView;
+
+import static me.ele.commons.DimenUtil.dip2px;
 
 public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
 
   static final String TAG = ToolbarBehavior.class.getSimpleName();
 
-  public ToolbarBehavior(Context context, AttributeSet attrs) {
-    super(context, attrs);
+  EMRecyclerView emRecyclerView;
+
+  public ToolbarBehavior(EMRecyclerView emRecyclerView) {
+    this.emRecyclerView = emRecyclerView;
   }
 
   @Override public boolean onStartNestedScroll(CoordinatorLayout coordinatorLayout, View child,
@@ -30,19 +32,13 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
   public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, View child, View target,
       int dx, int dy, int[] consumed) {
     Log.e(TAG, "onNestedPreScroll, dy: " + dy);
-    int minH = DimenUtil.dip2px(child.getContext(), 40);
-
-    if (dy < 0) {
-      Log.d(TAG, "hang on");
-    }
 
     consumed[0] = 0;
     // up scroll
     if (dy > 0) {
       ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
       int h = lp.height;
-      lp.height = Math.max(minH, h - dy);
-      child.setLayoutParams(lp);
+      setHeight(child, h - dy);
 
       Log.e(TAG, "onNestedPreScroll, consume dy: " + (h - lp.height));
       consumed[1] = h - lp.height;
@@ -54,13 +50,11 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
   @Override public void onNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target,
       int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
     Log.e(TAG, "onNestedScroll, dyUnconsumed: " + dyUnconsumed);
-    int maxH = DimenUtil.dip2px(child.getContext(), 300);
 
     // down scroll
     if (dyUnconsumed < 0) {
       ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
-      lp.height = Math.min(maxH, lp.height - dyUnconsumed);
-      child.setLayoutParams(lp);
+      setHeight(child, lp.height - dyUnconsumed);
     }
   }
 
@@ -75,8 +69,9 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
       mScroller = ScrollerCompat.create(child.getContext());
     }
     // up fling
-    if (velocityY > 0 && child.getLayoutParams().height > DimenUtil.dip2px(child.getContext(), 40)) {
-      mScroller.fling(0, (int) target.getY(), 0, (int) (-velocityY), 0, 0, DimenUtil.dip2px(child.getContext(), 40), DimenUtil.dip2px(child.getContext(), 300));
+    if (velocityY > 0 && child.getLayoutParams().height > dip2px(child.getContext(), 40)) {
+      mScroller.fling(0, (int) target.getY(), 0, (int) (-velocityY), 0, 0,
+          dip2px(child.getContext(), 40), dip2px(child.getContext(), 300));
       if (mScroller.computeScrollOffset()) {
         mFlingRunnable = new FlingRunnable(child, target);
         ViewCompat.postOnAnimation(child, mFlingRunnable);
@@ -98,8 +93,11 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     // down fling
     RecyclerView rv = (RecyclerView) target;
     LinearLayoutManager llm = (LinearLayoutManager) rv.getLayoutManager();
-    if (velocityY < 0 && llm.findFirstVisibleItemPosition() == 0 && child.getLayoutParams().height < DimenUtil.dip2px(child.getContext(), 300)) {
-      mScroller.fling(0, (int) target.getY(), 0, (int) (-velocityY), 0, 0, DimenUtil.dip2px(child.getContext(), 40), DimenUtil.dip2px(child.getContext(), 300));
+    if (velocityY < 0
+        && llm.findFirstVisibleItemPosition() == 0
+        && child.getLayoutParams().height < dip2px(child.getContext(), 300)) {
+      mScroller.fling(0, (int) target.getY(), 0, (int) (-velocityY), 0, 0,
+          dip2px(child.getContext(), 40), dip2px(child.getContext(), 300));
       if (mScroller.computeScrollOffset()) {
         mFlingRunnable = new FlingRunnable(child, target);
         ViewCompat.postOnAnimation(child, mFlingRunnable);
@@ -110,24 +108,32 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     return false;
   }
 
+  public void setHeight(View child, int height) {
+    Context ctx = child.getContext();
+    ViewGroup.LayoutParams lp = child.getLayoutParams();
+    lp.height = Math.min(dip2px(ctx, 300), Math.max(dip2px(ctx, 40), height));
+    child.setLayoutParams(lp);
+    if (lp.height == dip2px(ctx, 300)) {
+      emRecyclerView.enablePullRefresh();
+    } else {
+      emRecyclerView.disablePullRefresh();
+    }
+  }
+
   private class FlingRunnable implements Runnable {
 
     View child;
     View target;
-    int minH;
 
     public FlingRunnable(View child, View target) {
       this.child = child;
       this.target = target;
-      minH = DimenUtil.dip2px(child.getContext(), 40);
     }
 
     @Override public void run() {
       if (mScroller.computeScrollOffset()) {
-        ViewGroup.LayoutParams lp = child.getLayoutParams();
         int value = mScroller.getCurrY();
-        lp.height = Math.max(minH, value);
-        child.setLayoutParams(lp);
+        setHeight(child, value);
         ViewCompat.postOnAnimation(child, this);
       }
     }

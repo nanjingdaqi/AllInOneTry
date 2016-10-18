@@ -2,14 +2,12 @@ package org.peace.allinone.ui;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
-import me.ele.commons.DimenUtil;
 import me.ele.components.pullrefresh.PullToRefresh;
 import me.ele.components.recyclerview.EMRecyclerView;
 import org.peace.allinone.R;
@@ -24,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
   int H;
 
   @InjectView(R.id.rv) EMRecyclerView rv;
+  @InjectView(R.id.toolbar) View toolbar;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -32,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.inject(this);
     setupRV();
+    setupToolbar();
+  }
+
+  private void setupToolbar() {
+    CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) toolbar.getLayoutParams();
+    lp.setBehavior(new ToolbarBehavior(rv));
   }
 
   public void setupRV() {

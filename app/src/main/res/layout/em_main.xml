@@ -17,11 +17,11 @@
         >
 
       <View
+          android:id="@+id/toolbar"
           android:layout_width="match_parent"
           android:layout_height="300dp"
           android:tag="toolbar"
           android:background="@android:color/holo_green_light"
-          app:layout_behavior="org.peace.allinone.ui.ToolbarBehavior"
           />
 
       <android.support.v7.widget.RecyclerView
