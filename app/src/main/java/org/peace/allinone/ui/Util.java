@@ -22,6 +22,7 @@ public class Util {
     tv.setBackgroundColor(bg);
     tv.setGravity(Gravity.CENTER);
     tv.setTextSize(30);
+    tv.setClickable(true);
     return tv;
   }
 
@@ -56,6 +57,7 @@ public class Util {
 
     @Override public void onBindViewHolder(MyVH holder, int position) {
       holder.tv.setText("Item " + position);
+      holder.tv.setClickable(true);
     }
 
     @Override public int getItemCount() {
