@@ -37,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
   public void setupRV() {
     rv.setLayoutManager(new LinearLayoutManager(this));
     Util.insertItem(this, rv);
-    rv.addHeaderView(createHead(this, H, Color.RED, "Head 1"));
-    rv.addHeaderView(createHead(this, H, Color.BLUE, "Head 2"));
+    rv.addHeaderView(createHead(this, H, Color.TRANSPARENT, "Head 1"));
+    rv.addHeaderView(createHead(this, H, Color.TRANSPARENT, "Head 2"));
     rv.setRefreshListener(new PullToRefresh.OnRefreshListener() {
       @Override public void onRefresh() {
         rv.postDelayed(new Runnable() {
@@ -48,5 +48,6 @@ public class MainActivity extends AppCompatActivity {
         }, 3000);
       }
     });
+    rv.disablePullRefresh();
   }
 }

@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class RVBehavior extends HeaderBehavior<RecyclerView> {
+public class RVBehavior extends CoordinatorLayout.Behavior<RecyclerView> {
 
   static final String TAG = RVBehavior.class.getSimpleName();
 
@@ -25,17 +25,30 @@ public class RVBehavior extends HeaderBehavior<RecyclerView> {
 
   @Override public boolean onDependentViewChanged(CoordinatorLayout parent, RecyclerView child,
       View dependency) {
-    Log.e(TAG, "onDependentViewChanged");
-    child.setY(dependency.getY() + dependency.getHeight());
+    Log.e(TAG, "onDependentViewChanged, dep h: " + dependency.getLayoutParams().height);
+    child.setY(dependency.getY() + dependency.getLayoutParams().height);
     return true;
+  }
+
+  @Override public boolean onMeasureChild(CoordinatorLayout parent, RecyclerView child,
+      int parentWidthMeasureSpec, int widthUsed, int parentHeightMeasureSpec, int heightUsed) {
+    Log.e(TAG, "onMeasure");
+    return super.onMeasureChild(parent, child, parentWidthMeasureSpec, widthUsed,
+        parentHeightMeasureSpec, heightUsed);
   }
 
   @Override
   public boolean onLayoutChild(CoordinatorLayout parent, RecyclerView child, int layoutDirection) {
-    Log.e(TAG, "onLayoutChild");
-    child.layout(0, getDependency(parent, child).getBottom(), parent.getMeasuredWidth(),
-        getDependency(parent, child).getBottom() + child.getMeasuredHeight());
-    return true;
+    Log.e(TAG, "onLayoutChild, dep b: " + getDependency(parent, child).getBottom());
+    //child.layout(0, getDependency(parent, child).getBottom(), parent.getMeasuredWidth(),
+    //    getDependency(parent, child).getBottom() + child.getMeasuredHeight());
+    //parent.onLayoutChild(child, layoutDirection);
+    View dependency = getDependency(parent, child);
+    int y = (int) (dependency.getY() + dependency.getLayoutParams().height);
+    Log.e(TAG, "y: " + y);
+    //child.setY(y);
+    //return true;
+    return false;
   }
 
   private View getDependency(CoordinatorLayout parent, View child) {
@@ -47,13 +60,13 @@ public class RVBehavior extends HeaderBehavior<RecyclerView> {
 
   @Override public boolean onInterceptTouchEvent(CoordinatorLayout parent, RecyclerView child,
       MotionEvent ev) {
-    Log.e(TAG, "onInterceptTouchEvent");
+    //Log.e(TAG, "onInterceptTouchEvent");
     return super.onInterceptTouchEvent(parent, child, ev);
   }
 
   @Override
   public boolean onTouchEvent(CoordinatorLayout parent, RecyclerView child, MotionEvent ev) {
-    Log.e(TAG, "onTouchEvent");
+    //Log.e(TAG, "onTouchEvent");
     return super.onTouchEvent(parent, child, ev);
   }
 }
