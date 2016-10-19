@@ -550,9 +550,12 @@ public class BoxesPullToRefreshLayout extends ViewGroup implements NestedScrolli
     int targetY;
     if (reverse) {
       targetY = mTempNestedTargetOffsetTop - (int) ((slingshotDist * dragPercent) + extraMove);
+      Log.e("toolbar", "mTempNestedTargetOffsetTop: " + mTempNestedTargetOffsetTop);
+      Log.e("toolbar", "targetY: " + targetY);
     } else {
       targetY = mOriginalOffsetTop + (int) ((slingshotDist * dragPercent) + extraMove);
     }
+    targetY = Math.max(0, targetY);
     int offset = targetY - mCurrentTargetOffsetTop;
     setTargetOffsetTopAndBottom(offset, true);
     if (!mRefreshing) {
@@ -637,6 +640,7 @@ public class BoxesPullToRefreshLayout extends ViewGroup implements NestedScrolli
     // If we are in the middle of consuming a scroll, then we want to move the target back up
     // before allowing the list to scroll.
     if (dy > 0) {
+      Log.e("toolbar", "mTotalUnconsumed: " + mTotalUnconsumed);
       if (mTotalUnconsumed > 0) { // top - bottom - top
         if (dy > mTotalUnconsumed) {
           consumed[1] = dy - (int) mTotalUnconsumed; // not bug
@@ -650,10 +654,14 @@ public class BoxesPullToRefreshLayout extends ViewGroup implements NestedScrolli
         if (dy < mCurrentTargetOffsetTop) {
           consumed[1] = dy;
           mTotalConsumed += dy;
+          Log.e("toolbar", "1");
         } else {
           consumed[1] = dy;
           mTotalConsumed += mCurrentTargetOffsetTop;
+          Log.e("toolbar", "2");
+          Log.e("toolbar", "mCurrentTargetOffsetTop: " + mCurrentTargetOffsetTop);
         }
+        Log.e("toolbar", "mTotalConsumed: " + mTotalConsumed);
         moveTarget(mTotalConsumed, true);
       }
     }
@@ -705,12 +713,12 @@ public class BoxesPullToRefreshLayout extends ViewGroup implements NestedScrolli
     final int dy = dyUnconsumed + mParentOffsetInWindow[1];
     if (dy < 0) { // top-bottom scroll
       //if ((mTotalConsumed == 0 || mTotalConsumed == mSpinnerFinalOffset)) {
-        if (mRefreshing && !mOffsetConsumed) {
-          mTotalUnconsumed += mCurrentTargetOffsetTop;
-          mOffsetConsumed = true;
-        }
-        mTotalUnconsumed += Math.abs(dy);
-        moveTarget(mTotalUnconsumed, false);
+      if (mRefreshing && !mOffsetConsumed) {
+        mTotalUnconsumed += mCurrentTargetOffsetTop;
+        mOffsetConsumed = true;
+      }
+      mTotalUnconsumed += Math.abs(dy);
+      moveTarget(mTotalUnconsumed, false);
 
       //} else { // bottom - top - bottom
       //

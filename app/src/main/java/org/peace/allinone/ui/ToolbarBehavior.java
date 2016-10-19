@@ -51,7 +51,12 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
       int dx, int dy, int[] consumed) {
     Log.e(TAG, "onNestedPreScroll, dy: " + dy);
 
-    scrollingChildHelper.dispatchNestedPreScroll(dx, dy, consumed, new int[2]);
+    int parentDy = dy;
+    if (dy > 0) {
+      parentDy = Math.min(coordinatorLayout.getTop(), dy);
+    }
+    Log.e(TAG, "parentDy: " + parentDy);
+    scrollingChildHelper.dispatchNestedPreScroll(dx, parentDy, consumed, new int[2]);
 
     Log.e(TAG, "consumed[1]: " + consumed[1]);
     if (consumed[1] == dy) {
