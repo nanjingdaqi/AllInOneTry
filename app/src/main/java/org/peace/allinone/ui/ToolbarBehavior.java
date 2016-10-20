@@ -69,7 +69,7 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     // up scroll
     if (dy > 0) {
       ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
-      int h = lp.height;
+      int h = child.getMeasuredHeight();
       setHeight(child, h - dy);
 
       Log.e(TAG, "onNestedPreScroll, consume dy: " + (h - lp.height));
@@ -84,7 +84,7 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     // down scroll
     if (dyUnconsumed < 0) {
       ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
-      int h = lp.height;
+      int h = child.getMeasuredHeight();
       setHeight(child, lp.height - dyUnconsumed);
       dyUnconsumed += lp.height - h;
       Log.e(TAG, "onNestedScroll to parent, dyUn: " + dyUnconsumed);
