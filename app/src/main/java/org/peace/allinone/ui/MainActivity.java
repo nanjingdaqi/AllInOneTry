@@ -6,6 +6,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
+import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import me.ele.components.pullrefresh.PullToRefresh;
@@ -22,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
   int H;
 
   @InjectView(R.id.rv) EMRecyclerView rv;
-  @InjectView(R.id.toolbar) View toolbar;
+  @InjectView(R.id.toolbar) TextView toolbar;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -36,7 +37,13 @@ public class MainActivity extends AppCompatActivity {
 
   private void setupToolbar() {
     CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) toolbar.getLayoutParams();
-    lp.setBehavior(new ToolbarBehavior(rv));
+    ToolbarBehavior behavior = new ToolbarBehavior();
+    behavior.addHeightChangeListener(new ToolbarBehavior.HeightChangeListener() {
+      @Override public void onHeightChange(int height) {
+        toolbar.setText("H: " + height);
+      }
+    });
+    lp.setBehavior(behavior);
   }
 
   public void setupRV() {

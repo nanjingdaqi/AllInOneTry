@@ -10,7 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import me.ele.components.recyclerview.EMRecyclerView;
+import java.util.HashSet;
+import java.util.Set;
 
 import static me.ele.commons.DimenUtil.dip2px;
 
@@ -18,13 +19,13 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
 
   static final String TAG = ToolbarBehavior.class.getSimpleName();
 
-  private EMRecyclerView emRecyclerView;
   private NestedScrollingChildHelper scrollingChildHelper;
   private ScrollerCompat mScroller;
   private FlingRunnable mFlingRunnable;
 
-  public ToolbarBehavior(EMRecyclerView emRecyclerView) {
-    this.emRecyclerView = emRecyclerView;
+  private Set<HeightChangeListener> listeners = new HashSet<>();
+
+  public ToolbarBehavior() {
   }
 
   @Override
@@ -98,7 +99,8 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     if (mScroller == null) {
       mScroller = ScrollerCompat.create(child.getContext());
     }
-    if (coordinatorLayout.getTop() > 0 && scrollingChildHelper.dispatchNestedPreFling(velocityX, velocityY)) {
+    if (coordinatorLayout.getTop() > 0 && scrollingChildHelper.dispatchNestedPreFling(velocityX,
+        velocityY)) {
       return true;
     }
     if (velocityY > 0 && child.getLayoutParams().height > dip2px(child.getContext(), 40)) {
@@ -145,11 +147,29 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     scrollingChildHelper.stopNestedScroll();
   }
 
-  public void setHeight(View child, int height) {
+  private void setHeight(View child, int height) {
     Context ctx = child.getContext();
     ViewGroup.LayoutParams lp = child.getLayoutParams();
+    int h = lp.height;
     lp.height = Math.min(dip2px(ctx, 300), Math.max(dip2px(ctx, 40), height));
     child.setLayoutParams(lp);
+    if (h != lp.height) {
+      notifyHeightChange(lp.height);
+    }
+  }
+
+  private void notifyHeightChange(int height) {
+    for (HeightChangeListener listener : listeners) {
+      listener.onHeightChange(height);
+    }
+  }
+
+  public void addHeightChangeListener(HeightChangeListener listener) {
+    listeners.add(listener);
+  }
+
+  public void removeHeightChangeListener(HeightChangeListener listener) {
+    listeners.remove(listener);
   }
 
   private class FlingRunnable implements Runnable {
@@ -169,5 +189,9 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
         ViewCompat.postOnAnimation(child, this);
       }
     }
+  }
+
+  public interface HeightChangeListener {
+    void onHeightChange(int height);
   }
 }
