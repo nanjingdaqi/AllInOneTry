@@ -1,11 +1,13 @@
 package org.peace.allinone.ui;
 
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.*;
 import android.view.View;
+import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import java.util.ArrayList;
@@ -20,18 +22,24 @@ import static org.peace.allinone.ui.Util.createHead;
 public class MainActivity extends AppCompatActivity {
 
   @BindView(R.id.rv) EMRecyclerView rv;
-  @BindView(R.id.toolbar) HomeFragmentToolbar toolbar;
+  @BindView(R.id.toolbar) protected HomeFragmentToolbar toolbar;
+  @BindView(R.id.hello) protected HelloView helloView;
   @BindView(R.id.emotion) protected EmotionView emotionView;
   @BindView(R.id.address) protected AddressView addressView;
+  @BindView(R.id.search) protected SearchView searchView;
   @BindView(R.id.search_key_words) protected SearchKeyWordsView searchKeyWordsView;
 
+  TextView head1;
+  ToolbarBehavior behavior;
 
   int H = DimenUtil.dip2px(60);
 
   @Override protected void onCreate(Bundle savedInstanceState) {
-    getWindow().getDecorView()
-        .setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    if (Build.VERSION.SDK_INT >= 21) {
+      getWindow().getDecorView()
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    }
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
@@ -39,14 +47,15 @@ public class MainActivity extends AppCompatActivity {
 
     setupRV();
     setupToolbar();
+    setupAnimationManager();
   }
 
   private void setupToolbar() {
     CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) toolbar.getLayoutParams();
-    ToolbarBehavior behavior = new ToolbarBehavior();
+    behavior = new ToolbarBehavior();
     behavior.addHeightChangeListener(new ToolbarBehavior.HeightChangeListener() {
-      @Override public void onHeightChange(int height) {
-
+      @Override public void onHeightChange(int drawHeight, int measureHeight) {
+        head1.setText("dH: " + drawHeight + ", mH: " + measureHeight);
       }
     });
     lp.setBehavior(behavior);
@@ -63,19 +72,37 @@ public class MainActivity extends AppCompatActivity {
     searchKeyWordsView.setKeyWords(keyWords);
   }
 
-  public void setupRV() {
+  private void setupRV() {
     rv.setLayoutManager(new LinearLayoutManager(this));
     Util.insertItem(this, rv);
-    rv.addHeaderView(createHead(this, H, Color.TRANSPARENT, "Head 1"));
+    rv.addHeaderView(head1 = createHead(this, H, Color.TRANSPARENT, "Head 1"));
     rv.addHeaderView(createHead(this, H, Color.TRANSPARENT, "Head 2"));
     rv.setRefreshListener(new PullToRefresh.OnRefreshListener() {
       @Override public void onRefresh() {
         rv.postDelayed(new Runnable() {
           @Override public void run() {
+            if (searchKeyWordsView.getVisibility() == View.VISIBLE) {
+              searchKeyWordsView.setVisibility(View.GONE);
+            } else {
+              searchKeyWordsView.setVisibility(View.VISIBLE);
+            }
+            behavior.reset();
             rv.finishRefresh();
           }
-        }, 30000);
+        }, 5000);
       }
     });
+  }
+
+  private void setupAnimationManager() {
+    AnimationManager animationManager = AnimationManager.builder(this)
+        .setToolbarBehavior(behavior)
+        .setSearchView(searchView)
+        .setHelloView(helloView)
+        .setAddressView(addressView)
+        .setEmotionView(emotionView)
+        .setSearchKeyWordsView(searchKeyWordsView)
+        .build();
+    behavior.addHeightChangeListener(animationManager.getToolbarHeightChangeListener());
   }
 }

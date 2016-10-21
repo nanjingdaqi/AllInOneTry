@@ -7,37 +7,39 @@
     android:orientation="vertical"
     >
 
-  <LinearLayout
+  <RelativeLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginLeft="20dp"
       android:layout_marginRight="20dp"
-      android:layout_marginTop="50dp"
       android:gravity="top"
       android:orientation="horizontal"
       >
+
+    <android.support.v4.widget.Space
+        android:id="@+id/top_space"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        />
 
     <org.peace.allinone.ui.HelloView
         android:id="@+id/hello"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        />
-
-    <android.support.v4.widget.Space
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/top_space"
         />
 
     <org.peace.allinone.ui.EmotionView
         android:id="@+id/emotion"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_gravity="right"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/top_space"
         />
 
-  </LinearLayout>
+  </RelativeLayout>
 
   <org.peace.allinone.ui.AddressView
       android:id="@+id/address"
@@ -47,8 +49,10 @@
       />
 
   <org.peace.allinone.ui.SearchView
+      android:id="@+id/search"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_marginBottom="10dp"
       android:layout_marginLeft="15dp"
       android:layout_marginRight="15dp"
       android:layout_marginTop="22dp"
@@ -61,7 +65,6 @@
       android:layout_marginBottom="14dp"
       android:layout_marginLeft="20dp"
       android:layout_marginRight="20dp"
-      android:layout_marginTop="10dp"
       />
 
 </LinearLayout>

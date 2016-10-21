@@ -1,5 +1,7 @@
 package org.peace.allinone.ui;
 
+import android.app.Activity;
+import android.os.Build;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.NestedScrollingChildHelper;
 import android.support.v4.view.ViewCompat;
@@ -11,22 +13,30 @@ import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 import java.util.HashSet;
 import java.util.Set;
+import me.ele.base.utils.DimenUtil;
 
-import static me.ele.base.utils.DimenUtil.dip2px;
+import static me.ele.base.utils.DimenUtil.getStatusBarHeight;
 
 public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
 
   private static final String TAG = ToolbarBehavior.class.getSimpleName();
-  private static final int FLING_SCALE = 5;
+  private static final int FLING_SCALE = 1;
 
   private NestedScrollingChildHelper scrollingChildHelper;
   private ScrollerCompat mScroller;
   private FlingRunnable mFlingRunnable;
-  private int minH = dip2px(100);  // todo change to toolbar height plus status bar height
+  private int minH;
+
+  private CoordinatorLayout coordinatorLayout;
+  private View child;
 
   private Set<HeightChangeListener> listeners = new HashSet<>();
 
   public ToolbarBehavior() {
+  }
+
+  public void reset() {
+    setBottomMargin(coordinatorLayout, child, 0);
   }
 
   @Override
@@ -35,6 +45,13 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     if (scrollingChildHelper == null) {
       scrollingChildHelper = new NestedScrollingChildHelper(parent);
       scrollingChildHelper.setNestedScrollingEnabled(true);
+      this.coordinatorLayout = parent;
+      this.child = child;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        minH = getStatusBarHeight() + DimenUtil.getToolBarHeight((Activity) child.getContext());
+      } else {
+        minH = DimenUtil.getToolBarHeight((Activity) child.getContext());
+      }
     }
     return super.onMeasureChild(parent, child, parentWidthMeasureSpec, widthUsed,
         parentHeightMeasureSpec, heightUsed);
@@ -113,7 +130,7 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     // up fling
     MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
     if (velocityY > 0 && child.getMeasuredHeight() + lp.bottomMargin > minH) {
-      mScroller.fling(0, lp.bottomMargin, 0, (int) (-velocityY / 5), 0, 0,
+      mScroller.fling(0, lp.bottomMargin, 0, (int) (-velocityY / FLING_SCALE), 0, 0,
           -child.getMeasuredHeight() + minH, 0);
       if (mScroller.computeScrollOffset()) {
         mFlingRunnable = new FlingRunnable(coordinatorLayout, child);
@@ -140,7 +157,7 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     if (velocityY < 0
         && llm.findFirstCompletelyVisibleItemPosition() == 0
         && lp.bottomMargin < 0) {
-      mScroller.fling(0, lp.bottomMargin, 0, (int) (-velocityY / 5), 0, 0,
+      mScroller.fling(0, lp.bottomMargin, 0, (int) (-velocityY / FLING_SCALE), 0, 0,
           -child.getMeasuredHeight() + minH,
           0);
       if (mScroller.computeScrollOffset()) {
@@ -155,24 +172,21 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
 
   // use child's bottom margin for locating recylerview's y
   private void setBottomMargin(CoordinatorLayout coordinatorLayout, View child, int bottomMargin) {
-    if (bottomMargin >= 0) {
-      return;
-    }
     MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
     int orgMargin = lp.bottomMargin;
     int h = child.getMeasuredHeight();
     int fakeHeight = Math.max(minH, h + bottomMargin);
-    lp.bottomMargin = -(h - fakeHeight);
+    lp.bottomMargin = Math.min(0, -(h - fakeHeight));
     child.setLayoutParams(lp);
     coordinatorLayout.dispatchDependentViewsChanged(child);
     if (orgMargin != lp.bottomMargin) {
-      notifyHeightChange(child.getMeasuredHeight() + lp.bottomMargin);
+      notifyHeightChange(child.getMeasuredHeight() + lp.bottomMargin, child.getMeasuredHeight());
     }
   }
 
-  private void notifyHeightChange(int height) {
+  private void notifyHeightChange(int drawHeight, int measureHeight) {
     for (HeightChangeListener listener : listeners) {
-      listener.onHeightChange(height);
+      listener.onHeightChange(drawHeight, measureHeight);
     }
   }
 
@@ -208,6 +222,10 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
   }
 
   public interface HeightChangeListener {
-    void onHeightChange(int height);
+    /**
+     * @param drawHeight the height can be seen
+     * @param measureHeight the height was measured
+     */
+    void onHeightChange(int drawHeight, int measureHeight);
   }
 }
