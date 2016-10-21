@@ -13,6 +13,7 @@ import butterknife.ButterKnife;
 import java.util.ArrayList;
 import java.util.List;
 import me.ele.base.utils.DimenUtil;
+import me.ele.base.utils.ResourceUtil;
 import me.ele.components.pullrefresh.PullToRefresh;
 import me.ele.components.recyclerview.EMRecyclerView;
 import org.peace.allinone.R;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void setupToolbar() {
+    toolbar.setSkinDrawable(ResourceUtil.getDrawable(R.drawable.sp_home_banner_default));
     CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) toolbar.getLayoutParams();
     behavior = new ToolbarBehavior();
     behavior.addHeightChangeListener(new ToolbarBehavior.HeightChangeListener() {

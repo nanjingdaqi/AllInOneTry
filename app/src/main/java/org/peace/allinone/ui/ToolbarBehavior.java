@@ -20,7 +20,7 @@ import static me.ele.base.utils.DimenUtil.getStatusBarHeight;
 public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
 
   private static final String TAG = ToolbarBehavior.class.getSimpleName();
-  private static final int FLING_SCALE = 1;
+  private static final int FLING_SCALE = 5;
 
   private NestedScrollingChildHelper scrollingChildHelper;
   private ScrollerCompat mScroller;
