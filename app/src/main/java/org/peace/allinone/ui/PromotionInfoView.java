@@ -5,22 +5,20 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import java.util.List;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.animation.Animation.ABSOLUTE;
-import static android.view.animation.Animation.RELATIVE_TO_SELF;
+import static org.peace.allinone.ui.TextSwitcherHelper.createInAnim;
+import static org.peace.allinone.ui.TextSwitcherHelper.createOutAnim;
 
 public class PromotionInfoView extends TextSwitcher {
 
-  private List<String> texts;
-  private final int ANIM_DURATION = 500;
-  private final int ANIM_DELAY = 2000;
+  private final long ANIM_DURATION = 2000;
+  private final long ANIM_DELAY = 3000;
 
+  private List<String> texts;
   private int index;
 
   private Handler handler = new Handler();
@@ -40,8 +38,8 @@ public class PromotionInfoView extends TextSwitcher {
     super(context, attrs);
     addView(createTextView());
     addView(createTextView());
-    setInAnimation(createInAnim());
-    setOutAnimation(createOutAnim());
+    setInAnimation(createInAnim(ANIM_DURATION));
+    setOutAnimation(createOutAnim(ANIM_DURATION));
   }
 
   private TextView createTextView() {
@@ -56,25 +54,15 @@ public class PromotionInfoView extends TextSwitcher {
   public void setTexts(List<String> texts) {
     this.texts = texts;
     resetAnim();
-    handler.post(task);
+    setCurrentText(texts.get(0));
+    ++index;
+    if (texts.size() > 1) {
+      handler.postDelayed(task, ANIM_DELAY);
+    }
   }
 
   private void resetAnim() {
     handler.removeCallbacks(task);
     index = 0;
-  }
-
-  private Animation createOutAnim() {
-    TranslateAnimation anim =
-        new TranslateAnimation(ABSOLUTE, 0, 0, 0, RELATIVE_TO_SELF, 0, RELATIVE_TO_SELF, -1.0f);
-    anim.setDuration(ANIM_DURATION);
-    return anim;
-  }
-
-  private Animation createInAnim() {
-    TranslateAnimation anim =
-        new TranslateAnimation(ABSOLUTE, 0, 0, 0, RELATIVE_TO_SELF, 1.0f, RELATIVE_TO_SELF, 0);
-    anim.setDuration(ANIM_DURATION);
-    return anim;
   }
 }

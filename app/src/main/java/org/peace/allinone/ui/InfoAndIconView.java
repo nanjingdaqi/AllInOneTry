@@ -37,6 +37,6 @@ public class InfoAndIconView extends RelativeLayout {
   public void showPromotion() {
     weatherInfoView.setVisibility(GONE);
     promotionInfoView.setVisibility(VISIBLE);
-    promotionInfoView.setTexts(Arrays.asList("one", "two", "three"));
+    promotionInfoView.setTexts(Arrays.asList("one"));
   }
 }

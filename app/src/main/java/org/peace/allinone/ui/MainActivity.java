@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     });
     lp.setBehavior(behavior);
 
-    emotionView.showOrderStatus();
+    emotionView.showPromotion();
     addressView.setAddress("近铁城市广场");
 
     List<String> keyWords = new ArrayList<>();

@@ -29,6 +29,6 @@ public class OrderStatusView extends FrameLayout {
   }
 
   public void setStatusTexts() {
-    statusTextView.setTexts(Arrays.asList("1", "2", "3"));
+    statusTextView.setTexts(Arrays.asList("one", "two", "three"));
   }
 }
