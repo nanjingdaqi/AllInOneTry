@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import me.ele.commons.AppLogger;
+import me.ele.base.utils.AppLogger;
 import org.peace.allinone.R;
 
 public class SubActivity extends AppCompatActivity {
@@ -14,7 +14,7 @@ public class SubActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    ButterKnife.inject(this);
+    ButterKnife.bind(this);
   }
 
   @Override protected void onDestroy() {

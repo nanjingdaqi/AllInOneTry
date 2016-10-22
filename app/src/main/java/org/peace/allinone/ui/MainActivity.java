@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import me.ele.commons.AppLogger;
+import me.ele.base.utils.AppLogger;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,9 +29,6 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    int id = v.getId();
-    if (id == R.id.start_btn) {
-      startActivity(new Intent(this, SubActivity.class));
-    }
+    startActivity(new Intent(this, SingleInstanceActivity.class));
   }
 }
