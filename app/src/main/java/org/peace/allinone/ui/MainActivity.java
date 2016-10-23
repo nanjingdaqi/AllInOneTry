@@ -64,6 +64,11 @@ public class MainActivity extends AppCompatActivity {
 
     emotionView.showPromotion();
     addressView.setAddress("近铁城市广场");
+    addressView.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        emotionView.showOrderStatus(true);
+      }
+    });
 
     List<String> keyWords = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
