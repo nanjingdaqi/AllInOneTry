@@ -15,7 +15,7 @@
       android:src="@drawable/ic_launcher"
       />
 
-  <org.peace.allinone.ui.WeatherInfoView
+  <me.ele.shopping.ui.home.WeatherInfoView
       android:id="@+id/weather_info"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
       android:layout_toStartOf="@id/image"
       />
 
-  <org.peace.allinone.ui.PromotionInfoView
+  <me.ele.shopping.ui.home.PromotionInfoView
       android:id="@+id/promotion_info"
       android:layout_width="50dp"
       android:layout_height="40dp"

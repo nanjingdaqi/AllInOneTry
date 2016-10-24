@@ -22,7 +22,7 @@
         android:layout_alignParentTop="true"
         />
 
-    <org.peace.allinone.ui.HelloView
+    <me.ele.shopping.ui.home.HelloView
         android:id="@+id/hello"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
         android:layout_below="@id/top_space"
         />
 
-    <org.peace.allinone.ui.EmotionView
+    <me.ele.shopping.ui.home.EmotionView
         android:id="@+id/emotion"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
@@ -40,14 +40,14 @@
 
   </RelativeLayout>
 
-  <org.peace.allinone.ui.AddressView
+  <me.ele.shopping.ui.home.AddressView
       android:id="@+id/address"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginLeft="20dp"
       />
 
-  <org.peace.allinone.ui.SearchView
+  <me.ele.shopping.ui.home.SearchView
       android:id="@+id/search"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
       android:layout_marginTop="22dp"
       />
 
-  <org.peace.allinone.ui.SearchKeyWordsView
+  <me.ele.shopping.ui.home.SearchKeyWordsView
       android:id="@+id/search_key_words"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"

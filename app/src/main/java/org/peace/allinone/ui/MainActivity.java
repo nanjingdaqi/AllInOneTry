@@ -16,6 +16,7 @@ import me.ele.base.utils.DimenUtil;
 import me.ele.base.utils.ResourceUtil;
 import me.ele.components.pullrefresh.PullToRefresh;
 import me.ele.components.recyclerview.EMRecyclerView;
+import me.ele.shopping.ui.home.*;
 import org.peace.allinone.R;
 
 import static org.peace.allinone.ui.Util.createHead;
@@ -27,11 +28,11 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.hello) protected HelloView helloView;
   @BindView(R.id.emotion) protected EmotionView emotionView;
   @BindView(R.id.address) protected AddressView addressView;
-  @BindView(R.id.search) protected SearchView searchView;
+  @BindView(R.id.search) protected me.ele.shopping.ui.home.SearchView searchView;
   @BindView(R.id.search_key_words) protected SearchKeyWordsView searchKeyWordsView;
 
   TextView head1;
-  ToolbarBehavior behavior;
+  ToolbarBehavior toolbarBehavior;
 
   int H = DimenUtil.dip2px(60);
 
@@ -54,13 +55,13 @@ public class MainActivity extends AppCompatActivity {
   private void setupToolbar() {
     toolbar.setSkinDrawable(ResourceUtil.getDrawable(R.drawable.sp_home_banner_default));
     CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) toolbar.getLayoutParams();
-    behavior = new ToolbarBehavior();
-    behavior.addHeightChangeListener(new ToolbarBehavior.HeightChangeListener() {
+    toolbarBehavior = new ToolbarBehavior();
+    toolbarBehavior.addHeightChangeListener(new ToolbarBehavior.HeightChangeListener() {
       @Override public void onHeightChange(int drawHeight, int measureHeight) {
         head1.setText("dH: " + drawHeight + ", mH: " + measureHeight);
       }
     });
-    lp.setBehavior(behavior);
+    lp.setBehavior(toolbarBehavior);
 
     emotionView.showPromotion();
     addressView.setAddress("近铁城市广场");
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
               searchKeyWordsView.setVisibility(View.VISIBLE);
             }
-            behavior.reset();
+            toolbarBehavior.reset();
             rv.finishRefresh();
           }
         }, 5000);
@@ -103,13 +104,13 @@ public class MainActivity extends AppCompatActivity {
 
   private void setupAnimationManager() {
     AnimationManager animationManager = AnimationManager.builder(this)
-        .setToolbarBehavior(behavior)
+        .setToolbarBehavior(toolbarBehavior)
         .setSearchView(searchView)
         .setHelloView(helloView)
         .setAddressView(addressView)
         .setEmotionView(emotionView)
         .setSearchKeyWordsView(searchKeyWordsView)
         .build();
-    behavior.addHeightChangeListener(animationManager.getToolbarHeightChangeListener());
+    toolbarBehavior.addHeightChangeListener(animationManager.getToolbarHeightChangeListener());
   }
 }

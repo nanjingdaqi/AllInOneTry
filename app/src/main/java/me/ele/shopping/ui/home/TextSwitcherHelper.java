@@ -1,4 +1,4 @@
-package org.peace.allinone.ui;
+package me.ele.shopping.ui.home;
 
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;

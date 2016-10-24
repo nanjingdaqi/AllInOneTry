@@ -1,10 +1,10 @@
-package org.peace.allinone.ui;
+package me.ele.shopping.ui.home;
 
 import android.app.Activity;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import me.ele.base.utils.DimenUtil;
-import org.peace.allinone.ui.ToolbarBehavior.HeightChangeListener;
+import me.ele.shopping.ui.home.ToolbarBehavior.HeightChangeListener;
 
 import static me.ele.base.utils.DimenUtil.getToolBarHeight;
 

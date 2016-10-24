@@ -16,7 +16,7 @@
       android:src="@drawable/home_icon_scene_knight"
       />
 
-  <org.peace.allinone.ui.OrderStatusTextView
+  <me.ele.shopping.ui.home.OrderStatusTextView
       android:id="@+id/text"
       android:layout_width="0dp"
       android:layout_height="match_parent"

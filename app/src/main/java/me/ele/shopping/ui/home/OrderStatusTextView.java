@@ -1,4 +1,4 @@
-package org.peace.allinone.ui;
+package me.ele.shopping.ui.home;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -12,8 +12,8 @@ import java.util.List;
 import static android.view.Gravity.CENTER_VERTICAL;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static org.peace.allinone.ui.TextSwitcherHelper.createInAnim;
-import static org.peace.allinone.ui.TextSwitcherHelper.createOutAnim;
+import static me.ele.shopping.ui.home.TextSwitcherHelper.createInAnim;
+import static me.ele.shopping.ui.home.TextSwitcherHelper.createOutAnim;
 
 public class OrderStatusTextView extends TextSwitcher {
 

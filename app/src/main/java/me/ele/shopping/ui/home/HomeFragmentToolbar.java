@@ -1,4 +1,4 @@
-package org.peace.allinone.ui;
+package me.ele.shopping.ui.home;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     >
 
-  <org.peace.allinone.ui.InfoAndIconView
+  <me.ele.shopping.ui.home.InfoAndIconView
       android:id="@+id/info_and_icon"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -13,7 +13,7 @@
       tools:visibility="visible"
       />
 
-  <org.peace.allinone.ui.OrderStatusView
+  <me.ele.shopping.ui.home.OrderStatusView
       android:id="@+id/order_status"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"

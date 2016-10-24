@@ -1,4 +1,4 @@
-package org.peace.allinone.ui;
+package me.ele.shopping.ui.home;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -10,8 +10,6 @@ import android.widget.TextView;
 import java.util.List;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static org.peace.allinone.ui.TextSwitcherHelper.createInAnim;
-import static org.peace.allinone.ui.TextSwitcherHelper.createOutAnim;
 
 public class PromotionInfoView extends TextSwitcher {
 
@@ -38,8 +36,8 @@ public class PromotionInfoView extends TextSwitcher {
     super(context, attrs);
     addView(createTextView());
     addView(createTextView());
-    setInAnimation(createInAnim(ANIM_DURATION));
-    setOutAnimation(createOutAnim(ANIM_DURATION));
+    setInAnimation(TextSwitcherHelper.createInAnim(ANIM_DURATION));
+    setOutAnimation(TextSwitcherHelper.createOutAnim(ANIM_DURATION));
   }
 
   private TextView createTextView() {

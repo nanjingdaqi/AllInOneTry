@@ -1,13 +1,11 @@
-package org.peace.allinone.ui;
+package me.ele.shopping.ui.home;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import org.peace.allinone.R;
 
 public class OrderStatusView extends FrameLayout {
