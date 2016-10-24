@@ -22,7 +22,7 @@
         android:layout_alignParentTop="true"
         />
 
-    <me.ele.shopping.ui.home.HelloView
+    <me.ele.shopping.ui.home.toolbar.HelloView
         android:id="@+id/hello"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
         android:layout_below="@id/top_space"
         />
 
-    <me.ele.shopping.ui.home.EmotionView
+    <me.ele.shopping.ui.home.toolbar.EmotionView
         android:id="@+id/emotion"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
@@ -40,14 +40,14 @@
 
   </RelativeLayout>
 
-  <me.ele.shopping.ui.home.AddressView
+  <me.ele.shopping.ui.home.toolbar.AddressView
       android:id="@+id/address"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginLeft="20dp"
       />
 
-  <me.ele.shopping.ui.home.SearchView
+  <me.ele.shopping.ui.home.toolbar.SearchView
       android:id="@+id/search"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
       android:layout_marginTop="22dp"
       />
 
-  <me.ele.shopping.ui.home.SearchKeyWordsView
+  <me.ele.shopping.ui.home.toolbar.SearchKeyWordsView
       android:id="@+id/search_key_words"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"

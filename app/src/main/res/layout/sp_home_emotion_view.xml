@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     >
 
-  <me.ele.shopping.ui.home.InfoAndIconView
+  <me.ele.shopping.ui.home.toolbar.InfoAndIconView
       android:id="@+id/info_and_icon"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -13,7 +13,7 @@
       tools:visibility="visible"
       />
 
-  <me.ele.shopping.ui.home.OrderStatusView
+  <me.ele.shopping.ui.home.toolbar.OrderStatusView
       android:id="@+id/order_status"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"

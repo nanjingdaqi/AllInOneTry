@@ -15,7 +15,7 @@
       android:src="@drawable/ic_launcher"
       />
 
-  <me.ele.shopping.ui.home.WeatherInfoView
+  <me.ele.shopping.ui.home.toolbar.WeatherInfoView
       android:id="@+id/weather_info"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
       android:layout_toStartOf="@id/image"
       />
 
-  <me.ele.shopping.ui.home.PromotionInfoView
+  <me.ele.shopping.ui.home.toolbar.PromotionInfoView
       android:id="@+id/promotion_info"
       android:layout_width="50dp"
       android:layout_height="40dp"

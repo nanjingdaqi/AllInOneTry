@@ -1,14 +1,13 @@
-package me.ele.shopping.ui.home;
+package me.ele.shopping.ui.home.toolbar;
 
 import android.app.Activity;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import me.ele.base.utils.DimenUtil;
-import me.ele.shopping.ui.home.ToolbarBehavior.HeightChangeListener;
 
 import static me.ele.base.utils.DimenUtil.getToolBarHeight;
 
-public class AnimationManager implements HeightChangeListener {
+public class AnimationManager implements ToolbarBehavior.HeightChangeListener {
 
   private static final String TAG = AnimationManager.class.getSimpleName();
   private static final float ALPHA_FACTOR = 0.7f;
@@ -31,7 +30,7 @@ public class AnimationManager implements HeightChangeListener {
     this.activity = activity;
   }
 
-  public HeightChangeListener getToolbarHeightChangeListener() {
+  public ToolbarBehavior.HeightChangeListener getToolbarHeightChangeListener() {
     return this;
   }
 

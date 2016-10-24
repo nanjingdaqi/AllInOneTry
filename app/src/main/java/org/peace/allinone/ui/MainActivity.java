@@ -16,7 +16,7 @@ import me.ele.base.utils.DimenUtil;
 import me.ele.base.utils.ResourceUtil;
 import me.ele.components.pullrefresh.PullToRefresh;
 import me.ele.components.recyclerview.EMRecyclerView;
-import me.ele.shopping.ui.home.*;
+import me.ele.shopping.ui.home.toolbar.*;
 import org.peace.allinone.R;
 
 import static org.peace.allinone.ui.Util.createHead;
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.hello) protected HelloView helloView;
   @BindView(R.id.emotion) protected EmotionView emotionView;
   @BindView(R.id.address) protected AddressView addressView;
-  @BindView(R.id.search) protected me.ele.shopping.ui.home.SearchView searchView;
+  @BindView(R.id.search) protected me.ele.shopping.ui.home.toolbar.SearchView searchView;
   @BindView(R.id.search_key_words) protected SearchKeyWordsView searchKeyWordsView;
 
   TextView head1;

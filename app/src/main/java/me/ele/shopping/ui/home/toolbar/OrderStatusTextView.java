@@ -1,22 +1,25 @@
-package me.ele.shopping.ui.home;
+package me.ele.shopping.ui.home.toolbar;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
+import java.util.ArrayList;
 import java.util.List;
 
+import static android.view.Gravity.CENTER_VERTICAL;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-public class PromotionInfoView extends TextSwitcher {
+public class OrderStatusTextView extends TextSwitcher {
 
   private final long ANIM_DURATION = 2000;
   private final long ANIM_DELAY = 3000;
 
-  private List<String> texts;
+  private List<String> texts = new ArrayList<>();
+
   private int index;
 
   private Handler handler = new Handler();
@@ -28,11 +31,11 @@ public class PromotionInfoView extends TextSwitcher {
     }
   };
 
-  public PromotionInfoView(Context context) {
+  public OrderStatusTextView(Context context) {
     this(context, null);
   }
 
-  public PromotionInfoView(Context context, AttributeSet attrs) {
+  public OrderStatusTextView(Context context, AttributeSet attrs) {
     super(context, attrs);
     addView(createTextView());
     addView(createTextView());
@@ -42,10 +45,13 @@ public class PromotionInfoView extends TextSwitcher {
 
   private TextView createTextView() {
     TextView tv = new TextView(getContext());
-    tv.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+    tv.setMaxLines(2);
     tv.setTextColor(Color.WHITE);
-    tv.setTextSize(11);
-    tv.setLayoutParams(new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+    tv.setTextSize(10);
+    tv.setGravity(CENTER_VERTICAL);
+    LayoutParams lp = new LayoutParams(WRAP_CONTENT, MATCH_PARENT);
+    lp.gravity = CENTER_VERTICAL;
+    tv.setLayoutParams(lp);
     return tv;
   }
 

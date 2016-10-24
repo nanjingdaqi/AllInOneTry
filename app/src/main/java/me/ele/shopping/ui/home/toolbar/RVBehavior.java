@@ -1,4 +1,4 @@
-package me.ele.shopping.ui.home;
+package me.ele.shopping.ui.home.toolbar;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;

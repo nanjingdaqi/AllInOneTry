@@ -16,7 +16,7 @@
         android:layout_height="match_parent"
         >
 
-      <me.ele.shopping.ui.home.HomeFragmentToolbar
+      <me.ele.shopping.ui.home.toolbar.HomeFragmentToolbar
           android:id="@+id/toolbar"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
           android:layout_height="match_parent"
           android:scrollbars="vertical"
           android:background="@android:color/white"
-          app:layout_behavior="me.ele.shopping.ui.home.RVBehavior"
+          app:layout_behavior="me.ele.shopping.ui.home.toolbar.RVBehavior"
           />
 
     </android.support.design.widget.CoordinatorLayout>
