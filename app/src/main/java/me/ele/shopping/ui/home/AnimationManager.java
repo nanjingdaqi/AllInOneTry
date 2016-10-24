@@ -54,19 +54,14 @@ public class AnimationManager implements HeightChangeListener {
   }
 
   private void updateSearchView(int drawH, int measureH) {
-    int minToolbarH = toolbarBehavior.getMinH();
-    int maxToolbarH = measureH;
-
     int searchViewH = searchView.getMeasuredHeight();
     int searchViewMargin = (getToolBarHeight(activity) - searchViewH) / 2;
     int minSearchViewH = searchViewMargin + getStatusBarHeight();
+    int maxToolbarH = measureH;
+    int dy = maxToolbarH - drawH;
     int maxSearchViewH = searchView.getTop();
-
-    // 使用直线插补，横轴x为toolbar底部所在位置，纵轴y为searchView顶部位置
-    // 斜率
-    float k = ((maxSearchViewH - minSearchViewH) * 1.0f) / ((maxToolbarH - minToolbarH) * 1.0f);
-    int x = drawH - minToolbarH;
-    int y = (int) (k * x + minSearchViewH);
+    int y = maxSearchViewH - dy;
+    y = Math.max(minSearchViewH, y);
     searchView.setY(y);
   }
 
@@ -86,6 +81,14 @@ public class AnimationManager implements HeightChangeListener {
     int y = maxAddressViewH - dy;
     addressView.setY(y);
     addressView.setAlpha(calculateAlpha(drawH, measureH, dy));
+  }
+
+  private int getSearchViewScrollRange() {
+    int searchViewH = searchView.getMeasuredHeight();
+    int searchViewMargin = (getToolBarHeight(activity) - searchViewH) / 2;
+    int minSearchViewH = searchViewMargin + getStatusBarHeight();
+    int maxSearchViewH = searchView.getTop();
+    return maxSearchViewH - minSearchViewH;
   }
 
   private void updateEmotionView(int drawH, int measureH) {
@@ -109,10 +112,33 @@ public class AnimationManager implements HeightChangeListener {
     int maxSearchKeyWordsViewH = searchKeyWordsView.getTop();
     int y = maxSearchKeyWordsViewH - dy;
     searchKeyWordsView.setY(y);
-    searchKeyWordsView.setAlpha(calculateAlpha(drawH, measureH, dy));
+    float alpha;
+    if (dy <= getSearchViewScrollRange()) {
+      alpha = 1.f;
+    } else {
+      dy -= getSearchViewScrollRange();
+      alpha = 1.f - (dy * 1.f / (searchKeyWordsView.getMeasuredHeight()));
+      alpha = Math.max(0, alpha);
+    }
+    searchKeyWordsView.setAlpha(alpha);
   }
 
   private float calculateAlpha(int drawH, int measureH, int dy) {
+    int maxToolbarH = measureH;
+    int minToolbarH = toolbarBehavior.getMinH();
+    int deadH = (int) (maxToolbarH - (maxToolbarH - minToolbarH) * ALPHA_FACTOR);
+    float k = 1.0f / (maxToolbarH - deadH);
+    int currentH = minToolbarH + (maxToolbarH - minToolbarH) - dy;
+    float alpha;
+    if (currentH <= deadH) {
+      alpha = 0;
+    } else {
+      alpha = k * (currentH - deadH);
+    }
+    return alpha;
+  }
+
+  private float calculateAlpha2(int drawH, int measureH, int dy) {
     int maxToolbarH = measureH;
     int minToolbarH = toolbarBehavior.getMinH();
     int deadH = (int) (maxToolbarH - (maxToolbarH - minToolbarH) * ALPHA_FACTOR);
