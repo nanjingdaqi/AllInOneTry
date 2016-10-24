@@ -4,11 +4,10 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.Nullable;
 
-import static android.graphics.drawable.GradientDrawable.Orientation.TR_BL;
 import static me.ele.base.utils.ColorParser.parse;
 
 public class ToolbarBgDrawable extends Drawable implements ToolbarBehavior.HeightChangeListener {
@@ -17,10 +16,7 @@ public class ToolbarBgDrawable extends Drawable implements ToolbarBehavior.Heigh
 
   private static final float ALPHA_FACTOR = 0.25f;
 
-  private int blueStartColor = parse("#0088ff");
-  private int blueEndColor = parse("#0096ff");
-  private GradientDrawable blueDrawable =
-      new GradientDrawable(TR_BL, new int[] { blueStartColor, blueEndColor });
+  private ColorDrawable blueDrawable = new ColorDrawable(parse("#3190e8"));
   @Nullable private Drawable skinDrawable;
   private float blueAlpha;
   private int offset;
