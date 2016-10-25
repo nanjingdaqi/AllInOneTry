@@ -1,12 +1,38 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     >
 
-  <org.peace.allinone.ui.MyLayout
+  <TextView
+      android:id="@+id/one"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:text="One"
       />
 
-</FrameLayout>
+  <TextView
+      android:id="@+id/two"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/one"
+      android:text="Two"
+      />
+
+  <TextView
+      android:id="@+id/three"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/two"
+      android:text="Three"
+      />
+
+  <Button
+      android:id="@+id/btn"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:text="Start"
+      />
+
+
+</RelativeLayout>

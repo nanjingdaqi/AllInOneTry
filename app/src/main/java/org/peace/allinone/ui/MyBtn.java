@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.Button;
-import me.ele.commons.AppLogger;
 
 public class MyBtn extends Button {
   public MyBtn(Context context) {

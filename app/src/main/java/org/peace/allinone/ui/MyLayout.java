@@ -1,16 +1,14 @@
 package org.peace.allinone.ui;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import me.ele.commons.AppLogger;
-import me.ele.commons.DimenUtil;
+import me.ele.base.utils.AppLogger;
+import me.ele.base.utils.DimenUtil;
 import org.peace.allinone.R;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -44,7 +42,8 @@ public class MyLayout extends FrameLayout {
     addView(buyHistoryTV, lp);
 
     buyFoodsTV = new TextView(ctx);
-    buyFoodsTV.setText("Buy FoodsBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuy");
+    buyFoodsTV.setText(
+        "Buy FoodsBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuyBuy");
     buyFoodsTV.setSingleLine(true);
     buyFoodsTV.setEllipsize(TextUtils.TruncateAt.END);
     addView(buyFoodsTV, lp);
@@ -53,8 +52,8 @@ public class MyLayout extends FrameLayout {
     rebuyBtn.setText("再来一单");
     Drawable bg = getResources().getDrawable(R.drawable.shape);
     rebuyBtn.setBackgroundDrawable(bg);
-    rebuyBtn.setMinimumHeight(DimenUtil.dip2px(ctx, 0));
-    rebuyBtn.setMinHeight(DimenUtil.dip2px(ctx, 0));
+    rebuyBtn.setMinimumHeight(DimenUtil.dip2px(0));
+    rebuyBtn.setMinHeight(DimenUtil.dip2px(0));
     rebuyBtn.setMinimumWidth(0);
     rebuyBtn.setMinWidth(0);
     rebuyBtn.setIncludeFontPadding(false);
@@ -66,7 +65,7 @@ public class MyLayout extends FrameLayout {
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     int w = MeasureSpec.getSize(widthMeasureSpec);
-    int h = DimenUtil.dip2px(getContext(), 60);
+    int h = DimenUtil.dip2px(60);
     setMeasuredDimension(w, h);
   }
 
@@ -76,12 +75,12 @@ public class MyLayout extends FrameLayout {
     AppLogger.d("pw, ph: " + parentWidth + ", " + parentHeight);
 
     int buyHistoryH = buyHistoryTV.getMeasuredHeight();
-    int margin = DimenUtil.dip2px(getContext(), 8);
+    int margin = DimenUtil.dip2px(8);
     int buyFoodH = buyFoodsTV.getMeasuredHeight();
 
     AppLogger.d("bhh, m, bfh: " + buyHistoryH + ", " + margin + ", " + buyFoodH);
 
-    int paddingLR = DimenUtil.dip2px(getContext(), 22);
+    int paddingLR = DimenUtil.dip2px(22);
     int buyHistoryT = (parentHeight - buyHistoryH - margin - buyFoodH) / 2;
     AppLogger.d("ft: " + buyHistoryT);
     buyHistoryTV.layout(paddingLR, buyHistoryT, paddingLR + buyHistoryTV.getMeasuredWidth(),
@@ -100,7 +99,7 @@ public class MyLayout extends FrameLayout {
     AppLogger.d("rebuy cpdt: " + rebuyBtn.getCompoundPaddingTop());
     AppLogger.d("bh pdt: " + buyHistoryTV.getPaddingTop());
 
-    int maxW = parentWidth - paddingLR * 2 - rebuyW - DimenUtil.dip2px(getContext(), 8);
+    int maxW = parentWidth - paddingLR * 2 - rebuyW - DimenUtil.dip2px(8);
     if (maxW < buyFoodsTV.getMeasuredWidth()) {
       buyFoodsTV.setMaxWidth(maxW);
     }
