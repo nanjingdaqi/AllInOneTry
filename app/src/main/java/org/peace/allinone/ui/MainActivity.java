@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     addressView.setAddress("近铁城市广场");
     addressView.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        emotionView.showOrderStatus(true);
+
       }
     });
 
@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void setupAnimationManager() {
-    AnimationManager animationManager = AnimationManager.builder(this)
+    ScrollManager scrollManager = ScrollManager.builder(this)
         .setToolbarBehavior(toolbarBehavior)
         .setSearchView(searchView)
         .setHelloView(helloView)
@@ -111,6 +111,6 @@ public class MainActivity extends AppCompatActivity {
         .setEmotionView(emotionView)
         .setSearchKeyWordsView(searchKeyWordsView)
         .build();
-    toolbarBehavior.addHeightChangeListener(animationManager.getToolbarHeightChangeListener());
+    toolbarBehavior.addHeightChangeListener(scrollManager.getToolbarHeightChangeListener());
   }
 }

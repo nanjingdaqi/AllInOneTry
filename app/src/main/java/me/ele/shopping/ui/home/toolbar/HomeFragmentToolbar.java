@@ -37,6 +37,7 @@ public class HomeFragmentToolbar extends LinearLayout {
   @Override protected void onAttachedToWindow() {
     super.onAttachedToWindow();
     getBehavior().addHeightChangeListener(toolbarBgDrawable);
+    getBehavior().setup((CoordinatorLayout) getParent(), this);
   }
 
   @Override protected void onDetachedFromWindow() {

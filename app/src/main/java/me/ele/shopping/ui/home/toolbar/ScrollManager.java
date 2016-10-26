@@ -7,9 +7,9 @@ import me.ele.base.utils.DimenUtil;
 
 import static me.ele.base.utils.DimenUtil.getToolBarHeight;
 
-public class AnimationManager implements ToolbarBehavior.HeightChangeListener {
+public class ScrollManager implements ToolbarBehavior.HeightChangeListener {
 
-  private static final String TAG = AnimationManager.class.getSimpleName();
+  private static final String TAG = ScrollManager.class.getSimpleName();
   private static final float ALPHA_FACTOR = 0.7f;
 
   private Activity activity;
@@ -23,10 +23,10 @@ public class AnimationManager implements ToolbarBehavior.HeightChangeListener {
   private int statusBarHeight;
 
   public static Builder builder(Activity activity) {
-    return new Builder(new AnimationManager(activity));
+    return new Builder(new ScrollManager(activity));
   }
 
-  private AnimationManager(Activity activity) {
+  private ScrollManager(Activity activity) {
     this.activity = activity;
   }
 
@@ -137,25 +137,10 @@ public class AnimationManager implements ToolbarBehavior.HeightChangeListener {
     return alpha;
   }
 
-  private float calculateAlpha2(int drawH, int measureH, int dy) {
-    int maxToolbarH = measureH;
-    int minToolbarH = toolbarBehavior.getMinH();
-    int deadH = (int) (maxToolbarH - (maxToolbarH - minToolbarH) * ALPHA_FACTOR);
-    float k = 1.0f / (maxToolbarH - deadH);
-    int currentH = minToolbarH + (maxToolbarH - minToolbarH) - dy;
-    float alpha;
-    if (currentH <= deadH) {
-      alpha = 0;
-    } else {
-      alpha = k * (currentH - deadH);
-    }
-    return alpha;
-  }
-
   public static class Builder {
-    private AnimationManager instance;
+    private ScrollManager instance;
 
-    private Builder(AnimationManager instance) {
+    private Builder(ScrollManager instance) {
       this.instance = instance;
     }
 
@@ -190,7 +175,7 @@ public class AnimationManager implements ToolbarBehavior.HeightChangeListener {
       return this;
     }
 
-    public AnimationManager build() {
+    public ScrollManager build() {
       if (instance.toolbarBehavior == null) {
         throw new IllegalStateException("has to set toolbarBehavior for AnimationManager");
       }
