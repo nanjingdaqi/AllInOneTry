@@ -29,7 +29,6 @@
           android:layout_height="match_parent"
           android:scrollbars="vertical"
           android:background="@android:color/white"
-          app:layout_behavior="me.ele.shopping.ui.home.toolbar.RVBehavior"
           />
 
     </android.support.design.widget.CoordinatorLayout>

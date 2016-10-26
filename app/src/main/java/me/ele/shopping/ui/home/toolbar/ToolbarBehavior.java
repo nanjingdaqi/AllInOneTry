@@ -13,14 +13,18 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup.MarginLayoutParams;
 import java.util.HashSet;
 import java.util.Set;
 import me.ele.base.utils.DimenUtil;
 
+import static android.view.View.MeasureSpec.makeMeasureSpec;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static me.ele.base.utils.DimenUtil.getScreenHeight;
+import static me.ele.base.utils.DimenUtil.getScreenWidth;
 import static me.ele.base.utils.DimenUtil.getStatusBarHeight;
 
-public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
+public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentToolbar> {
 
   private static final String TAG = ToolbarBehavior.class.getSimpleName();
   private static final int FLING_SCALE = 2;
@@ -29,9 +33,11 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
   private ScrollerCompat mScroller;
   private FlingRunnable mFlingRunnable;
   private int minH;
+  private int currentDrawHeight; // minH <= currentDrawHeight <= child.measureHeight
+  private int currentMeasureHeight;
 
   private CoordinatorLayout coordinatorLayout;
-  private View child;
+  private HomeFragmentToolbar child;
   private ValueAnimator scrollToTopAnim;
 
   private Set<HeightChangeListener> listeners = new HashSet<>();
@@ -44,11 +50,10 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
   }
 
   public void reset() {
-    setBottomMargin(coordinatorLayout, child, 0);
+    setCurrentOffset(coordinatorLayout, child, child.getMeasuredHeight());
   }
 
-  public void setup(CoordinatorLayout coordinatorLayout, View child) {
-    Log.e(TAG, "setup");
+  public void setup(CoordinatorLayout coordinatorLayout, HomeFragmentToolbar child) {
     this.coordinatorLayout = coordinatorLayout;
     this.child = child;
     scrollingChildHelper = new NestedScrollingChildHelper(coordinatorLayout);
@@ -58,14 +63,29 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     } else {
       minH = DimenUtil.getToolBarHeight((Activity) child.getContext());
     }
+    if (child.getMeasuredHeight() == 0) {
+      child.measure(makeMeasureSpec(getScreenWidth(), MATCH_PARENT),
+          makeMeasureSpec(getScreenHeight(), WRAP_CONTENT));
+    }
+    currentDrawHeight = child.getMeasuredHeight();
+    notifyHeightChange(currentDrawHeight, child.getMeasuredHeight());
   }
 
-  private int getChildBottomMargin() {
-    MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
-    return lp.bottomMargin;
+  @Override
+  public boolean onLayoutChild(CoordinatorLayout parent, HomeFragmentToolbar child,
+      int layoutDirection) {
+    boolean ret = super.onLayoutChild(parent, child, layoutDirection);
+    if (currentMeasureHeight != child.getMeasuredHeight()) {
+      Log.e(TAG, "notify due to height change");
+      setCurrentOffset(coordinatorLayout, child,
+          currentDrawHeight + (child.getMeasuredHeight() - currentMeasureHeight));
+      currentMeasureHeight = child.getMeasuredHeight();
+    }
+    return ret;
   }
 
-  @Override public boolean onStartNestedScroll(CoordinatorLayout coordinatorLayout, View child,
+  @Override
+  public boolean onStartNestedScroll(CoordinatorLayout coordinatorLayout, HomeFragmentToolbar child,
       View directTargetChild, View target, int nestedScrollAxes) {
     if (scrollingChildHelper.startNestedScroll(nestedScrollAxes)) {
       return true;
@@ -74,23 +94,20 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
   }
 
   @Override
-  public void onStopNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target) {
+  public void onStopNestedScroll(CoordinatorLayout coordinatorLayout, HomeFragmentToolbar child,
+      View target) {
     scrollingChildHelper.stopNestedScroll();
   }
 
   @Override
-  public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, View child, View target,
-      int dx, int dy, int[] consumed) {
-    Log.e(TAG, "onNestedPreScroll, dy: " + dy);
-
+  public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, HomeFragmentToolbar child,
+      View target, int dx, int dy, int[] consumed) {
     int parentDy = dy;
     if (dy > 0) {
       parentDy = Math.min(coordinatorLayout.getTop(), dy);
     }
-    Log.e(TAG, "parentDy: " + parentDy);
     scrollingChildHelper.dispatchNestedPreScroll(dx, parentDy, consumed, new int[2]);
 
-    Log.e(TAG, "consumed[1]: " + consumed[1]);
     if (consumed[1] == dy) {
       return;
     }
@@ -99,32 +116,32 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
 
     // up scroll
     if (dy > 0) {
-      int orgMargin = getChildBottomMargin();
-      setBottomMargin(coordinatorLayout, child, getChildBottomMargin() - dy);
+      int orgDrawHeight = currentDrawHeight;
+      setCurrentOffset(coordinatorLayout, child, currentDrawHeight - dy);
 
-      Log.e(TAG, "onNestedPreScroll, consume dy: " + (-getChildBottomMargin() + orgMargin));
-      consumed[1] = -getChildBottomMargin() + orgMargin;
+      Log.e(TAG, "onNestedPreScroll, consume dy: " + (orgDrawHeight - currentDrawHeight));
+      consumed[1] = orgDrawHeight - currentDrawHeight;
     }
   }
 
-  @Override public void onNestedScroll(CoordinatorLayout coordinatorLayout, View child, View target,
+  @Override
+  public void onNestedScroll(CoordinatorLayout coordinatorLayout, HomeFragmentToolbar child,
+      View target,
       int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
-    Log.e(TAG, "onNestedScroll, dyUnconsumed: " + dyUnconsumed);
-
     // down scroll
     if (dyUnconsumed < 0) {
-      int orgMargin = getChildBottomMargin();
-      setBottomMargin(coordinatorLayout, child, getChildBottomMargin() - dyUnconsumed);
-      dyUnconsumed += -orgMargin - (-getChildBottomMargin());
+      int orgDrawHeight = currentDrawHeight;
+      setCurrentOffset(coordinatorLayout, child, currentDrawHeight - dyUnconsumed);
+      dyUnconsumed += currentDrawHeight - orgDrawHeight;
       Log.e(TAG, "onNestedScroll to parent, dyUn: " + dyUnconsumed);
       scrollingChildHelper.dispatchNestedScroll(0, 0, 0, dyUnconsumed, new int[2]);
     }
   }
 
   @Override
-  public boolean onNestedPreFling(CoordinatorLayout coordinatorLayout, View child, View target,
+  public boolean onNestedPreFling(CoordinatorLayout coordinatorLayout, HomeFragmentToolbar child,
+      View target,
       float velocityX, float velocityY) {
-    Log.e(TAG, "onNestedPreFling, vy: " + velocityY + ", cor top: " + coordinatorLayout.getTop());
     if (mScroller == null) {
       mScroller = ScrollerCompat.create(child.getContext());
     }
@@ -134,9 +151,9 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     }
 
     // up fling
-    if (velocityY > 0 && child.getMeasuredHeight() + getChildBottomMargin() > minH) {
-      mScroller.fling(0, getChildBottomMargin(), 0, (int) (-velocityY / FLING_SCALE), 0, 0,
-          -child.getMeasuredHeight() + minH, 0);
+    if (velocityY > 0 && currentDrawHeight > minH) {
+      mScroller.fling(0, currentDrawHeight, 0, (int) (-velocityY / FLING_SCALE), 0, 0, minH,
+          child.getMeasuredHeight());
       if (mScroller.computeScrollOffset()) {
         mFlingRunnable = new FlingRunnable(coordinatorLayout, child);
         ViewCompat.postOnAnimation(child, mFlingRunnable);
@@ -148,9 +165,9 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
   }
 
   @Override
-  public boolean onNestedFling(CoordinatorLayout coordinatorLayout, View child, View target,
+  public boolean onNestedFling(CoordinatorLayout coordinatorLayout, HomeFragmentToolbar child,
+      View target,
       float velocityX, float velocityY, boolean consumed) {
-    Log.e(TAG, "onNestedFling, vy: " + velocityY);
     if (mScroller == null) {
       mScroller = ScrollerCompat.create(child.getContext());
     }
@@ -160,10 +177,9 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     LinearLayoutManager llm = (LinearLayoutManager) rv.getLayoutManager();
     if (velocityY < 0
         && llm.findFirstCompletelyVisibleItemPosition() == 0
-        && getChildBottomMargin() < 0) {
-      mScroller.fling(0, getChildBottomMargin(), 0, (int) (-velocityY / FLING_SCALE), 0, 0,
-          -child.getMeasuredHeight() + minH,
-          0);
+        && currentDrawHeight < child.getMeasuredHeight()) {
+      mScroller.fling(0, currentDrawHeight, 0, (int) (-velocityY / FLING_SCALE), 0, 0, minH,
+          child.getMeasuredHeight());
       if (mScroller.computeScrollOffset()) {
         mFlingRunnable = new FlingRunnable(coordinatorLayout, child);
         ViewCompat.postOnAnimation(child, mFlingRunnable);
@@ -174,17 +190,12 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     return false;
   }
 
-  // use child's bottom margin for locating recylerview's y
-  private void setBottomMargin(CoordinatorLayout coordinatorLayout, View child, int bottomMargin) {
-    MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
-    int orgMargin = lp.bottomMargin;
-    int h = child.getMeasuredHeight();
-    int fakeHeight = Math.max(minH, h + bottomMargin);
-    lp.bottomMargin = Math.min(0, -(h - fakeHeight));
-    child.setLayoutParams(lp);
-    coordinatorLayout.dispatchDependentViewsChanged(child);
-    if (orgMargin != lp.bottomMargin) {
-      notifyHeightChange(child.getMeasuredHeight() + lp.bottomMargin, child.getMeasuredHeight());
+  private void setCurrentOffset(CoordinatorLayout coordinatorLayout, View child, int offset) {
+    int orgOffset = currentDrawHeight;
+    currentDrawHeight = Math.max(minH, offset);
+    currentDrawHeight = Math.min(currentDrawHeight, child.getMeasuredHeight());
+    if (orgOffset != currentDrawHeight) {
+      notifyHeightChange(currentDrawHeight, child.getMeasuredHeight());
     }
   }
 
@@ -208,13 +219,13 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
 
   public void animateToTop() {
     ensureScrollToTopAnim();
-    final int currentBottomMargin = getChildBottomMargin();
-    final int target = -(child.getMeasuredHeight() - getMinH());
+    final int initOffset = currentDrawHeight;
+    final int target = minH;
     scrollToTopAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override public void onAnimationUpdate(ValueAnimator animation) {
         float value = (float) animation.getAnimatedValue();
-        int targetMargin = (int) (currentBottomMargin + (target - currentBottomMargin) * value);
-        setBottomMargin(coordinatorLayout, child, targetMargin);
+        int targetOffset = (int) (initOffset + (target - initOffset) * value);
+        setCurrentOffset(coordinatorLayout, child, targetOffset);
       }
     });
     scrollToTopAnim.start();
@@ -240,7 +251,7 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<View> {
     @Override public void run() {
       if (mScroller.computeScrollOffset()) {
         int value = mScroller.getCurrY();
-        setBottomMargin(coordinatorLayout, child, value);
+        setCurrentOffset(coordinatorLayout, child, value);
         ViewCompat.postOnAnimation(child, this);
       }
     }

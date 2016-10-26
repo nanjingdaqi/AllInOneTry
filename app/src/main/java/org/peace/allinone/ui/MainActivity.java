@@ -47,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
 
-    setupRV();
     setupToolbar();
+    setupRV();
     setupAnimationManager();
   }
 
@@ -82,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
 
   private void setupRV() {
     rv.setLayoutManager(new LinearLayoutManager(this));
+    //RVBehavior behavior =
+    //    (RVBehavior) ((CoordinatorLayout.LayoutParams) rv.getLayoutParams()).getBehavior();
+    //behavior.setup(rv.getRecyclerView());
     Util.insertItem(this, rv);
     rv.addHeaderView(head1 = createHead(this, H, Color.TRANSPARENT, "Head 1"));
     rv.addHeaderView(createHead(this, H, Color.TRANSPARENT, "Head 2"));
@@ -97,7 +100,12 @@ public class MainActivity extends AppCompatActivity {
             toolbarBehavior.reset();
             rv.finishRefresh();
           }
-        }, 5000);
+        }, 2000);
+      }
+    });
+    toolbarBehavior.addHeightChangeListener(new ToolbarBehavior.HeightChangeListener() {
+      @Override public void onHeightChange(int drawHeight, int measureHeight) {
+        rv.getRecyclerView().setY(drawHeight);
       }
     });
   }
