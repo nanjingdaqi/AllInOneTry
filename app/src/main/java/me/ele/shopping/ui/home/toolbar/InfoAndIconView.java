@@ -1,6 +1,7 @@
 package me.ele.shopping.ui.home.toolbar;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -37,6 +38,7 @@ public class InfoAndIconView extends RelativeLayout {
   public void showPromotion() {
     weatherInfoView.setVisibility(GONE);
     promotionInfoView.setVisibility(VISIBLE);
-    promotionInfoView.setTexts(Arrays.asList("one"));
+    promotionInfoView.setTexts(Arrays.asList(TextUtils.join("\n", new String[] { "foo" }),
+        TextUtils.join("\n", new String[] { "foo2", "bar2" })));
   }
 }

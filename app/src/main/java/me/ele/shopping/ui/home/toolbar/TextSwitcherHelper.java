@@ -1,6 +1,7 @@
 package me.ele.shopping.ui.home.toolbar;
 
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 
 import static android.view.animation.Animation.ABSOLUTE;
@@ -15,6 +16,7 @@ class TextSwitcherHelper {
     TranslateAnimation anim =
         new TranslateAnimation(ABSOLUTE, 0, 0, 0, RELATIVE_TO_SELF, 0, RELATIVE_TO_SELF, -1.0f);
     anim.setDuration(duration);
+    anim.setInterpolator(new DecelerateInterpolator());
     return anim;
   }
 
@@ -22,6 +24,7 @@ class TextSwitcherHelper {
     TranslateAnimation anim =
         new TranslateAnimation(ABSOLUTE, 0, 0, 0, RELATIVE_TO_SELF, 1.0f, RELATIVE_TO_SELF, 0);
     anim.setDuration(duration);
+    anim.setInterpolator(new DecelerateInterpolator());
     return anim;
   }
 }

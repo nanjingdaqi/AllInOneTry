@@ -13,7 +13,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 public class PromotionInfoView extends TextSwitcher {
 
-  private final long ANIM_DURATION = 2000;
+  private final long ANIM_DURATION = 500;
   private final long ANIM_DELAY = 3000;
 
   private List<String> texts;
