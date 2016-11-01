@@ -17,8 +17,11 @@ buildscript {
 allprojects {
   repositories {
     jcenter()
+//    maven {
+//      url "file:/Users/peacepassion/Desktop/maven_repo"
+//    }
     maven {
-      url "file:/Users/peacepassion/Desktop/maven_repo"
+      url "http://maven.dev.elenet.me/nexus/content/groups/public"
     }
     maven {
       url "https://jitpack.io"

@@ -1,9 +1,8 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<me.ele.shopping.ui.home.HomePageFragmentRootView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     tools:context=".ui.MainActivity"
     >
 
@@ -14,4 +13,4 @@
       app:main_layout="@layout/em_main"
       />
 
-</LinearLayout>
+</me.ele.shopping.ui.home.HomePageFragmentRootView>

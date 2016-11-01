@@ -33,8 +33,8 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentTool
   private ScrollerCompat mScroller;
   private FlingRunnable mFlingRunnable;
   private int minH;
-  private int currentDrawHeight; // minH <= currentDrawHeight <= child.measureHeight
-  private int currentMeasureHeight;
+  private int currentDrawHeight = -1; // minH <= currentDrawHeight <= child.measureHeight
+  private int currentMeasureHeight = -1;
 
   private CoordinatorLayout coordinatorLayout;
   private HomeFragmentToolbar child;
@@ -53,7 +53,7 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentTool
     setCurrentOffset(coordinatorLayout, child, child.getMeasuredHeight());
   }
 
-  public void setup(CoordinatorLayout coordinatorLayout, HomeFragmentToolbar child) {
+  void setup(CoordinatorLayout coordinatorLayout, HomeFragmentToolbar child) {
     this.coordinatorLayout = coordinatorLayout;
     this.child = child;
     scrollingChildHelper = new NestedScrollingChildHelper(coordinatorLayout);
@@ -67,19 +67,30 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentTool
       child.measure(makeMeasureSpec(getScreenWidth(), MATCH_PARENT),
           makeMeasureSpec(getScreenHeight(), WRAP_CONTENT));
     }
-    currentDrawHeight = child.getMeasuredHeight();
-    notifyHeightChange(currentDrawHeight, child.getMeasuredHeight());
   }
 
   @Override
-  public boolean onLayoutChild(CoordinatorLayout parent, HomeFragmentToolbar child,
+  public boolean onLayoutChild(CoordinatorLayout parent, final HomeFragmentToolbar child,
       int layoutDirection) {
+    Log.e(TAG, "onLayoutChild");
     boolean ret = super.onLayoutChild(parent, child, layoutDirection);
-    if (currentMeasureHeight != child.getMeasuredHeight()) {
+    if (currentDrawHeight == -1 || currentMeasureHeight == -1) {
+      Log.e(TAG, "notify due to first layout");
+      child.post(new Runnable() {
+        @Override public void run() {
+          setCurrentOffset(coordinatorLayout, child, child.getMeasuredHeight());
+          currentMeasureHeight = child.getMeasuredHeight();
+        }
+      });
+    } else if (currentMeasureHeight != child.getMeasuredHeight()) {
       Log.e(TAG, "notify due to height change");
-      setCurrentOffset(coordinatorLayout, child,
-          currentDrawHeight + (child.getMeasuredHeight() - currentMeasureHeight));
-      currentMeasureHeight = child.getMeasuredHeight();
+      child.post(new Runnable() {
+        @Override public void run() {
+          setCurrentOffset(coordinatorLayout, child,
+              currentDrawHeight + (child.getMeasuredHeight() - currentMeasureHeight));
+          currentMeasureHeight = child.getMeasuredHeight();
+        }
+      });
     }
     return ret;
   }
@@ -119,7 +130,6 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentTool
       int orgDrawHeight = currentDrawHeight;
       setCurrentOffset(coordinatorLayout, child, currentDrawHeight - dy);
 
-      Log.e(TAG, "onNestedPreScroll, consume dy: " + (orgDrawHeight - currentDrawHeight));
       consumed[1] = orgDrawHeight - currentDrawHeight;
     }
   }
@@ -133,7 +143,6 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentTool
       int orgDrawHeight = currentDrawHeight;
       setCurrentOffset(coordinatorLayout, child, currentDrawHeight - dyUnconsumed);
       dyUnconsumed += currentDrawHeight - orgDrawHeight;
-      Log.e(TAG, "onNestedScroll to parent, dyUn: " + dyUnconsumed);
       scrollingChildHelper.dispatchNestedScroll(0, 0, 0, dyUnconsumed, new int[2]);
     }
   }
@@ -217,6 +226,10 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentTool
     return minH;
   }
 
+  public int getCurrentDrawHeight() {
+    return currentDrawHeight;
+  }
+
   public void animateToTop() {
     ensureScrollToTopAnim();
     final int initOffset = currentDrawHeight;
@@ -240,8 +253,8 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentTool
 
   private class FlingRunnable implements Runnable {
 
-    CoordinatorLayout coordinatorLayout;
-    View child;
+    private CoordinatorLayout coordinatorLayout;
+    private View child;
 
     public FlingRunnable(CoordinatorLayout coordinatorLayout, View child) {
       this.coordinatorLayout = coordinatorLayout;

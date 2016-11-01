@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.*;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
   private void setupToolbar() {
     toolbar.setSkinDrawable(ResourceUtil.getDrawable(R.drawable.sp_home_banner_default));
+    toolbar.setClickable(true);
     CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) toolbar.getLayoutParams();
     toolbarBehavior = new ToolbarBehavior();
     toolbarBehavior.addHeightChangeListener(new ToolbarBehavior.HeightChangeListener() {
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     addressView.setAddress("近铁城市广场");
     addressView.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-
+        Toast.makeText(MainActivity.this, "foo", Toast.LENGTH_SHORT).show();
       }
     });
 
@@ -100,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             toolbarBehavior.reset();
             rv.finishRefresh();
           }
-        }, 2000);
+        }, 10000);
       }
     });
     toolbarBehavior.addHeightChangeListener(new ToolbarBehavior.HeightChangeListener() {
