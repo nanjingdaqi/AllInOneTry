@@ -7,6 +7,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.widget.ImageView;
+import me.ele.base.utils.ViewUtils;
 
 import static me.ele.base.utils.ColorParser.parse;
 
@@ -16,15 +18,18 @@ public class ToolbarBgDrawable extends Drawable implements ToolbarBehavior.Heigh
 
   private static final float ALPHA_FACTOR = 0.25f;
 
-  private ColorDrawable blueDrawable = new ColorDrawable(parse("#3190e8"));
+  private ColorDrawable blueDrawable = new ColorDrawable(parse("#0096FF"));
   @Nullable private Drawable skinDrawable;
   private float blueAlpha;
   private int offset;
+  private ImageView scaleImageView; // used for drawable scale type
 
   private HomeFragmentToolbar homeFragmentToolbar;
 
   public ToolbarBgDrawable(HomeFragmentToolbar homeFragmentToolbar) {
     this.homeFragmentToolbar = homeFragmentToolbar;
+    scaleImageView = new ImageView(ViewUtils.getActivity(homeFragmentToolbar));
+    scaleImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
   }
 
   public void setSkinDrawable(Drawable skinDrawable) {
@@ -59,7 +64,10 @@ public class ToolbarBgDrawable extends Drawable implements ToolbarBehavior.Heigh
     } else {
       int alpha = (int) (blueAlpha * 255);
       if (alpha != 255) {
+        canvas.save();
+        canvas.concat(scaleImageView.getImageMatrix());
         skinDrawable.draw(canvas);
+        canvas.restore();
       }
       blueDrawable.setAlpha(alpha);
       blueDrawable.draw(canvas);
@@ -71,6 +79,8 @@ public class ToolbarBgDrawable extends Drawable implements ToolbarBehavior.Heigh
     super.onBoundsChange(bounds);
     if (skinDrawable != null) {
       skinDrawable.setBounds(bounds);
+      scaleImageView.layout(bounds.left, bounds.top, bounds.right, bounds.bottom);
+      scaleImageView.setImageDrawable(skinDrawable);
     }
     blueDrawable.setBounds(bounds);
   }
