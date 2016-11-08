@@ -27,7 +27,8 @@ import static me.ele.base.utils.DimenUtil.getStatusBarHeight;
 public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentToolbar> {
 
   private static final String TAG = ToolbarBehavior.class.getSimpleName();
-  private static final int FLING_SCALE = 2;
+  private static final int FLING_SCALE = 1;
+  private static final int FLING_VELOCITY_BOUND = 5000;
 
   private NestedScrollingChildHelper scrollingChildHelper;
   private ScrollerCompat mScroller;
@@ -159,6 +160,8 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentTool
       return true;
     }
 
+    Log.e(TAG, "vY: " + velocityY);
+
     // up fling
     if (velocityY > 0 && currentDrawHeight > minH) {
       mScroller.fling(0, currentDrawHeight, 0, (int) (-velocityY / FLING_SCALE), 0, 0, minH,
@@ -166,7 +169,7 @@ public class ToolbarBehavior extends CoordinatorLayout.Behavior<HomeFragmentTool
       if (mScroller.computeScrollOffset()) {
         mFlingRunnable = new FlingRunnable(coordinatorLayout, child);
         ViewCompat.postOnAnimation(child, mFlingRunnable);
-        return true;
+        return velocityY < FLING_VELOCITY_BOUND;
       }
     }
 
