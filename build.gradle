@@ -3,8 +3,12 @@
 buildscript {
   repositories {
     jcenter()
+    maven {
+      url "http://maven.dev.elenet.me/nexus/content/groups/public"
+    }
   }
   dependencies {
+    classpath 'me.ele:eradle:1.7.0'
     classpath 'com.android.tools.build:gradle:2.1.3'
     classpath 'me.tatarka:gradle-retrolambda:3.2.0'
     classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
@@ -17,13 +21,6 @@ buildscript {
 allprojects {
   repositories {
     jcenter()
-    maven {
-      url "${server}/nexus/content/groups/mobile"
-      credentials {
-        username nexusUsername
-        password nexusPassword
-      }
-    }
     maven {
       url "https://jitpack.io"
     }

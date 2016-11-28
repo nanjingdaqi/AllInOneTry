@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.neenbedankt.android-apt'
+//apply plugin: 'eradle'
 
 android {
   compileSdkVersion 23
@@ -38,8 +39,8 @@ dependencies {
 
   compile 'com.jakewharton:butterknife:8.3.0'
   compile 'com.afollestad:material-dialogs:0.7.3.4'
-  compile 'com.squareup.okhttp:okhttp:2.5.0'
-  compile 'com.squareup.retrofit:retrofit:1.9.0'
+  compile 'com.squareup.okhttp3:okhttp:3.3.0'
+  compile 'com.squareup.retrofit2:retrofit:2.1.0'
   compile 'com.google.code.gson:gson:2.3.1'
 
   compile 'io.reactivex:rxandroid:1.0.1'
