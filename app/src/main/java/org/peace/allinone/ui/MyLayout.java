@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
@@ -8,6 +9,8 @@ import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 
 public class MyLayout extends LinearLayout {
+
+  int[] params = { android.R.attr.background, android.R.attr.padding };
 
   public MyLayout(Context context) {
     this(context, null);
@@ -20,6 +23,14 @@ public class MyLayout extends LinearLayout {
   public MyLayout(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     inflate(context, R.layout.my_layout, this);
+
+    AppLogger.e("background: " + attrs.getAttributeValue("android", "background"));
+    AppLogger.e("padding: " + attrs.getAttributeValue("android", "padding"));
+
+    TypedArray ta = context.obtainStyledAttributes(attrs, params);
+    AppLogger.e("background: " + ta.hasValue(0));
+    AppLogger.e("padding: " + ta.hasValue(1));
+    ta.recycle();
   }
 
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
