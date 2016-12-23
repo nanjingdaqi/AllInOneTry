@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+        maven {
+            url "http://maven.dev.elenet.me/nexus/content/groups/public"
+        }
+    }
+    dependencies {
+        classpath 'me.ele:eradle:1.7.0'
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'eradle'
+
+repositories {
+    jcenter()
+}
+
+modifyPom {
+    project {
+        groupId 'me.ele'
+        artifactId 'apt-db-merger'
+        version '0.2.0'
+        packaging 'jar'
+    }
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile 'com.android.tools.build:gradle:2.2.0'
+}
+

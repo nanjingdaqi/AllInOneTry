@@ -3,6 +3,7 @@ apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'eradle'
 apply plugin: 'AndResGuard'
+apply plugin: 'me.ele.res-guard-mess'
 
 android {
   compileSdkVersion 23
