@@ -54,10 +54,8 @@ dependencies {
 andResGuard {
   use7zip = true
   useSign = true
-  keepRoot = false
-  whiteList = ["R.mipmap.icon",
-               "R.drawable.splash_logo",
-               "R.string.com.crashlytics.*",]
+  keepRoot = true
+  whiteList = ["R.drawable.icon"]
   compressFilePattern = ["*.png",
                          "*.jpg",
                          "*.jpeg",
