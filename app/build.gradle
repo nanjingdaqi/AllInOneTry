@@ -1,7 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.neenbedankt.android-apt'
-//apply plugin: 'eradle'
+apply plugin: 'eradle'
+apply plugin: 'AndResGuard'
 
 android {
   compileSdkVersion 23
@@ -23,7 +24,14 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
-  buildTypes {}
+  buildTypes {
+    debug {
+      minifyEnabled true
+      shrinkResources true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      zipAlignEnabled true
+    }
+  }
 }
 
 def support_version = "23.2.1"
@@ -38,18 +46,23 @@ dependencies {
   compile "com.android.support:recyclerview-v7:${support_version}"
 
   compile 'com.jakewharton:butterknife:8.3.0'
-  compile 'com.afollestad:material-dialogs:0.7.3.4'
-  compile 'com.squareup.okhttp3:okhttp:3.3.0'
-  compile 'com.squareup.retrofit2:retrofit:2.1.0'
-  compile 'com.google.code.gson:gson:2.3.1'
-
-  compile 'io.reactivex:rxandroid:1.0.1'
-  // Because RxAndroid releases are few and far between, it is recommended you also
-  // explicitly depend on RxJava's latest version for bug fixes and new features.
-  compile 'io.reactivex:rxjava:1.0.14'
-  compile 'io.reactivex:rxjava-math:1.0.0'
-  compile 'com.jakewharton.rxbinding:rxbinding:0.2.0'
 
   apt "com.jakewharton:butterknife-compiler:8.3.0"
+}
 
+andResGuard {
+  use7zip = true
+  useSign = true
+  keepRoot = false
+  whiteList = ["R.mipmap.icon",
+               "R.drawable.splash_logo",
+               "R.string.com.crashlytics.*",]
+  compressFilePattern = ["*.png",
+                         "*.jpg",
+                         "*.jpeg",
+                         "*.gif",
+                         "resources.arsc"]
+  sevenzip {
+    artifact = 'com.tencent.mm:SevenZip:1.1.8'
+  }
 }

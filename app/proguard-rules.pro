@@ -15,3 +15,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-dontshrink
+-dontwarn #不警告
+-dontpreverify #不预校验
+-dontoptimize #不优化
+-ignorewarnings #忽略警告
