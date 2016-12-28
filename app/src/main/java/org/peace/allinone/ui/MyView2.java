@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
-import me.ele.commons.AppLogger;
 import org.peace.allinone.R;
 
 public class MyView2 extends View {

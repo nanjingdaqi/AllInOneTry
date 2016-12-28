@@ -9,7 +9,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import me.ele.commons.AppLogger;
+import me.ele.base.utils.AppLogger;
 
 public class MyDrawable extends Drawable {
 
