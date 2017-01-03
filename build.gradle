@@ -16,7 +16,7 @@ buildscript {
 
 allprojects {
   repositories {
-    jcenter()
+//    jcenter()
 //    maven {
 //      url "file:/Users/peacepassion/Desktop/maven_repo"
 //    }

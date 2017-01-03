@@ -2,15 +2,12 @@ package me.ele.shopping.ui.home.toolbar;
 
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
-import android.widget.ImageView;
-import me.ele.base.utils.ViewUtils;
-
-import static me.ele.base.utils.ColorParser.parse;
 
 public class ToolbarBgDrawable extends Drawable implements ToolbarBehavior.HeightChangeListener {
 
@@ -18,18 +15,16 @@ public class ToolbarBgDrawable extends Drawable implements ToolbarBehavior.Heigh
 
   private static final float ALPHA_FACTOR = 0.25f;
 
-  private ColorDrawable blueDrawable = new ColorDrawable(parse("#0096FF"));
+  private ColorDrawable blueDrawable = new ColorDrawable(0xff0096FF);
   @Nullable private Drawable skinDrawable;
   private float blueAlpha;
   private int offset;
-  private ImageView scaleImageView; // used for drawable scale type
+  private Matrix skinMatrix;
 
   private HomeFragmentToolbar homeFragmentToolbar;
 
   public ToolbarBgDrawable(HomeFragmentToolbar homeFragmentToolbar) {
     this.homeFragmentToolbar = homeFragmentToolbar;
-    scaleImageView = new ImageView(ViewUtils.getActivity(homeFragmentToolbar));
-    scaleImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
   }
 
   public void setSkinDrawable(Drawable skinDrawable) {
@@ -65,7 +60,7 @@ public class ToolbarBgDrawable extends Drawable implements ToolbarBehavior.Heigh
       int alpha = (int) (blueAlpha * 255);
       if (alpha != 255) {
         canvas.save();
-        canvas.concat(scaleImageView.getImageMatrix());
+        canvas.concat(skinMatrix);
         skinDrawable.draw(canvas);
         canvas.restore();
       }
@@ -78,9 +73,28 @@ public class ToolbarBgDrawable extends Drawable implements ToolbarBehavior.Heigh
   @Override protected void onBoundsChange(Rect bounds) {
     super.onBoundsChange(bounds);
     if (skinDrawable != null) {
-      skinDrawable.setBounds(bounds);
-      scaleImageView.layout(bounds.left, bounds.top, bounds.right, bounds.bottom);
-      scaleImageView.setImageDrawable(skinDrawable);
+      // ref ImageView#configBounds method
+      skinMatrix = new Matrix();
+      int dwidth = skinDrawable.getIntrinsicWidth();
+      int dheight = skinDrawable.getIntrinsicHeight();
+      skinDrawable.setBounds(0, 0, dwidth, dheight);
+
+      int vwidth = bounds.right - bounds.left;
+      int vheight = bounds.bottom - bounds.top;
+
+      float scale;
+      float dx = 0, dy = 0;
+
+      if (dwidth * vheight > vwidth * dheight) {
+        scale = (float) vheight / (float) dheight;
+        dx = (vwidth - dwidth * scale) * 0.5f;
+      } else {
+        scale = (float) vwidth / (float) dwidth;
+        dy = vheight - dheight * scale;
+      }
+
+      skinMatrix.setScale(scale, scale);
+      skinMatrix.postTranslate(Math.round(dx), Math.round(dy));
     }
     blueDrawable.setBounds(bounds);
   }
