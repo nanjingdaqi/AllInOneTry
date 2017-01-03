@@ -1,6 +1,9 @@
 package org.peace.allinone.ui;
 
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -54,7 +57,9 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void setupToolbar() {
-    toolbar.setSkinDrawable(ResourceUtil.getDrawable(R.drawable.sp_home_banner_default));
+    Drawable skin = ResourceUtil.getDrawable(R.drawable.sp_home_banner_default2);
+    //skin.setColorFilter(Color.RED, PorterDuff.Mode.ADD);
+    toolbar.setSkinDrawable(skin);
     toolbar.setClickable(true);
     CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) toolbar.getLayoutParams();
     toolbarBehavior = new ToolbarBehavior();
