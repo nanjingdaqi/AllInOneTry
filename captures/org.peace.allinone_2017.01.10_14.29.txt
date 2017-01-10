@@ -1,0 +1,24 @@
+TASK org.peace.allinone id=7913
+  ACTIVITY org.peace.allinone/.ui.MainActivity ec8b921 pid=25035
+    Local FragmentActivity 2a09848b State:
+      mCreated=truemResumed=true mStopped=false mReallyStopped=false
+      mLoadersStarted=true
+    FragmentManager misc state:
+      mHost=android.support.v4.app.FragmentActivity$HostCallbacks@3931d134
+      mContainer=android.support.v4.app.FragmentActivity$HostCallbacks@3931d134
+      mCurState=5 mStateSaved=false mDestroyed=false
+    View Hierarchy:
+      com.android.internal.policy.impl.PhoneWindow$DecorView{1c9518ae V.E..... ... 0,0-1536,2560}
+        android.widget.LinearLayout{3bc2a1d3 V.E..... ... 0,0-1536,2560}
+          android.view.ViewStub{1c137c5 G.E..... ... 0,0-0,0 #1020375}
+          android.widget.FrameLayout{3828b41 V.E..... ... 0,100-1536,2560}
+            android.support.v7.widget.ActionBarOverlayLayout{3a4948e6 V.E..... ... 0,0-1536,2460 #7f0b0058 app:id/decor_content_parent}
+              android.support.v7.widget.ContentFrameLayout{6ab9a7d V.E..... ... 0,224-1536,2460 #1020002 android:id/content}
+                android.widget.LinearLayout{12d52e40 V.E..... ... 0,0-1536,2236}
+                  android.support.v7.widget.AppCompatButton{3e5c6179 VFED..C. ... 64,64-1472,256 #7f0b0069 app:id/start_btn}
+              android.support.v7.widget.ActionBarContainer{1b228558 V.ED.... ... 0,0-1536,224 #7f0b0059 app:id/action_bar_container}
+                android.support.v7.widget.Toolbar{33e69f04 V.E..... ... 0,0-1536,224 #7f0b005a app:id/action_bar}
+                  android.widget.TextView{1a3b722 V.ED.... ... 64,58-532,165}
+                  android.support.v7.widget.ActionMenuView{35db9ae9 V.E..... ... 1536,0-1536,224}
+                android.support.v7.widget.ActionBarContextView{24d0ca9c G.E..... ... 0,0-0,0 #7f0b005b app:id/action_context_bar}
+        android.view.View{3199f82b V.ED.... ... 0,0-1536,105 #102002f android:id/statusBarBackground}

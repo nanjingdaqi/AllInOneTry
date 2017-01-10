@@ -1,0 +1,39 @@
+Applications Memory Usage (kB):
+Uptime: 213111021 Realtime: 452263438
+
+** MEMINFO in pid 25035 [org.peace.allinone] **
+                   Pss  Private  Private  Swapped     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------
+  Native Heap        0        0        0        0    12288     6472     5815
+  Dalvik Heap     3297     3236        0    27224    32285    31736      549
+ Dalvik Other      776      776        0        0                           
+        Stack      220      220        0        0                           
+    Other dev        4        0        4        0                           
+     .so mmap      497      108       56     1584                           
+    .apk mmap      138        0       12        0                           
+    .ttf mmap      235        0      232        0                           
+    .dex mmap     2624        0     2624        0                           
+    .oat mmap     1160        0      380        0                           
+    .art mmap     3377     2968      192        4                           
+   Other mmap        5        4        0        0                           
+      Unknown     4398     4376        0      952                           
+        TOTAL    16731    11688     3500    29764    44573    38208     6364
+ 
+ Objects
+               Views:       16         ViewRootImpl:        1
+         AppContexts:        3           Activities:        1
+              Assets:        3        AssetManagers:        3
+       Local Binders:        8        Proxy Binders:       18
+       Parcel memory:        3         Parcel count:       14
+    Death Recipients:        0      OpenSSL Sockets:        0
+  Bitmaps(preloaded):      446      Bitmaps(client):       -2
+             WebView:        0
+ 
+ Dalvik
+         isLargeHeap:    false
+ 
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+ 

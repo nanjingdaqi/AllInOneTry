@@ -1,0 +1,138 @@
+CURRENT STATS:
+Per-Package Stats:
+  * org.peace.allinone / u0a401 / v1:
+      * org.peace.allinone / u0a401 / v1:
+               TOTAL: 7.9% (16MB-16MB-16MB/14MB-15MB-15MB over 7)
+                 Top: 7.9% (16MB-16MB-16MB/14MB-15MB-15MB over 7)
+            (Cached): 92% (15MB-15MB-15MB/14MB-14MB-14MB over 4)
+
+Summary:
+  * org.peace.allinone / u0a401 / v1:
+           TOTAL: 7.9% (16MB-16MB-16MB/14MB-15MB-15MB over 7)
+             Top: 7.9% (16MB-16MB-16MB/14MB-15MB-15MB over 7)
+        (Cached): 92% (15MB-15MB-15MB/14MB-14MB-14MB over 4)
+
+Run time Stats:
+  SOn /Norm: +2h15m21s757ms (running)
+      TOTAL: +2h15m21s757ms
+
+Memory usage:
+  Persist: 250MB (91 samples)
+  Top    : 202MB (91 samples)
+  ImpFg  : 285MB (172 samples)
+  ImpBg  : 30MB (17 samples)
+  Service: 157MB (247 samples)
+  Receivr: 0.92KB (77 samples)
+  Home   : 55MB (17 samples)
+  CchAct : 14MB (4 samples)
+  CchEmty: 91MB (128 samples)
+  TOTAL  : 1.1GB
+  ServRst: 2.0KB (72 samples)
+
+          Start time: 2017-01-10 12:15:59
+  Total elapsed time: +2h15m21s784ms (partial) libart.so
+
+AGGREGATED OVER LAST 24 HOURS:
+System memory usage:
+  SOff/Norm: 1 samples:
+    Cached: 491MB min, 491MB avg, 491MB max
+    Free: 108MB min, 108MB avg, 108MB max
+    ZRam: 10MB min, 10MB avg, 10MB max
+    Kernel: 337MB min, 337MB avg, 337MB max
+    Native: 71MB min, 71MB avg, 71MB max
+       Mod : 1 samples:
+    Cached: 870MB min, 870MB avg, 870MB max
+    Free: 331MB min, 331MB avg, 331MB max
+    ZRam: 4.0KB min, 4.0KB avg, 4.0KB max
+    Kernel: 254MB min, 254MB avg, 254MB max
+    Native: 107MB min, 107MB avg, 107MB max
+  SOn /Norm: 2 samples:
+    Cached: 538MB min, 581MB avg, 625MB max
+    Free: 133MB min, 149MB avg, 165MB max
+    ZRam: 10MB min, 12MB avg, 13MB max
+    Kernel: 330MB min, 333MB avg, 336MB max
+    Native: 70MB min, 70MB avg, 71MB max
+       Mod : 2 samples:
+    Cached: 824MB min, 851MB avg, 877MB max
+    Free: 272MB min, 310MB avg, 349MB max
+    ZRam: 4.0KB min, 4.0KB avg, 4.0KB max
+    Kernel: 254MB min, 256MB avg, 259MB max
+    Native: 106MB min, 107MB avg, 107MB max
+
+Per-Package Stats:
+  * org.peace.allinone / u0a401 / v1:
+      * org.peace.allinone / u0a401 / v1:
+               TOTAL: 12% (10MB-33MB-43MB/9.2MB-31MB-41MB over 41)
+                 Top: 12% (10MB-33MB-43MB/9.2MB-31MB-41MB over 41)
+          (Last Act): 4.5% (15MB-27MB-39MB/13MB-25MB-37MB over 2)
+            (Cached): 23% (15MB-15MB-15MB/13MB-14MB-14MB over 5)
+
+Summary:
+  * org.peace.allinone / u0a401 / v1:
+           TOTAL: 12% (10MB-33MB-43MB/9.2MB-31MB-41MB over 41)
+             Top: 12% (10MB-33MB-43MB/9.2MB-31MB-41MB over 41)
+      (Last Act): 4.5% (15MB-27MB-39MB/13MB-25MB-37MB over 2)
+        (Cached): 23% (15MB-15MB-15MB/13MB-14MB-14MB over 5)
+
+Run time Stats:
+  SOff/Norm: +32m17s179ms
+       Mod : +2h3m58s482ms
+  SOn /Norm: +8h41m24s184ms
+       Mod : +1m41s305ms
+      TOTAL: +11h19m21s150ms
+
+Memory usage:
+  Kernel : 295MB (48 samples)
+  Native : 89MB (48 samples)
+  Persist: 260MB (531 samples)
+  Top    : 112MB (710 samples)
+  ImpFg  : 284MB (1359 samples)
+  ImpBg  : 28MB (291 samples)
+  Service: 185MB (3345 samples)
+  Receivr: 4.7KB (1443 samples)
+  Home   : 51MB (125 samples)
+  LastAct: 1.2MB (12 samples)
+  CchAct : 6.8MB (11 samples)
+  CchEmty: 94MB (752 samples)
+  Cached : 704MB (48 samples)
+  Free   : 226MB (48 samples)
+  Z-Ram  : 5.6MB (48 samples)
+  TOTAL  : 2.3GB
+  ServRst: 1.5KB (402 samples)
+
+          Start time: 2017-01-09 19:24:23
+  Total elapsed time: +1d1h8m57s122ms (partial) libart.so
+
+AGGREGATED OVER LAST 3 HOURS:
+Per-Package Stats:
+  * org.peace.allinone / u0a401 / v1:
+      * org.peace.allinone / u0a401 / v1:
+               TOTAL: 7.9% (16MB-16MB-16MB/14MB-15MB-15MB over 7)
+                 Top: 7.9% (16MB-16MB-16MB/14MB-15MB-15MB over 7)
+            (Cached): 92% (15MB-15MB-15MB/14MB-14MB-14MB over 4)
+
+Summary:
+  * org.peace.allinone / u0a401 / v1:
+           TOTAL: 7.9% (16MB-16MB-16MB/14MB-15MB-15MB over 7)
+             Top: 7.9% (16MB-16MB-16MB/14MB-15MB-15MB over 7)
+        (Cached): 92% (15MB-15MB-15MB/14MB-14MB-14MB over 4)
+
+Run time Stats:
+  SOn /Norm: +2h15m21s918ms
+      TOTAL: +2h15m21s918ms
+
+Memory usage:
+  Persist: 250MB (91 samples)
+  Top    : 203MB (98 samples)
+  ImpFg  : 285MB (172 samples)
+  ImpBg  : 30MB (17 samples)
+  Service: 157MB (247 samples)
+  Receivr: 0.92KB (77 samples)
+  Home   : 55MB (17 samples)
+  CchAct : 14MB (4 samples)
+  CchEmty: 91MB (128 samples)
+  TOTAL  : 1.1GB
+  ServRst: 2.0KB (72 samples)
+
+          Start time: 2017-01-10 12:15:59
+  Total elapsed time: +2h15m21s920ms (partial) libart.so

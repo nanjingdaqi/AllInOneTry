@@ -1,0 +1,35 @@
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        f6f226e org.peace.allinone/.ui.MainActivity
+
+Key Set Manager:
+  [org.peace.allinone]
+      Signing KeySets: 12943
+
+Packages:
+  Package [org.peace.allinone] (296cfc64):
+    userId=10401 gids=[3003]
+    pkg=Package{3de35d0f org.peace.allinone}
+    codePath=/data/app/org.peace.allinone-2
+    resourcePath=/data/app/org.peace.allinone-2
+    legacyNativeLibraryDir=/data/app/org.peace.allinone-2/lib
+    primaryCpuAbi=armeabi-v7a
+    secondaryCpuAbi=null
+    versionCode=1 targetSdk=23
+    versionName=1.0
+    splits=[base]
+    applicationInfo=ApplicationInfo{28c3619c org.peace.allinone}
+    flags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    dataDir=/data/data/org.peace.allinone
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2017-01-10 11:33:29
+    firstInstallTime=2016-09-25 17:22:11
+    lastUpdateTime=2017-01-10 11:33:29
+    signatures=PackageSignatures{37400a93 [3d9647a5]}
+    permissionsFixed=true haveGids=true installStatus=1
+    pkgFlags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    User 0:  installed=true hidden=false stopped=false notLaunched=false enabled=0
+    User 10:  installed=true hidden=false stopped=true notLaunched=true enabled=0
+    grantedPermissions:
+      android.permission.INTERNET
