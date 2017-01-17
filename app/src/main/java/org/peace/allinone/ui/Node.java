@@ -1,61 +1,54 @@
 package org.peace.allinone.ui;
 
+import java.util.LinkedList;
+
 public class Node {
+  private Node left;
+  private Node right;
 
-  static Node HEAD = new Node();
-  static Node TAIL = new Node();
+  private String value;
 
-  Node next;
-  int value;
+  public Node(String value) {
+    this.value = value;
+  }
 
-  public static Node getReverseN(int N) {
-    Node head = HEAD;
-    Node tail = TAIL;
+  public static void main(String[] args) {
+    // 构造一个二叉树
+    Node root = new Node("root");
+    Node l1 = new Node("l1");
+    Node r1 = new Node("r1");
+    root.left = l1;
+    root.right = r1;
+    Node l2 = new Node("r2");
+    l1.left = l2;
 
-    int l = 0;
-    Node tmp = head;
-    while (tmp != tail) {
-      tmp = head.next.next;
-      l += 2;
-      if (tmp == null) {
-        --l; // go back
+    // demo
+    Node result = findTargetNode(root);
+    System.out.println(result.value);
+  }
+
+  static Node findTargetNode(Node root) {
+    Node result = root;
+    LinkedList<Node> queue = new LinkedList<>(); // 队列
+    queue.add(root);
+    // 从右子节点开始按层遍历二叉树
+    while (queue.size() > 0) {
+      Node head = queue.pollFirst();
+      if (isLeaf(head)) {
+        result = head;
+        break;
       }
-    }
-
-    int M = l - N;
-    Node result = head;
-    for (int i = 0; i < M; ++i) {
-      result = result.next;
+      if (head.right != null) {
+        queue.add(head.right);
+      }
+      if (head.left != null) {
+        queue.add(head.left);
+      }
     }
     return result;
   }
 
-  public static void sort(Node head, Node tail) {
-    Node tmpTail = tail;
-    while (tmpTail != head) {
-      tmpTail = doSort(head, tmpTail);
-    }
-  }
-
-  static Node doSort(Node head, Node tail) {
-    Node tmp = head;
-    Node end = tail;
-    while (tmp != tail && tmp != null) {
-      Node r = tmp.next;
-      if (r == tail) {
-        end = tmp;
-      }
-      if (r != null && tmp.value > r.value) {
-        swap(tmp, r);
-      }
-      tmp = tmp.next;
-    }
-    return end;
-  }
-
-  static void swap(Node left, Node right) {
-    int t = left.value;
-    left.value = right.value;
-    right.value = t;
+  static boolean isLeaf(Node node) {
+    return node.left == null && node.right == null;
   }
 }
