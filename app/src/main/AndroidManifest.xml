@@ -20,12 +20,18 @@
       </intent-filter>
     </activity>
 
-    <activity android:name=".ui.SubActivity"/>
+    <activity android:name=".ui.SubActivity">
+      <intent-filter>
+        <action android:name="foo"/>
+        <action android:name="bar"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+    </activity>
 
     <activity
+        android:label="foo"
         android:launchMode="singleInstance"
         android:name=".ui.SingleInstanceActivity"
-        android:label="foo"
         android:taskAffinity=""
         />
 

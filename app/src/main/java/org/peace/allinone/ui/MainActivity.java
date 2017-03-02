@@ -29,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    startActivity(new Intent(this, SingleInstanceActivity.class));
+    //startActivity(new Intent(this, SingleInstanceActivity.class));
+    Intent intent = new Intent();
+    intent.setAction("foo");
+    startActivity(intent);
   }
 }
