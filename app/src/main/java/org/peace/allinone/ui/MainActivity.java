@@ -25,5 +25,7 @@ public class MainActivity extends AppCompatActivity {
     AppLogger.e("l2: " + l2);
     Locale l3 = new Locale(l1.toString());
     AppLogger.e("l3: " + l3);
+    AppLogger.e("for tag l1: " + Locale.forLanguageTag(l1.toString()));
+    AppLogger.e("for tag l2: " + Locale.forLanguageTag(l2.toString()));
   }
 }
