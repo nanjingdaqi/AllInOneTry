@@ -35,6 +35,10 @@
         android:taskAffinity=""
         />
 
+    <activity-alias
+        android:name="Foo"
+        android:targetActivity=".ui.SubActivity"/>
+
   </application>
 
 </manifest>

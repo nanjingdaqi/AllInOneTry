@@ -1,5 +1,6 @@
 package org.peace.allinone.ui;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -30,8 +31,12 @@ public class MainActivity extends AppCompatActivity {
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
     //startActivity(new Intent(this, SingleInstanceActivity.class));
+    //Intent intent = new Intent();
+    //intent.setAction("foo");
+    //startActivity(intent);
+
     Intent intent = new Intent();
-    intent.setAction("foo");
+    intent.setComponent(new ComponentName(getPackageName(), "Foo"));
     startActivity(intent);
   }
 }
