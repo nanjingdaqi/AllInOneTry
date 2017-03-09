@@ -20,6 +20,13 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name=".MyReceiver">
+            <intent-filter>
+                <action android:name="hello"/>
+                <data android:scheme="foo"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
