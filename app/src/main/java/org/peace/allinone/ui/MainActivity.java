@@ -19,4 +19,8 @@ public class MainActivity extends AppCompatActivity {
   @OnClick(R.id.start_btn) public void onClick(View v) {
 
   }
+
+  public String foo(String str) {
+    return str;
+  }
 }
