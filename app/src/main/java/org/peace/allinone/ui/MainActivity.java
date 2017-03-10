@@ -9,6 +9,8 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
+  FooClass myFoo;
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -20,7 +22,11 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
-  public String foo(String str) {
-    return str;
+  public void setMyFoo(FooClass foo) {
+    this.myFoo = foo;
+  }
+
+  public boolean foo() {
+    return myFoo.foo();
   }
 }
