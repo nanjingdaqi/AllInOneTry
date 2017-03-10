@@ -63,5 +63,7 @@ dependencies {
   androidTestCompile 'com.android.support.test:rules:' + rootProject.rulesVersion;
   androidTestCompile 'org.hamcrest:hamcrest-library:' + rootProject.hamcrestVersion;
   androidTestCompile 'com.linkedin.dexmaker:dexmaker-mockito:2.2.0'
-//  androidTestCompile 'org.mockito:mockito-core:' + rootProject.mockitoVersion;
+
+  testCompile 'junit:junit:' + rootProject.junitVersion;
+  testCompile 'org.mockito:mockito-core:' + rootProject.mockitoVersion;
 }

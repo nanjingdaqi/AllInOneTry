@@ -29,4 +29,9 @@ public class MainActivity extends AppCompatActivity {
   public boolean foo() {
     return myFoo.foo();
   }
+
+  public boolean foo2() {
+    FooClass foo = new FooClass();
+    return foo.foo();
+  }
 }
