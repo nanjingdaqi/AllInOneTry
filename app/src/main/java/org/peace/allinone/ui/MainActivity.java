@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import me.ele.base.utils.AppLogger;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -17,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-
+    AppLogger.e("class hash code: " + getClass().hashCode());
+    AppLogger.e("classname hash code: " + getClass().getName().hashCode());
   }
 }
