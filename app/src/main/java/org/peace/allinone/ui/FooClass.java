@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.content.Context;
+import android.support.annotation.VisibleForTesting;
 import android.view.LayoutInflater;
 
 /**
@@ -13,6 +14,7 @@ public class FooClass {
     return true;
   }
 
+  @VisibleForTesting
   public boolean foo2(Context context) {
     return context.toString().equals("hello");
   }

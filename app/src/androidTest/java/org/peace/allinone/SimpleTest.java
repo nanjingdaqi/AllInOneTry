@@ -1,5 +1,7 @@
 package org.peace.allinone;
 
+import android.content.Context;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.runner.AndroidJUnitRunner;
@@ -25,6 +27,8 @@ public class SimpleTest {
 
   @Rule
   public ActivityTestRule<MainActivity> simpleRule = new ActivityTestRule<>(MainActivity.class);
+
+  Context context = InstrumentationRegistry.getTargetContext();
 
   @Mock
   FooClass fooObj1;
