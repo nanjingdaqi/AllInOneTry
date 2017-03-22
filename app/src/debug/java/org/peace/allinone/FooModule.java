@@ -15,7 +15,7 @@ public class FooModule {
   public FooClass provideFooClass() {
     return new FooClass() {
       @Override public String foo4() {
-        return "Debug FooClass";
+        return "Debug FooClass and test_id is: " + TestIdHolder.id;
       }
     };
   }
