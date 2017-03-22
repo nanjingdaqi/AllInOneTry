@@ -23,4 +23,8 @@ public class FooClass {
     LayoutInflater inflater = LayoutInflater.from(context);
     return inflater.toString().equals("hello");
   }
+
+  public String foo4() {
+    return "FooClass";
+  }
 }
