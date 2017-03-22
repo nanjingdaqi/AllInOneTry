@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-    foo2();
+    foo();
   }
 
   public void setMyFoo(FooClass foo) {
