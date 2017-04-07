@@ -1,10 +1,13 @@
 package org.peace.allinone.ui;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import me.ele.base.utils.AppLogger;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -22,6 +25,16 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
+    //alloc();
+    bitmapSize();
+  }
+
+  public void bitmapSize() {
+    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+    AppLogger.e("bitmap size: " + bitmap.getByteCount());
+  }
+
+  public void alloc() {
     if (bytes == null) {
       bytes = new byte[10 * 1024 * 1024];
       return;
