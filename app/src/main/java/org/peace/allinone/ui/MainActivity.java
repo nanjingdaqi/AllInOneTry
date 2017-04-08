@@ -11,6 +11,7 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.ele.base.utils.AppLogger;
+import org.peace.allinone.A;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,10 +46,13 @@ public class MainActivity extends AppCompatActivity {
     ButterKnife.bind(this);
   }
 
+  A a = new A();
+
   @OnClick(R.id.start_btn) public void onClick(View v) {
     //alloc();
     //bitmapSize();
-    h.obtainMessage().sendToTarget();
+    //h.obtainMessage().sendToTarget();
+    a.i++;
   }
 
   public void bitmapSize() {
