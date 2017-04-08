@@ -1,10 +1,12 @@
 package org.peace.allinone.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import org.peace.allinone.MyService;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -17,6 +19,11 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
+    Intent intent = new Intent(this, MyService.class);
+    startService(intent);
+  }
 
+  @OnClick(R.id.stop_btn) public void onStop(View v) {
+    stopService(new Intent(this, MyService.class));
   }
 }
