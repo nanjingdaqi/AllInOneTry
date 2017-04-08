@@ -3,8 +3,11 @@ package org.peace.allinone.ui;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.ele.base.utils.AppLogger;
@@ -17,6 +20,24 @@ public class MainActivity extends AppCompatActivity {
   byte[] byte3;
   byte[] bytes4;
 
+  public class H extends Handler {
+    @Override public void handleMessage(Message msg) {
+      super.handleMessage(msg);
+      Toast.makeText(MainActivity.this, "handle msg", Toast.LENGTH_LONG).show();
+      new Thread(new Runnable() {
+        @Override public void run() {
+          try {
+            Thread.sleep(10 * 60 * 1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+      }).start();
+    }
+  }
+
+  H h = new H();
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -26,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
     //alloc();
-    bitmapSize();
+    //bitmapSize();
+    h.obtainMessage().sendToTarget();
   }
 
   public void bitmapSize() {
