@@ -1,5 +1,6 @@
 package org.peace.allinone.ui;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
       new Thread(new Runnable() {
         @Override public void run() {
           try {
-            Thread.sleep(10 * 60 * 1000);
+            Thread.sleep(20 * 1000);
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
@@ -51,8 +52,17 @@ public class MainActivity extends AppCompatActivity {
   @OnClick(R.id.start_btn) public void onClick(View v) {
     //alloc();
     //bitmapSize();
-    //h.obtainMessage().sendToTarget();
-    a.i++;
+    //a.i++;
+    //leak();
+    gotoSub();
+  }
+
+  public void gotoSub() {
+    startActivity(new Intent(this, SubActivity.class));
+  }
+
+  public void leak() {
+    h.obtainMessage().sendToTarget();
   }
 
   public void bitmapSize() {

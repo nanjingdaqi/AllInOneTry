@@ -21,6 +21,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ui.SubActivity"/>
+
+        <service android:name=".SettingsLeakService"/>
+
     </application>
 
 </manifest>
