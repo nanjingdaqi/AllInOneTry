@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
+import me.ele.base.utils.AppLogger;
 
 /**
  * Created by daqi on 17-3-9.
@@ -11,7 +12,11 @@ import android.widget.Toast;
 
 public class MyReceiver extends BroadcastReceiver {
 
+  public String value = "MyReceiver";
+
   @Override public void onReceive(Context context, Intent intent) {
+    AppLogger.e("me: " + hashCode());
+    AppLogger.e("value: " + value);
     Toast.makeText(context, "hello", Toast.LENGTH_SHORT).show();
   }
 }

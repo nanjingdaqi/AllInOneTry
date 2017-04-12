@@ -20,16 +20,6 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".MyReceiver"
-            android:process=".receiver"
-            android:exported="true"
-            >
-            <intent-filter>
-                <action android:name="hello"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </receiver>
-
     </application>
 
 </manifest>
