@@ -3,6 +3,7 @@ package org.peace.allinone.ui;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import butterknife.ButterKnife;
@@ -35,8 +36,18 @@ public class MainActivity extends AppCompatActivity {
     //intent.setAction("foo");
     //startActivity(intent);
 
-    Intent intent = new Intent();
-    intent.setComponent(new ComponentName(getPackageName(), "Foo"));
-    startActivity(intent);
+    //Intent intent = new Intent();
+    //intent.setComponent(new ComponentName(getPackageName(), "Foo"));
+    //startActivity(intent);
+
+    v.postDelayed(new Runnable() {
+      @Override public void run() {
+        postDialog();
+      }
+    }, 10 * 1000);
+  }
+
+  public void postDialog() {
+    new AlertDialog.Builder(this).setTitle("Peace").show();
   }
 }
