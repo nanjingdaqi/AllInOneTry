@@ -26,6 +26,8 @@ public class MyApp extends Application {
     DimenUtil.init(this);
     ResourceUtil.init(this);
     registerActivityLifecycleCallbacks(new MyCallback());
+
+    getSystemService(CONNECTIVITY_SERVICE);
   }
 
   private void installLeakCanary() {
@@ -36,6 +38,7 @@ public class MyApp extends Application {
     LeakCanary.refWatcher(this)
         .listenerServiceClass(SettingsLeakService.class)
         .maxStoredHeapDumps(100)
+        .excludedRefs(null)
         .buildAndInstall();
   }
 

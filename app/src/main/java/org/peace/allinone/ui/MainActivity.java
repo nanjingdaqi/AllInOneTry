@@ -54,7 +54,17 @@ public class MainActivity extends AppCompatActivity {
     //bitmapSize();
     //a.i++;
     //leak();
-    gotoSub();
+    //gotoSub();
+    //testWifiLeak();
+    testConnectivityManager();
+  }
+
+  public void testConnectivityManager() {
+    getSystemService(CONNECTIVITY_SERVICE);
+  }
+
+  public void testWifiLeak() {
+    getSystemService(WIFI_SERVICE);
   }
 
   public void gotoSub() {
