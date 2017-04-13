@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     int id = v.getId();
     if (id == R.id.start_btn) {
       MyFragment2 dlgFrag = new MyFragment2();
-      dlgFrag.show(getSupportFragmentManager(), "");
+      dlgFrag.show(getFragmentManager(), "");
     }
   }
 }
