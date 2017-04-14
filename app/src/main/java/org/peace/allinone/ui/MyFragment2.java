@@ -50,8 +50,13 @@ public class MyFragment2 extends DialogFragment implements View.OnClickListener{
     AppLogger.e("frag2 onSave");
   }
 
+  @Override public void onResume() {
+    super.onResume();
+  }
+
   @Override public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
     super.onViewStateRestored(savedInstanceState);
+    AppLogger.e("on view restored");
   }
 
   @Override public void onClick(View v) {
