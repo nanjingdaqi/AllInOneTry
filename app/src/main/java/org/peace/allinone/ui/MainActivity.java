@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -33,10 +34,16 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    int id = v.getId();
-    if (id == R.id.start_btn) {
-      MyFragment2 dlgFrag = new MyFragment2();
-      dlgFrag.show(getFragmentManager(), "");
-    }
+    Toast.makeText(this, "show later", Toast.LENGTH_LONG).show();
+    v.postDelayed(new Runnable() {
+      @Override public void run() {
+        showDialogFrag();
+      }
+    }, 5 * 1000);
+  }
+
+  public void showDialogFrag() {
+    MyFragment2 dlgFrag = new MyFragment2();
+    dlgFrag.show(getFragmentManager(), "");
   }
 }
