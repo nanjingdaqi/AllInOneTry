@@ -56,7 +56,12 @@ public class MainActivity extends AppCompatActivity {
     //leak();
     //gotoSub();
     //testWifiLeak();
-    testConnectivityManager();
+    //testConnectivityManager();
+    toast();
+  }
+
+  public void toast() {
+    Toast.makeText(this, "fo", Toast.LENGTH_LONG).show();
   }
 
   public void testConnectivityManager() {
