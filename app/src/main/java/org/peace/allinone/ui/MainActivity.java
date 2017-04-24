@@ -57,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
     //gotoSub();
     //testWifiLeak();
     //testConnectivityManager();
-    toast();
+
+    throw new RuntimeException("foo");
   }
 
   public void toast() {
