@@ -7,13 +7,21 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.View;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import me.ele.base.utils.AppLogger;
 import org.peace.allinone.A;
 import org.peace.allinone.R;
+
+import static android.os.Build.VERSION_CODES.N;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +29,24 @@ public class MainActivity extends AppCompatActivity {
   byte[] bytes2;
   byte[] byte3;
   byte[] bytes4;
+
+  HashMap<String, String> hashMap = new HashMap<>();
+  ArrayMap<String, String> arrayMap = new ArrayMap<>();
+
+  HashMap<String, String> hashMap2 = new HashMap<>();
+  ArrayMap<String, String> arrayMap2 = new ArrayMap<>();
+
+  HashMap<String, String> hashMap3 = new HashMap<>();
+  ArrayMap<String, String> arrayMap3 = new ArrayMap<>();
+
+  HashSet<String> hashSet = new HashSet<>();
+  ArraySet<String> arraySet = new ArraySet<>();
+
+  HashSet<String> hashSet2 = new HashSet<>();
+  ArraySet<String> arraySet2 = new ArraySet<>();
+
+  HashSet<String> hashSet3 = new HashSet<>();
+  ArraySet<String> arraySet3 = new ArraySet<>();
 
   public class H extends Handler {
     @Override public void handleMessage(Message msg) {
@@ -45,6 +71,36 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
+    init();
+  }
+
+  private void init() {
+    inject(6, hashMap);
+    inject(20, hashMap2);
+    inject(100, hashMap3);
+
+    inject(6, arrayMap);
+    inject(20, arrayMap2);
+    inject(100, arrayMap3);
+
+    inject(6, hashSet);
+    inject(20, hashSet2);
+    inject(100, hashSet3);
+
+    inject(6, arraySet);
+    inject(20, arraySet2);
+    inject(100, arraySet3);
+  }
+
+  private void inject(int n, Map<String, String> map) {
+    for (int i = 0; i < n; ++i) {
+      map.put("key-" + i, "val");
+    }
+  }
+  private void inject(int n, Set<String> set) {
+    for (int i = 0; i < n; ++i) {
+      set.add("val-" + i);
+    }
   }
 
   A a = new A();
@@ -58,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
     //testWifiLeak();
     //testConnectivityManager();
 
-    throw new RuntimeException("foo");
+    //throw new RuntimeException("foo");
   }
 
   public void toast() {
