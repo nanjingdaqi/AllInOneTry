@@ -25,6 +25,10 @@ import static android.os.Build.VERSION_CODES.N;
 
 public class MainActivity extends AppCompatActivity {
 
+  enum Test {
+    ENUM1, ENUM2
+  }
+
   byte[] bytes;
   byte[] bytes2;
   byte[] byte3;
@@ -47,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
 
   HashSet<String> hashSet3 = new HashSet<>();
   ArraySet<String> arraySet3 = new ArraySet<>();
+
+  Test t = Test.ENUM1;
+  Test t2 = Test.ENUM2;
 
   public class H extends Handler {
     @Override public void handleMessage(Message msg) {
@@ -71,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
-    init();
+    //init();
   }
 
   private void init() {
