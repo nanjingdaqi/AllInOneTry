@@ -5,7 +5,14 @@
       android:defaultValue="true"
       android:summary="Just a test"
       android:title="foo"
+      android:key="check_box"
       />
+
+  <org.peace.allinone.ui.MyPref
+      android:key="my_pref"
+    android:title="My Pref"
+    android:summary="hello"
+    />
 
   <PreferenceScreen android:title="bar">
     <EditTextPreference
