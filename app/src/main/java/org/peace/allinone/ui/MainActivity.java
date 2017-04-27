@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -33,14 +34,34 @@ public class MainActivity extends AppCompatActivity {
     myFragment = (MyFragment) getSupportFragmentManager().findFragmentById(R.id.my_frag);
   }
 
-  @OnClick({ R.id.start_btn }) public void onClick(View v) {
-    Toast.makeText(this, "show later", Toast.LENGTH_LONG).show();
-    v.postDelayed(new Runnable() {
+  @Override protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    AppLogger.e("on save");
+    try {
+      Thread.sleep(2 * 1000);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    //showDialogFrag();
+    getWindow().getDecorView().post(new Runnable() {
       @Override public void run() {
         showDialogFrag();
       }
-    }, 5 * 1000);
+    });
   }
+
+  @Override public boolean onTouchEvent(MotionEvent event) {
+    AppLogger.e("on touch");
+    boolean ret = super.onTouchEvent(event);
+      Toast.makeText(this, "show later", Toast.LENGTH_LONG).show();
+    showDialogFrag();
+    return ret;
+  }
+
+  //@OnClick({ R.id.start_btn }) public void onClick(View v) {
+  //  Toast.makeText(this, "show later", Toast.LENGTH_LONG).show();
+  //  showDialogFrag();
+  //}
 
   public void showDialogFrag() {
     MyFragment2 dlgFrag = new MyFragment2();
