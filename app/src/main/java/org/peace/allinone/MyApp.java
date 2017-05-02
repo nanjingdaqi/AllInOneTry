@@ -56,7 +56,7 @@ public class MyApp extends Application {
 
     LeakCanary.refWatcher(this)
         .listenerServiceClass(SettingsLeakService.class)
-        .maxStoredHeapDumps(100)
+        .maxStoredHeapDumps(1000)
         .excludedRefs(null)
         .buildAndInstall();
   }

@@ -122,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
     //testConnectivityManager();
 
     //throw new RuntimeException("foo");
+
+    leak();
   }
 
   public void toast() {

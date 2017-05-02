@@ -1,6 +1,7 @@
 package org.peace.allinone;
 
 import android.os.Environment;
+import android.text.format.DateFormat;
 import android.util.Log;
 import com.squareup.leakcanary.AnalysisResult;
 import com.squareup.leakcanary.DisplayLeakService;
@@ -8,10 +9,12 @@ import com.squareup.leakcanary.HeapDump;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 
 /**
  * Created by daqi on 17-4-10.
@@ -21,7 +24,15 @@ public class SettingsLeakService extends DisplayLeakService {
 
   static final String TAG = SettingsLeakService.class.getSimpleName();
 
-  static final String HPROF_PATH = "/sdcard/settings_hprof_path.txt";
+  File ROOT_DIR;
+
+  @Override public void onCreate() {
+    super.onCreate();
+    ROOT_DIR = new File(Environment.getExternalStorageDirectory(), "leak-canary" + File.separator + getPackageName());
+    if (!ROOT_DIR.exists()) {
+      ROOT_DIR.mkdirs();
+    }
+  }
 
   @Override
   protected void afterDefaultHandling(HeapDump heapDump, AnalysisResult result, String leakInfo) {
@@ -35,29 +46,20 @@ public class SettingsLeakService extends DisplayLeakService {
 
     Log.e(TAG, "simple leak trace: " + result.leakTrace);
 
-    Log.e(TAG, "start saving leak heap");
+    dumpLeakInfo(heapDump, result, leakInfo);
 
     File heapDumpFile = heapDump.heapDumpFile;
-    File dir = new File(Environment.getExternalStorageDirectory(), "leak-canary" + File.separator + getPackageName());
-    File dest = new File(dir, heapDumpFile.getName());
+    File dest = new File(ROOT_DIR, heapDumpFile.getName());
     if (dest.exists()) {
       dest.delete();
     }
-    dest.getParentFile().mkdirs();
     try {
       dest.createNewFile();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    try {
       copy(heapDumpFile, dest);
     } catch (IOException e) {
       e.printStackTrace();
     }
 
-    writeHeapPath(dest.getAbsolutePath());
-
-    Log.e(TAG, "save path: " + dest.getAbsolutePath());
     Log.e(TAG, "start kill myself");
 
     throw new RuntimeException("yes find a memory leak");
@@ -82,18 +84,36 @@ public class SettingsLeakService extends DisplayLeakService {
     }
   }
 
-  public static void writeHeapPath(String heapPath) {
+  public void dumpLeakInfo(HeapDump heapDump, AnalysisResult result, String leakInfo) {
+    File infoFile = touchLeakInfoFile();
+    String content = new StringBuilder()
+        .append("simple ref:\n")
+        .append(result.leakTrace + "\n")
+        .append("\n")
+        .append("hprof file name: " + heapDump.heapDumpFile.getName() + "\n")
+        .toString();
     try {
-      File addressFile = new File(HPROF_PATH);
-      if (addressFile.exists()) {
-        addressFile.delete();
-      }
-      addressFile.createNewFile();
-      OutputStream os = new FileOutputStream(addressFile);
-      os.write(heapPath.getBytes());
-      os.close();
-    } catch (Exception e) {
+      FileOutputStream fos = new FileOutputStream(infoFile);
+      fos.write(content.getBytes());
+      fos.close();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public File touchLeakInfoFile() {
+    String suffix = DateFormat.format("MM-dd_hh-mm-ss", new Date()).toString();
+    File file = new File(ROOT_DIR, "leak-info_" + suffix + ".txt");
+    if (file.exists()) {
+      file.delete();
+    }
+    try {
+      file.createNewFile();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return file;
   }
 }
