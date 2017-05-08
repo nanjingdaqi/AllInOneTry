@@ -22,46 +22,28 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
-  @BindView(R.id.start_btn) Button mStartBtn;
-  MyFragment myFragment;
-
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
 
-    myFragment = (MyFragment) getSupportFragmentManager().findFragmentById(R.id.my_frag);
+    MyFragment fg1 = new MyFragment();
+    getFragmentManager().beginTransaction()
+        .add(R.id.content, fg1)
+        .addToBackStack("frag1")
+        .commit();
   }
 
   @Override protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
-    AppLogger.e("on save");
-    try {
-      Thread.sleep(2 * 1000);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    //showDialogFrag();
-    getWindow().getDecorView().post(new Runnable() {
-      @Override public void run() {
-        showDialogFrag();
-      }
-    });
   }
 
-  @Override public boolean onTouchEvent(MotionEvent event) {
-    AppLogger.e("on touch");
-    boolean ret = super.onTouchEvent(event);
-      Toast.makeText(this, "show later", Toast.LENGTH_LONG).show();
-    showDialogFrag();
-    return ret;
+  @Override public void onBackPressed() {
+    AppLogger.e("onBackPressed");
+    getSupportFragmentManager().popBackStackImmediate();
+    super.onBackPressed();
   }
-
-  //@OnClick({ R.id.start_btn }) public void onClick(View v) {
-  //  Toast.makeText(this, "show later", Toast.LENGTH_LONG).show();
-  //  showDialogFrag();
-  //}
 
   public void showDialogFrag() {
     MyFragment2 dlgFrag = new MyFragment2();

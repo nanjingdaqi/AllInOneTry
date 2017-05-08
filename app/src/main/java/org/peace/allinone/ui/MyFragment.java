@@ -1,9 +1,12 @@
 package org.peace.allinone.ui;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import me.ele.base.utils.AppLogger;
@@ -18,6 +21,7 @@ public class MyFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AppLogger.e("frag1 oncreate");
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -31,5 +35,24 @@ public class MyFragment extends Fragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         AppLogger.e("frag onSave");
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        getView();
+        menu.add(0, 1, 0, "Test");
+    }
+
+    static int i = 1;
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            getActivity().getFragmentManager().beginTransaction()
+                .replace(R.id.content, new MyFragment3())
+                .addToBackStack("frag" + i++)
+                .commit();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
