@@ -17,25 +17,11 @@
       android:text="Start"
       />
 
-  <View
-      android:layout_width="200dp"
-      android:layout_height="100dp"
-      android:background="@drawable/ic_launcher"
-      />
-
-  <org.peace.allinone.ui.MyView3
-      android:layout_width="200dp"
-      android:layout_height="100dp"
-      />
-
-  <org.peace.allinone.ui.MyView4
-      android:layout_width="200dp"
-      android:layout_height="100dp"
-      />
-
-  <org.peace.allinone.ui.MyView5
-      android:layout_width="200dp"
-      android:layout_height="100dp"
+  <ImageView
+      android:id="@+id/img"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:scaleType="fitCenter"
       />
 
 </LinearLayout>
