@@ -18,6 +18,9 @@ public class MainActivity extends AppCompatActivity {
 
   @BindView(R.id.img) ImageView imageView;
 
+  Bitmap orgBitmap;
+  Bitmap newBitmap;
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -43,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
   void shrinkDrawable(BitmapDrawable bitmapDrawable) {
     Matrix matrix = new Matrix();
     matrix.setScale(0.5f, 0.5f);
-    Bitmap orgBitmap = bitmapDrawable.getBitmap();
-    Bitmap newBitmap = Bitmap.createBitmap(orgBitmap, 0, 0, orgBitmap.getWidth(), orgBitmap.getHeight(), matrix, true);
+    orgBitmap = bitmapDrawable.getBitmap();
+    newBitmap = Bitmap.createBitmap(orgBitmap, 0, 0, orgBitmap.getWidth(), orgBitmap.getHeight(), matrix, true);
     try {
       Method method = BitmapDrawable.class.getDeclaredMethod("setBitmap", Bitmap.class);
       method.setAccessible(true);
