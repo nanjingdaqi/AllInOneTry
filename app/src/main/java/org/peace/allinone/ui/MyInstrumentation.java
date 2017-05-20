@@ -3,11 +3,12 @@ package org.peace.allinone.ui;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Intent;
+import me.ele.base.utils.AppLogger;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
-import me.ele.commons.AppLogger;
 
 public class MyInstrumentation extends Instrumentation implements InvocationHandler {
 
