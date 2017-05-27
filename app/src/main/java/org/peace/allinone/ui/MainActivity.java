@@ -3,12 +3,14 @@ package org.peace.allinone.ui;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import butterknife.ButterKnife;
@@ -79,6 +81,48 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
     //init();
+    task.execute();
+  }
+
+  AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+
+    @Override
+    protected void onPreExecute() {
+      super.onPreExecute();
+      AppLogger.e("start");
+      Log.e("peace", "start");
+    }
+
+    @Override
+    protected Void doInBackground(Void... params) {
+      try {
+        AppLogger.e("doing");
+        Log.e("peace", "doing");
+        Thread.sleep(20 * 1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+      super.onPostExecute(aVoid);
+      AppLogger.e("done");
+      Log.e("peace", "done");
+    }
+
+    @Override
+    protected void onCancelled(Void aVoid) {
+      super.onCancelled(aVoid);
+      Log.e("peace", "canceled");
+    }
+  };
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    task.cancel(true);
   }
 
   private void init() {
@@ -123,7 +167,8 @@ public class MainActivity extends AppCompatActivity {
 
     //throw new RuntimeException("foo");
 
-    leak();
+//    leak();
+    Log.e("peace", "click");
   }
 
   public void toast() {

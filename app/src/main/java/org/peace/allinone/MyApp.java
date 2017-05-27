@@ -23,11 +23,12 @@ public class MyApp extends Application {
   @Override public void onCreate() {
     super.onCreate();
 
+    AppLogger.debug = true;
+
     installLeakCanary();
 
     AppLogger.e("dir: " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
 
-    AppLogger.debug = true;
     DimenUtil.init(this);
     ResourceUtil.init(this);
     registerActivityLifecycleCallbacks(new MyCallback());
