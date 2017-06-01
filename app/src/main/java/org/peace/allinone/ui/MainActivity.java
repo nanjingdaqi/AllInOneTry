@@ -11,6 +11,8 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
+  private String str = "";
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -21,12 +23,14 @@ public class MainActivity extends AppCompatActivity {
   @OnClick(R.id.start_btn) public void onClick(View v) {
     AppLogger.e("class hash code: " + getClass().hashCode());
     AppLogger.e("classname hash code: " + getClass().getName().hashCode());
+    NonStaticClass obj = new NonStaticClass();
+    AppLogger.e(obj.toString());
   }
 
-  public class NonStaticClass extends DialogFragment {
+  public class NonStaticClass {
 
     public NonStaticClass() {
-
+        str = "fuck";
     }
 
     public NonStaticClass(String arg) {
