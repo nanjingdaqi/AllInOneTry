@@ -23,7 +23,14 @@ public class MainActivity extends AppCompatActivity {
     AppLogger.e("classname hash code: " + getClass().getName().hashCode());
   }
 
-  public static class StaticClass extends DialogFragment {
+  public class NonStaticClass extends DialogFragment {
 
+    public NonStaticClass() {
+
+    }
+
+    public NonStaticClass(String arg) {
+
+    }
   }
 }
