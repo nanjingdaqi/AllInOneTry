@@ -18,6 +18,10 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
+
+    A a = new A();
+    A.B b = a.new B();
+    b.foo();
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
