@@ -7,8 +7,8 @@ package org.peace.allinone.ui;
 public class A {
     private static int i = 0;
 
-    public class B {
-        public void foo() {
+    public void foo() {
+        synchronized (this) {
             i++;
         }
     }
