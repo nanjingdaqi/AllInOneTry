@@ -40,13 +40,6 @@
 
         <provider android:authorities="peace" android:name=".Main.Provider"/>
 
-        <service android:name=".Main.AuthService" android:exported="true">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
-            </intent-filter>
-            <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/auth" android:value="true"/>
-
-        </service>
 
     </application>
 
