@@ -3,7 +3,18 @@
     package="org.peace.allinone">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- client -->
+    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+    
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 
+    <!-- Authenticator -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
     <application
         android:allowBackup="true"
         android:name=".MyApp"
@@ -19,6 +30,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:exported="true" android:name=".Main.SyncService">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter" android:resource="@xml/sync" android:value="true"/>
+        </service>
+
+        <provider android:authorities="peace" android:name=".Main.Provider"/>
+
+        <service android:name=".Main.AuthService" android:exported="true">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/auth" android:value="true"/>
+
+        </service>
 
     </application>
 
