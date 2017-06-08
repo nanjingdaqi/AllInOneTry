@@ -21,13 +21,21 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
     account = CreateSyncAccount(this);
-    ContentResolver.addPeriodicSync(account, "peace", new Bundle(), 10 * 1000);
+    ContentResolver.setSyncAutomatically(account, "peace", true);
+    ContentResolver.addPeriodicSync(account, "peace", new Bundle(), 1);
   }
 
   Account account;
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-    ContentResolver.requestSync(account, "peace", new Bundle());
+//    ContentResolver.requestSync(account, "peace", new Bundle());
+//    ContentResolver.setIsSyncable(account, "peace", 1);
+//    ContentResolver.setMasterSyncAutomatically(true);
+//    ContentResolver.setSyncAutomatically(account, "peace", true);
+//    Bundle bundle = new Bundle();
+//    bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+//    ContentResolver.requestSync(account, "peace", bundle);
+//    ContentResolver.setSyncAutomatically(account, "peace", true);
   }
 
   /**
