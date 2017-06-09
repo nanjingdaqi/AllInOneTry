@@ -29,7 +29,7 @@
     </style>
 
     <style name="Foo.Bar" parent="Theme.AppCompat">
-        <item name="*android:textColor">#000</item>
+        <item name="*android:regularColor">#000</item>
     </style>
 
     <color name="bg">#33dddddd</color>
