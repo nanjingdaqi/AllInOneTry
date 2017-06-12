@@ -8,6 +8,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.ele.base.utils.AppLogger;
 import org.peace.allinone.R;
+import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,14 +19,19 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
-    new A().foo();
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
     AppLogger.e("class hash code: " + getClass().hashCode());
     AppLogger.e("classname hash code: " + getClass().getName().hashCode());
+      Log.d("Peace", "on click");
     NonStaticClass obj = new NonStaticClass();
     AppLogger.e(obj.toString());
+    try {
+      new A().foo();
+    } catch (MyException e) {
+
+    }
   }
 
   public class NonStaticClass {
