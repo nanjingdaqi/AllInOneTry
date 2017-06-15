@@ -1,5 +1,6 @@
 package org.peace.allinone.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -46,11 +47,14 @@ public class MainActivity extends AppCompatActivity {
     //intent.setComponent(new ComponentName(getPackageName(), "Foo"));
     //startActivity(intent);
 
-    v.postDelayed(new Runnable() {
-      @Override public void run() {
-        postDialog();
-      }
-    }, 10 * 1000);
+//    v.postDelayed(new Runnable() {
+//      @Override public void run() {
+//        postDialog();
+//      }
+//    }, 10 * 1000);
+
+    Intent intent = new Intent("android.settings.SYNC_SETTINGS");
+    startActivity(intent);
   }
 
   public void postDialog() {
