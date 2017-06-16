@@ -53,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
 //      }
 //    }, 10 * 1000);
 
-    Intent intent = new Intent("android.settings.SYNC_SETTINGS");
+//    Intent intent = new Intent("android.settings.SYNC_SETTINGS");
+    Intent intent = new Intent("foo");
     startActivity(intent);
   }
 
