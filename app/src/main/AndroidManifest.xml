@@ -21,15 +21,7 @@
     </activity>
 
     <activity android:name=".ui.SubActivity">
-      <intent-filter>
-        <action android:name="foo"/>
-        <action android:name="bar"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-      </intent-filter>
-    </activity>
-
-    <activity android:name=".ui.Sub2Activity">
-      <intent-filter android:priority="100">
+      <intent-filter android:priority="-1">
         <action android:name="foo"/>
         <action android:name="bar"/>
         <category android:name="android.intent.category.DEFAULT"/>
