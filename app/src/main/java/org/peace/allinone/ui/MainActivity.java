@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.start_btn)
     public void onClick(View v) {
-        Intent intent = new Intent(this, SubActivity.class);
+        Intent intent = new Intent("peace");
         Bundle bundle = new Bundle();
         TestWrapper t = new TestWrapper(test);
         bundle.putParcelable("binder", t);
