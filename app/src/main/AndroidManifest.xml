@@ -20,6 +20,10 @@
       </intent-filter>
     </activity>
 
+      <activity android:name=".ui.SubActivity"
+                android:process=":sub"
+      />
+
     <service android:name=".MyService"/>
 
   </application>
