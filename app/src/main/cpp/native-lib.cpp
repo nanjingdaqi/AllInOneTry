@@ -57,16 +57,21 @@ void alloc(JNIEnv* env) {
     LOGE("obj2 ref: %d", env->GetObjectRefType(obj2));
 }
 
+void fromJava(JNIEnv* env, jobject obj) {
+    LOGE("obj ref: %d", env->GetObjectRefType(obj));
+}
+
 JNINativeMethod methods[] = {
         {"native_hello", "()Ljava/lang/String;", (void*)native_hello},
         {"alloc", "()V", (void*)alloc},
-        {"op_obj", "()V", (void*)op_obj}
+        {"op_obj", "()V", (void*)op_obj},
+        {"fromJava", "(Ljava/lang/String;)V", (void*)fromJava}
 };
 
 void registerNativeMethods(JNIEnv* env) {
     jclass cls = env->FindClass("org/peace/allinone/ui/MainActivity");
     LOGE("RegisterNatives begin");
-    env->RegisterNatives(cls, methods, 3);
+    env->RegisterNatives(cls, methods, 4);
     LOGE("RegisterNatives done");
 }
 
