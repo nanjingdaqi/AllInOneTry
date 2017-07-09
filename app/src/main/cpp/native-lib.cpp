@@ -39,15 +39,34 @@ jstring native_hello(JNIEnv* env) {
     return env->NewStringUTF("native hello");
 }
 
+jobject obj;
+jobject obj2;
+
+void op_obj(JNIEnv* env) {
+    jclass cls = env->FindClass("org/peace/allinone/Daqi");
+    jfieldID mid = (jfieldID) env->GetFieldID(cls, "msg", "Ljava/lang/String;");
+    LOGE("obj msg: %s", env->GetStringUTFChars((jstring) env->GetObjectField(obj2, mid), NULL));
+}
+
+void alloc(JNIEnv* env) {
+    jclass cls = env->FindClass("org/peace/allinone/Daqi");
+    obj = env->AllocObject(cls);
+    obj = env->NewObject(cls, env->GetMethodID(cls, "<init>", "()V"));
+    LOGE("obj ref: %d", env->GetObjectRefType(obj));
+    obj2 = env->NewGlobalRef(obj);
+    LOGE("obj2 ref: %d", env->GetObjectRefType(obj2));
+}
 
 JNINativeMethod methods[] = {
-        {"native_hello", "()Ljava/lang/String;", (void*)native_hello}
+        {"native_hello", "()Ljava/lang/String;", (void*)native_hello},
+        {"alloc", "()V", (void*)alloc},
+        {"op_obj", "()V", (void*)op_obj}
 };
 
 void registerNativeMethods(JNIEnv* env) {
     jclass cls = env->FindClass("org/peace/allinone/ui/MainActivity");
     LOGE("RegisterNatives begin");
-    env->RegisterNatives(cls, methods, 1);
+    env->RegisterNatives(cls, methods, 3);
     LOGE("RegisterNatives done");
 }
 

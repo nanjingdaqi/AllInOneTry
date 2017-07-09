@@ -24,13 +24,23 @@ public class MainActivity extends AppCompatActivity {
   @OnClick(R.id.start_btn) public void onClick(View v) {
 //      Toast.makeText(this, stringFromJNI(), Toast.LENGTH_SHORT).show();
       try {
-          Toast.makeText(this, native_hello(), Toast.LENGTH_SHORT).show();
+//          Toast.makeText(this, native_hello(), Toast.LENGTH_SHORT).show();
       } catch (RuntimeException e) {
           e.printStackTrace();
       }
+
+      alloc();
+  }
+
+  @OnClick(R.id.btn2) public void click2(View v) {
+      op_obj();
   }
 
     public native String stringFromJNI();
+
+    public native void alloc();
+
+    public native void op_obj();
 
     public static String forNative() {
         return "Hello JAVA";
