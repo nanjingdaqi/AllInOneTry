@@ -27,16 +27,24 @@ Java_org_peace_allinone_ui_MainActivity_stringFromJNI(
     return (jstring) env->CallStaticObjectMethod(cls, mid);
 }
 
-JNIEnv* env;
-jstring native_hello() {
+int throw_ex(JNIEnv* env) {
+    jclass exp_cls = env->FindClass("java/lang/RuntimeException");
+    jobject exp = env->AllocObject(exp_cls);
+//    env->Throw((jthrowable) exp);
+    return env->ThrowNew(exp_cls, "foo");
+}
+
+jstring native_hello(JNIEnv* env) {
+    throw_ex(env);
     return env->NewStringUTF("native hello");
 }
+
 
 JNINativeMethod methods[] = {
         {"native_hello", "()Ljava/lang/String;", (void*)native_hello}
 };
 
-void registerNativeMethods() {
+void registerNativeMethods(JNIEnv* env) {
     jclass cls = env->FindClass("org/peace/allinone/ui/MainActivity");
     LOGE("RegisterNatives begin");
     env->RegisterNatives(cls, methods, 1);
@@ -44,10 +52,11 @@ void registerNativeMethods() {
 }
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+    JNIEnv* env;
     LOGE("JNI_OnLoad");
     vm->GetEnv((void **) &env, JNI_VERSION_1_4);
     LOGE("get env done");
-    registerNativeMethods();
+    registerNativeMethods(env);
     return JNI_VERSION_1_4;
 }
 
