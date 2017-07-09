@@ -22,7 +22,8 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-      Toast.makeText(this, stringFromJNI(), Toast.LENGTH_SHORT).show();
+//      Toast.makeText(this, stringFromJNI(), Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, native_hello(), Toast.LENGTH_SHORT).show();
   }
 
     public native String stringFromJNI();
@@ -30,4 +31,6 @@ public class MainActivity extends AppCompatActivity {
     public static String forNative() {
         return "Hello JAVA";
     }
+
+    public native String native_hello();
 }
