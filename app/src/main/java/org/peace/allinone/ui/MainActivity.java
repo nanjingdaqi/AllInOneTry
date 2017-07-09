@@ -23,7 +23,11 @@ public class MainActivity extends AppCompatActivity {
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
 //      Toast.makeText(this, stringFromJNI(), Toast.LENGTH_SHORT).show();
-      Toast.makeText(this, native_hello(), Toast.LENGTH_SHORT).show();
+      try {
+          Toast.makeText(this, native_hello(), Toast.LENGTH_SHORT).show();
+      } catch (RuntimeException e) {
+          e.printStackTrace();
+      }
   }
 
     public native String stringFromJNI();
