@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import org.peace.allinone.Daqi;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,12 +30,18 @@ public class MainActivity extends AppCompatActivity {
           e.printStackTrace();
       }
 
-      alloc();
+//      alloc();
+
+      fromJava(daqi.msg);
   }
+
+  Daqi daqi = new Daqi();
 
   @OnClick(R.id.btn2) public void click2(View v) {
       op_obj();
   }
+
+  public native void fromJava(String obj);
 
     public native String stringFromJNI();
 
