@@ -24,7 +24,7 @@
                 android:process=":sub"
       />
 
-    <service android:name=".MyService"/>
+    <service android:name=".MyService" android:exported="true"/>
 
   </application>
 
