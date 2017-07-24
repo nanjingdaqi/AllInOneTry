@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import butterknife.ButterKnife;
@@ -17,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-
+      Settings.System.putFloat(getBaseContext().getContentResolver(),
+              Settings.System.FONT_SCALE, (float) 3.0);
   }
 }
