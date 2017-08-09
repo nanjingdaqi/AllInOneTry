@@ -20,12 +20,12 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-
+      foo();
   }
   
   synchronized public void foo() {
       synchronized (this) {
-          Toast.makeText(this, "foo", Toast.LENGTH_SHORT).show();
+          Toast.makeText(this, "foo" + A.foo(10, 10), Toast.LENGTH_SHORT).show();
       }
   }
 }

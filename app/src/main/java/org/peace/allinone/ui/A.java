@@ -6,7 +6,11 @@ package org.peace.allinone.ui;
 
 public class A {
 
-    public int foo(int a, int b) {
-        return a + b;
+    public static int foo(int a, int b) {
+        int l = 10;
+        if (System.currentTimeMillis() > 1) {
+            throw new RuntimeException("here");
+        }
+        return a + b + l;
     }
 }

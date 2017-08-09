@@ -16,7 +16,22 @@ android {
     versionName "1.0"
   }
 
-  buildTypes {}
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  buildTypes {
+      debug {
+          debuggable true
+      }
+    release {
+      debuggable false
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.debug
+    }
+  }
 }
 
 def support_version = "23.2.1"
