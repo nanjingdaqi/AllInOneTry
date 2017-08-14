@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,10 +40,11 @@ public class MainActivity extends AppCompatActivity {
       }
 
       @Override public int getCount() {
-        return 2;
+        return 5;
       }
     };
     viewPager.setAdapter(adapter);
+    viewPager.setOffscreenPageLimit(10);
 
     tabLayout.setupWithViewPager(viewPager);
     tabLayout.setTabMode(TabLayout.MODE_FIXED);
@@ -52,10 +54,13 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
+  static String T = "daqi";
+
   public static class MyFrag extends Fragment {
 
     @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
+      Log.e(T, "onCreateView");
       View root = inflater.inflate(R.layout.myfrag_layout, container, false);
       return root;
     }
