@@ -20,7 +20,8 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-      foo();
+//      foo();
+      A.foo();
   }
   
   synchronized public void foo() {
