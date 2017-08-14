@@ -44,14 +44,13 @@ public class MainActivity extends AppCompatActivity {
       }
     };
     viewPager.setAdapter(adapter);
-    viewPager.setOffscreenPageLimit(10);
 
     tabLayout.setupWithViewPager(viewPager);
     tabLayout.setTabMode(TabLayout.MODE_FIXED);
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-
+    viewPager.setOffscreenPageLimit(10);
   }
 
   static String T = "daqi";
