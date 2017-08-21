@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-                       android:label="Peace"
+                       android:label="@string/app_name"
                        android:icon="@drawable/ic_launcher"
                        android:accountType="peace"
                        android:smallIcon="@drawable/ic_launcher"

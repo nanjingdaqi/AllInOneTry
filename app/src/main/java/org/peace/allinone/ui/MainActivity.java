@@ -15,14 +15,19 @@ import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
 
+//  static String AUTH = "com.android.contacts";
+//  static String AUTH = "com.foo";
+  static String AUTH = "peace";
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
     account = CreateSyncAccount(this);
-    ContentResolver.setSyncAutomatically(account, "peace", true);
-    ContentResolver.addPeriodicSync(account, "peace", new Bundle(), 1);
+//    ContentResolver.setSyncAutomatically(account, AUTH, true);
+//    ContentResolver.addPeriodicSync(account, AUTH, new Bundle(), 1);
+      ContentResolver.requestSync(account, AUTH, new Bundle());
   }
 
   Account account;

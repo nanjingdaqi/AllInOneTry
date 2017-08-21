@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.util.Log;
+import org.peace.allinone.MyApp;
 
 /**
  * Created by daqi on 17-6-5.
@@ -23,11 +24,11 @@ public class Sync extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.e(T, "on perform sync");
-        try {
-            Thread.sleep(10 * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        MyApp.doSth(30);
+        Log.e(T, "30s passed");
+        MyApp.doSth(100);
         Log.e(T, "on perform sync end");
     }
+
+
 }
