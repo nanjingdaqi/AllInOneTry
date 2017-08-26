@@ -57,7 +57,14 @@ public class MainActivity extends AppCompatActivity {
     //Intent intent = new Intent("foo");
     //startActivity(intent);
 
-    startActivity(new Intent(this, SubActivity.class));
+    Bundle options = new Bundle();
+    options.putInt("android:activity.animExitRes", 0);
+    options.putInt("android:activity.animEnterRes", 0);
+    options.putInt("android:activity.animType", 1);
+
+    startActivity(new Intent(this, SubActivity.class), options);
+
+//    overridePendingTransition(0, 0);
   }
 
   public void postDialog() {
