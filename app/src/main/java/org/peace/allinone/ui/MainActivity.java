@@ -57,12 +57,15 @@ public class MainActivity extends AppCompatActivity {
     //Intent intent = new Intent("foo");
     //startActivity(intent);
 
-    Bundle options = new Bundle();
-    options.putInt("android:activity.animExitRes", 0);
-    options.putInt("android:activity.animEnterRes", 0);
-    options.putInt("android:activity.animType", 1);
+//    Bundle options = new Bundle();
+//    options.putInt("android:activity.animExitRes", 0);
+//    options.putInt("android:activity.animEnterRes", 0);
+//    options.putInt("android:activity.animType", 1);
 
-    startActivity(new Intent(this, SubActivity.class), options);
+    Intent intent = new Intent(this, SubActivity.class);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+    startActivity(intent);
 
 //    overridePendingTransition(0, 0);
   }
