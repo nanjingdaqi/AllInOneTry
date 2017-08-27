@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 //    options.putInt("android:activity.animType", 1);
 
     Intent intent = new Intent(this, SubActivity.class);
-    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
     startActivity(intent);
 

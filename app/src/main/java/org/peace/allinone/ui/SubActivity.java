@@ -4,11 +4,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import me.ele.base.utils.AppLogger;
 import org.peace.allinone.R;
 
 public class SubActivity extends AppCompatActivity {
+
+  @BindView(R.id.start_btn)
+  Button startBtn;
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -17,6 +24,13 @@ public class SubActivity extends AppCompatActivity {
       AppLogger.e("on create");
 
     ButterKnife.bind(this);
+
+    startBtn.setText("SubActivity");
+  }
+
+  @OnClick({ R.id.start_btn }) public void onClick(View v) {
+      Intent intent = new Intent(this, MainActivity.class);
+    startActivity(intent);
   }
 
   @Override
