@@ -9,6 +9,8 @@ import butterknife.OnClick;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
+
+    public int bb = 10;
     
     public volatile boolean bl;
 
@@ -21,7 +23,9 @@ public class MainActivity extends AppCompatActivity {
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
 //      foo();
-      A.foo();
+//      A.foo();
+      A a = new A();
+      bb = a.aa;
   }
   
   synchronized public void foo() {

@@ -11,6 +11,8 @@ import java.util.List;
 
 public class A {
 
+    public int aa = 0;
+
     public static int foo(int a, int b) {
         int l = 10;
         if (System.currentTimeMillis() > 1) {
