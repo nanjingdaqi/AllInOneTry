@@ -24,10 +24,10 @@ public class MainActivity extends AppCompatActivity {
   @OnClick(R.id.start_btn) public void onClick(View v) {
 //      foo();
 //      A.foo();
-      A a = new A();
-      bb = a.aa;
+//      A a = new A();
+//      bb = a.aa;
   }
-  
+
   synchronized public void foo() {
       synchronized (this) {
           Toast.makeText(this, "foo" + A.foo(10, 10), Toast.LENGTH_SHORT).show();
