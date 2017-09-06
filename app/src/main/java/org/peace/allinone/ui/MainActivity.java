@@ -10,6 +10,7 @@ import butterknife.OnClick;
 import org.peace.allinone.R;
 
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,25 +21,32 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        try {
-            Class AppGlobals_CLS = Class.forName("android.app.AppGlobals");
-            Method getPackageManager_MTD = AppGlobals_CLS.getDeclaredMethod("getPackageManager");
-            Object IPackageManager_OBJ = getPackageManager_MTD.invoke(AppGlobals_CLS);
-            Method setApplicationEnabledSetting_MTD = IPackageManager_OBJ.getClass()
-                    .getDeclaredMethod("setApplicationEnabledSetting", String.class, int.class, int.class, int.class, String.class);
-            setApplicationEnabledSetting_MTD.invoke(IPackageManager_OBJ, "com.android.documentsui", 1, 0, 0, getPackageName());
-
-            Method setComponentEnabledSetting_MTD = IPackageManager_OBJ.getClass()
-                    .getDeclaredMethod("setComponentEnabledSetting", ComponentName.class, int.class, int.class, int.class);
-            setComponentEnabledSetting_MTD.invoke(IPackageManager_OBJ, new ComponentName(getPackageName(), SubActivity.class.getName()), 2, 0, 0);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Class AppGlobals_CLS = Class.forName("android.app.AppGlobals");
+//            Method getPackageManager_MTD = AppGlobals_CLS.getDeclaredMethod("getPackageManager");
+//            Object IPackageManager_OBJ = getPackageManager_MTD.invoke(AppGlobals_CLS);
+//            Method setApplicationEnabledSetting_MTD = IPackageManager_OBJ.getClass()
+//                    .getDeclaredMethod("setApplicationEnabledSetting", String.class, int.class, int.class, int.class, String.class);
+//            setApplicationEnabledSetting_MTD.invoke(IPackageManager_OBJ, "com.android.documentsui", 1, 0, 0, getPackageName());
+//
+//            Method setComponentEnabledSetting_MTD = IPackageManager_OBJ.getClass()
+//                    .getDeclaredMethod("setComponentEnabledSetting", ComponentName.class, int.class, int.class, int.class);
+//            setComponentEnabledSetting_MTD.invoke(IPackageManager_OBJ, new ComponentName(getPackageName(), SubActivity.class.getName()), 2, 0, 0);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     @OnClick(R.id.start_btn)
     public void onClick(View v) {
-        Intent intent = new Intent(this, SubActivity.class);
-        startActivity(intent);
+        try {
+            Class LocalPicker_cls = Class.forName("com.android.internal.app.LocalePicker");
+            Method updateLocale_mtd = LocalPicker_cls.getDeclaredMethod("updateLocale", Locale.class);
+            updateLocale_mtd.setAccessible(true);
+            Locale locale = new Locale("en", "US");
+            updateLocale_mtd.invoke(LocalPicker_cls, locale);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
