@@ -13,6 +13,26 @@ public class A {
 
     public int aa = 0;
 
+    public static int exp() {
+        try {
+            int b = 0 / 0;
+            return b;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            return -1;
+        }
+    }
+
+    public static void flow() {
+        if (A.class != null) {
+            foo(1, 2);
+        } else {
+            exp();
+        }
+        A.foo();
+    }
+
     public static int foo(int a, int b) {
         int l = 10;
         if (System.currentTimeMillis() > 1) {
