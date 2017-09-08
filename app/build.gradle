@@ -16,7 +16,22 @@ android {
     versionName "1.0"
   }
 
-  buildTypes {}
+  signingConfigs {
+    platformN {
+      storeFile file('../platform-n.keystore')
+      storePassword 'android'
+      keyAlias 'platform-n'
+      keyPassword 'android'
+    }
+  }
+
+  buildTypes {
+    debug {
+      debuggable true
+      minifyEnabled false
+      signingConfig signingConfigs.platformN
+    }
+  }
 }
 
 def support_version = "23.2.1"
