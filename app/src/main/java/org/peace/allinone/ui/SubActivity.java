@@ -10,6 +10,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.ele.base.utils.AppLogger;
+import org.peace.allinone.MyApp;
 import org.peace.allinone.R;
 
 public class SubActivity extends AppCompatActivity {
@@ -19,6 +20,9 @@ public class SubActivity extends AppCompatActivity {
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    MyApp.doSth(5);
+
     setContentView(R.layout.activity_main);
 
       AppLogger.e("on create");

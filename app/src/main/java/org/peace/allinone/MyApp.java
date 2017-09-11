@@ -15,5 +15,14 @@ public class MyApp extends Application {
     AppLogger.debug = true;
     DimenUtil.init(this);
     ResourceUtil.init(this);
+
+    doSth(5);
+  }
+
+  public static void doSth(long d) {
+    long tm = System.currentTimeMillis();
+    while (System.currentTimeMillis() - tm < d * 1000) {
+
+    }
   }
 }

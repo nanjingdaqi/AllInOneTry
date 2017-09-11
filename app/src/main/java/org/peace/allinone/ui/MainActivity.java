@@ -5,18 +5,23 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.ele.base.utils.AppLogger;
+import org.peace.allinone.MyApp;
 import org.peace.allinone.R;
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
 
+  @BindView(R.id.start_btn)
+  Button btn;
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-
     ButterKnife.bind(this);
   }
 
@@ -62,12 +67,19 @@ public class MainActivity extends AppCompatActivity {
 //    options.putInt("android:activity.animEnterRes", 0);
 //    options.putInt("android:activity.animType", 1);
 
-    Intent intent = new Intent(this, SubActivity.class);
+//    Intent intent = new Intent(this, SubActivity.class);
 //    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-    startActivity(intent);
+//    startActivity(intent);
 
 //    overridePendingTransition(0, 0);
+
+//      btn.invalidate();
+
+    Intent intent = new Intent(this, SubActivity.class);
+    startActivity(intent);
+    overridePendingTransition(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom);
+    finish();
   }
 
   public void postDialog() {
