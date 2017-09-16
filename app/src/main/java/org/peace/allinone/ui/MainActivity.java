@@ -25,20 +25,24 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.start_btn)
     public void onClick(View v) {
         Intent intent = new Intent();
-        intent.setComponent(new ComponentName("com.android.settings", "TestSettings"));
-        PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+//        intent.setComponent(new ComponentName("com.android.settings", "TestSettings"));
+        intent.setComponent(new ComponentName("com.android.settings", "com.android.settings.TestSettings"));
+//        intent = new Intent(this, MainActivity.class);
+//        PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+//
+//        Notification.Builder builder = new Notification.Builder(this);
+//        builder.setContentTitle("daqi_title");
+//        builder.setContentText("daqi-content");
+//        builder.setContentIntent(pi);
+//        builder.setSmallIcon(android.R.drawable.ic_popup_sync);
+//        builder.setWhen(0);
+//        builder.setOngoing(true);
+//        builder.setAutoCancel(false);
+//
+//        Notification notification = builder.build();
+//
+//        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(100, notification);
 
-        Notification.Builder builder = new Notification.Builder(this);
-        builder.setContentTitle("daqi_title");
-        builder.setContentText("daqi-content");
-        builder.setContentIntent(pi);
-        builder.setSmallIcon(android.R.drawable.ic_popup_sync);
-        builder.setWhen(0);
-        builder.setOngoing(true);
-        builder.setAutoCancel(false);
-
-        Notification notification = builder.build();
-
-        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(100, notification);
+        startActivity(intent);
     }
 }
