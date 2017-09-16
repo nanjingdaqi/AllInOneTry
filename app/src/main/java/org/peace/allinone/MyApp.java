@@ -16,7 +16,7 @@ public class MyApp extends Application {
     DimenUtil.init(this);
     ResourceUtil.init(this);
 
-    doSth(5);
+//    doSth(5);
   }
 
   public static void doSth(long d) {

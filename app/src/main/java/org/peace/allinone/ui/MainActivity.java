@@ -1,5 +1,6 @@
 package org.peace.allinone.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -14,7 +15,9 @@ import org.peace.allinone.MyApp;
 import org.peace.allinone.R;
 import android.util.Log;
 
-public class MainActivity extends AppCompatActivity {
+import static org.peace.allinone.MyApp.doSth;
+
+public class MainActivity extends Activity {
 
   @BindView(R.id.start_btn)
   Button btn;
@@ -23,11 +26,23 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     ButterKnife.bind(this);
+
+//    startActivity(new Intent(this, SubActivity.class));
+//    overridePendingTransition(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom);
+//      finish();
+//    overridePendingTransition(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom);
+
+    doSth(5);
   }
 
   @Override protected void onResume() {
     super.onResume();
     AppLogger.e("main onresume");
+  }
+
+  @Override
+  public void onWindowFocusChanged(boolean hasFocus) {
+    super.onWindowFocusChanged(hasFocus);
   }
 
   @Override protected void onPostResume() {
@@ -39,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
   public void onBackPressed() {
     Log.e("Peace", "on back pressed");
       finish();
-    finish();
   }
 
   @OnClick({ R.id.start_btn }) public void onClick(View v) {

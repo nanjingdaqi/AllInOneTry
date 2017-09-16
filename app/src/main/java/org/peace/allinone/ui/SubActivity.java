@@ -21,21 +21,28 @@ public class SubActivity extends AppCompatActivity {
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+
+
     MyApp.doSth(5);
 
-    setContentView(R.layout.activity_main);
+    getWindow().getDecorView().postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        setContentView(R.layout.activity_main);
+      }
+    }, 5000);
 
       AppLogger.e("on create");
 
-    ButterKnife.bind(this);
+//    ButterKnife.bind(this);
 
-    startBtn.setText("SubActivity");
+//    startBtn.setText("SubActivity");
   }
 
-  @OnClick({ R.id.start_btn }) public void onClick(View v) {
-      Intent intent = new Intent(this, MainActivity.class);
-    startActivity(intent);
-  }
+//  @OnClick({ R.id.start_btn }) public void onClick(View v) {
+//      Intent intent = new Intent(this, MainActivity.class);
+//    startActivity(intent);
+//  }
 
   @Override
   protected void onNewIntent(Intent intent) {
