@@ -28,26 +28,6 @@ public class MyApp extends Application {
     installLeakCanary();
 
     AppLogger.e("dir: " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
-
-    DimenUtil.init(this);
-    ResourceUtil.init(this);
-    registerActivityLifecycleCallbacks(new MyCallback());
-
-    getSystemService(CONNECTIVITY_SERVICE);
-
-    try {
-      Field field = Resources.class.getDeclaredField("sPreloadedDrawables");
-      field.setAccessible(true);
-      LongSparseArray<Object>[] sPreloadedDrawables = (LongSparseArray<Object>[]) field.get(Resources.class);
-      AppLogger.e("sPreloaded size: " + sPreloadedDrawables.length);
-      AppLogger.e("sPreloaded 0: " + sPreloadedDrawables[0].size());
-      AppLogger.e("sPreloaded 1: " + sPreloadedDrawables[1].size());
-      sPreloadedDrawables[0].clear();
-      sPreloadedDrawables[1].clear();
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
   }
 
   private void installLeakCanary() {

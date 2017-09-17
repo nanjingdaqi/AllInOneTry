@@ -15,12 +15,15 @@ import android.view.View;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import java.lang.ref.ReferenceQueue;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import me.ele.base.utils.AppLogger;
 import org.peace.allinone.A;
+import org.peace.allinone.MyRef;
 import org.peace.allinone.R;
 
 import static android.os.Build.VERSION_CODES.N;
@@ -74,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
   }
 
   H h = new H();
+  A a = new A();
+    ReferenceQueue<A> queue = new ReferenceQueue<>();
+  MyRef<A> rA = new MyRef(a, queue);
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -81,7 +87,13 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
     //init();
-    task.execute();
+//    task.execute();
+    AppLogger.e(rA.toString());
+  }
+
+  @OnClick(R.id.start_btn) public void onClick(View v) {
+      a = null;
+    AppLogger.e("queue poll: " + queue.poll());
   }
 
   AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
@@ -152,23 +164,6 @@ public class MainActivity extends AppCompatActivity {
     for (int i = 0; i < n; ++i) {
       set.add("val-" + i);
     }
-  }
-
-  A a = new A();
-
-  @OnClick(R.id.start_btn) public void onClick(View v) {
-    //alloc();
-    //bitmapSize();
-    //a.i++;
-    //leak();
-    //gotoSub();
-    //testWifiLeak();
-    //testConnectivityManager();
-
-    //throw new RuntimeException("foo");
-
-//    leak();
-    Log.e("peace", "click");
   }
 
   public void toast() {
