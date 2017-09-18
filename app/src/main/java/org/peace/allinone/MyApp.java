@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.LongSparseArray;
+import com.squareup.leakcanary.DebuggerControl;
 import com.squareup.leakcanary.HeapDump;
 import com.squareup.leakcanary.LeakCanary;
 import java.lang.reflect.Field;
@@ -19,6 +20,8 @@ import static com.google.gson.reflect.TypeToken.get;
  * Created by peacepassion on 15/8/11.
  */
 public class MyApp extends Application {
+
+  public static Activity activity;
 
   @Override public void onCreate() {
     super.onCreate();
@@ -36,10 +39,22 @@ public class MyApp extends Application {
     }
 
     LeakCanary.refWatcher(this)
-        .listenerServiceClass(SettingsLeakService.class)
         .maxStoredHeapDumps(1000)
+            .debuggerControl(new DebuggerControl() {
+              @Override
+              public boolean isDebuggerAttached() {
+                return false;
+              }
+            })
         .excludedRefs(null)
         .buildAndInstall();
+  }
+
+  public static void doSth(long t) {
+    long tm = System.currentTimeMillis();
+    while (System.currentTimeMillis() - tm < t * 1000) {
+
+    }
   }
 
   public static class MyCallback implements ActivityLifecycleCallbacks {

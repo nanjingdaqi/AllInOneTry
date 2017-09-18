@@ -1,24 +1,26 @@
 package org.peace.allinone.ui;
 
-import android.view.View;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import me.ele.base.utils.AppLogger;
+import org.peace.allinone.A;
+import org.peace.allinone.MyApp;
 
 /**
  * Created by daqi on 17-4-10.
  */
 
-public class SubActivity extends MainActivity {
+public class SubActivity extends AppCompatActivity {
 
-  @Override public void onClick(View v) {
-    //super.onClick(v);
-    AppLogger.e("onClick");
-    leak();
+  @Override
+  protected void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setTitle("SubActivity");
 
-    v.postDelayed(new Runnable() {
-      @Override public void run() {
-        //throw new RuntimeException("kill");
-      }
-    }, 10 * 1000);
+    A.a.activity = this;
+//    A a = new A();
+//    a.activity = this;
   }
 
   @Override protected void onDestroy() {

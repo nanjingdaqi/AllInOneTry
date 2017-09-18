@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import me.ele.base.utils.AppLogger;
 import org.peace.allinone.A;
+import org.peace.allinone.MyApp;
 import org.peace.allinone.MyRef;
 import org.peace.allinone.R;
 
@@ -92,8 +93,12 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-      a = null;
-    AppLogger.e("queue poll: " + queue.poll());
+      startActivity(new Intent(this, SubActivity.class));
+  }
+
+  @OnClick(R.id.btn2) public void release(View v) {
+//    A.a.activity = null;
+      A.a = null;
   }
 
   AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
