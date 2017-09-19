@@ -2,13 +2,19 @@ package org.peace.allinone.ui;
 
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.widget.ImageView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import me.ele.base.utils.AppLogger;
@@ -27,19 +33,19 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
 
+    String uriStr = "android.resource://com.mipay.wallet/drawable/mipay_search_home";
+    Uri uri = Uri.parse(uriStr);
     try {
-      BitmapDrawable bitmapDrawable =
-          (BitmapDrawable) getPackageManager().getApplicationIcon("com.android.settings");
-
-      imageView.setImageDrawable(bitmapDrawable);
-      AppLogger.e("icon w: " + bitmapDrawable.getIntrinsicWidth() + ", h: " + bitmapDrawable.getIntrinsicHeight());
-      AppLogger.e("icon byte size: " + bitmapDrawable.getBitmap().getByteCount());
-
-      shrinkDrawable(bitmapDrawable);
-      AppLogger.e("new icon w: " + bitmapDrawable.getIntrinsicWidth() + ", h: " + bitmapDrawable.getIntrinsicHeight());
-      AppLogger.e("new icon byte size: " + bitmapDrawable.getBitmap().getByteCount());
-    } catch (PackageManager.NameNotFoundException e) {
-      e.printStackTrace();
+      Drawable d1 = Drawable.createFromResourceStream(getResources(), null, getContentResolver().openInputStream(uri), uriStr);
+        Drawable d2 = Drawable.createFromStream(getContentResolver().openInputStream(uri), uriStr);
+      BitmapFactory.Options options = new BitmapFactory.Options();
+      options.inDensity = DisplayMetrics.DENSITY_DEVICE_STABLE;
+      options.inScreenDensity = DisplayMetrics.DENSITY_DEVICE_STABLE;
+      options.inTargetDensity = DisplayMetrics.DENSITY_DEVICE_STABLE;
+      Drawable d3 = Drawable.createFromResourceStream(getResources(), null, getContentResolver().openInputStream(uri), uriStr, options);
+      AppLogger.e("" + d1 + d2 + d3);
+    } catch (FileNotFoundException e) {
+        throw new RuntimeException(e);
     }
   }
 
