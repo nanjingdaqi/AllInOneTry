@@ -9,6 +9,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import butterknife.OnClick;
 import me.ele.base.utils.AppLogger;
 import org.peace.allinone.R;
 
@@ -41,6 +42,16 @@ public class MyFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         getView();
         menu.add(0, 1, 0, "Test");
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(1).setEnabled(!menu.findItem(1).isEnabled());
+    }
+
+    @OnClick(R.id.start_btn) public void onClick(View v) {
+        getActivity().invalidateOptionsMenu();
     }
 
     static int i = 1;
