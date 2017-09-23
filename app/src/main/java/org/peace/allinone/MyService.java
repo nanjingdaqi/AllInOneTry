@@ -3,6 +3,7 @@ package org.peace.allinone;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import me.ele.base.utils.AppLogger;
 
@@ -11,8 +12,19 @@ import me.ele.base.utils.AppLogger;
  */
 
 public class MyService extends Service {
+
+  public static class FooImpl extends IFoo.Stub {
+
+    @Override
+    public int doSth() throws RemoteException {
+      return 100;
+    }
+  }
+
+  public FooImpl foo = new FooImpl();
+
   @Nullable @Override public IBinder onBind(Intent intent) {
-    return null;
+    return foo.asBinder();
   }
 
   @Override public void onCreate() {
