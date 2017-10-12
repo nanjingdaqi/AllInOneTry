@@ -10,10 +10,18 @@ import me.ele.base.utils.ResourceUtil;
  */
 public class MyApp extends Application {
 
-  @Override public void onCreate() {
-    super.onCreate();
-    AppLogger.debug = true;
-    DimenUtil.init(this);
-    ResourceUtil.init(this);
-  }
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        AppLogger.debug = true;
+        DimenUtil.init(this);
+        ResourceUtil.init(this);
+    }
+
+    public static void doSth(long tm) {
+        long t = System.currentTimeMillis();
+        while (System.currentTimeMillis() - t < tm * 1000) {
+
+        }
+    }
 }

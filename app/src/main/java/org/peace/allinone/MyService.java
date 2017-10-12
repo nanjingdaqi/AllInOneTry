@@ -3,6 +3,8 @@ package org.peace.allinone;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import me.ele.base.utils.AppLogger;
@@ -24,6 +26,13 @@ public class MyService extends Service {
   public FooImpl foo = new FooImpl();
 
   @Nullable @Override public IBinder onBind(Intent intent) {
+    Messenger messenger = intent.getParcelableExtra("messenger");
+    try {
+        MyApp.doSth(3);
+      messenger.send(Message.obtain());
+    } catch (RemoteException e) {
+      e.printStackTrace();
+    }
     return foo.asBinder();
   }
 
