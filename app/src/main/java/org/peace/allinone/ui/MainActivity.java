@@ -10,15 +10,18 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.ele.base.utils.AppLogger;
+import org.peace.allinone.IFoo;
 import org.peace.allinone.MyService;
 import org.peace.allinone.R;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection {
@@ -80,6 +83,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
+        IFoo foo = IFoo.Stub.asInterface(service);
+        try {
+            foo.setP(new Messenger(myHandler));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
