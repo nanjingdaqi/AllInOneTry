@@ -35,8 +35,25 @@ public class MainActivity extends AppCompatActivity {
         .commit();
   }
 
+  @OnClick(R.id.start_btn)
+  public void onClick(View v) {
+    showDialogFrag();
+  }
+
   @Override protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
+  }
+
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    final MyFragment2 fragment = (MyFragment2) getFragmentManager().findFragmentByTag("test");
+    getWindow().getDecorView().postDelayed(new Runnable() {
+      @Override
+      public void run() {
+          fragment.dismiss();
+      }
+    }, 3000);
   }
 
   @Override public void onBackPressed() {
@@ -47,6 +64,6 @@ public class MainActivity extends AppCompatActivity {
 
   public void showDialogFrag() {
     MyFragment2 dlgFrag = new MyFragment2();
-    dlgFrag.show(getFragmentManager(), "");
+    dlgFrag.show(getFragmentManager(), "test");
   }
 }
