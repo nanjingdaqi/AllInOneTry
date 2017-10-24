@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
 //  static String AUTH = "com.android.contacts";
 //  static String AUTH = "com.foo";
-  static String AUTH = "peace";
+  static String AUTH = "peace2";
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
    */
   public static Account CreateSyncAccount(Context context) {
     // Create the account type and default account
-    Account newAccount = new Account("peace", "peace");
+    Account newAccount = new Account("peace2", "peace");
     // Get an instance of the Android account manager
     AccountManager accountManager = (AccountManager) context.getSystemService(
                     ACCOUNT_SERVICE);

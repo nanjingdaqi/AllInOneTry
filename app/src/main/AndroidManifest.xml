@@ -39,7 +39,7 @@
                        android:resource="@xml/sync" android:value="true"/>
         </service>
 
-        <provider android:authorities="peace"
+        <provider android:authorities="peace2"
                   android:syncable="true"
                   android:name=".Main.Provider"/>
 
