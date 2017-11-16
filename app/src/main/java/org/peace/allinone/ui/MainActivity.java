@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        handlerThread.quit();
         AppLogger.e("waiting finish");
     }
 
@@ -84,12 +85,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public void onServiceConnected(ComponentName name, IBinder service) {
         Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
         IFoo foo = IFoo.Stub.asInterface(service);
-        try {
-            foo.setP(new Messenger(myHandler));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+//        try {
+//            foo.setP(new Messenger(myHandler));
+//        } catch (RemoteException e) {
+//            e.printStackTrace();
+//            throw new RuntimeException(e);
+//        }
     }
 
     @Override

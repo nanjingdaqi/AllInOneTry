@@ -35,12 +35,14 @@ public class MyService extends Service {
   public FooImpl foo = new FooImpl();
 
   @Nullable @Override public IBinder onBind(Intent intent) {
-    Messenger messenger = intent.getParcelableExtra("messenger");
-    try {
+    if (intent.hasExtra("messenger")) {
+      Messenger messenger = intent.getParcelableExtra("messenger");
+      try {
         MyApp.doSth(1);
-      messenger.send(Message.obtain());
-    } catch (RemoteException e) {
-      e.printStackTrace();
+        messenger.send(Message.obtain());
+      } catch (RemoteException e) {
+        e.printStackTrace();
+      }
     }
     return foo.asBinder();
   }
