@@ -2,12 +2,14 @@ package org.peace.allinone;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.widget.Toast;
 import me.ele.base.utils.AppLogger;
 import org.peace.allinone.ui.MainActivity;
 
@@ -17,7 +19,7 @@ import org.peace.allinone.ui.MainActivity;
 
 public class MyService extends Service {
 
-  public static class FooImpl extends IFoo.Stub {
+  public class FooImpl extends IFoo.Stub {
 
     Parcelable p;
 
@@ -28,7 +30,26 @@ public class MyService extends Service {
 
     @Override
     public void setP(Messenger p) throws RemoteException {
-        this.p = p;
+//        this.p = p;
+        clientMsger = null;
+    }
+
+    @Override
+    public Messenger getMessenger() throws RemoteException {
+      return new Messenger(mH);
+    }
+  }
+
+  Messenger clientMsger;
+
+  H mH = new H();
+
+  public class H extends Handler {
+    @Override
+    public void handleMessage(Message msg) {
+//        String str = (String) msg.obj;
+      clientMsger = msg.replyTo;
+      Toast.makeText(MyService.this, "" + msg.what, Toast.LENGTH_LONG).show();
     }
   }
 

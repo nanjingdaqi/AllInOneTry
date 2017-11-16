@@ -63,14 +63,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         handlerThread.start();
         myHandler = new MyHandler(handlerThread.getLooper());
         messenger = new Messenger(myHandler);
-        intent.putExtra("messenger", messenger);
+//        intent.putExtra("messenger", messenger);
         bindService(intent, this, BIND_AUTO_CREATE);
         AppLogger.e("start waiting");
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            latch.await();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         handlerThread.quit();
         AppLogger.e("waiting finish");
     }
@@ -84,13 +84,28 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
-        IFoo foo = IFoo.Stub.asInterface(service);
-//        try {
-//            foo.setP(new Messenger(myHandler));
-//        } catch (RemoteException e) {
-//            e.printStackTrace();
-//            throw new RuntimeException(e);
-//        }
+        final IFoo foo = IFoo.Stub.asInterface(service);
+        try {
+            Messenger msger = foo.getMessenger();
+            Message msg = Message.obtain();
+            msg.what = 333;
+            msg.replyTo = messenger;
+            msger.send(msg);
+
+            myHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        foo.setP(null);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }, 10 * 1000);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
