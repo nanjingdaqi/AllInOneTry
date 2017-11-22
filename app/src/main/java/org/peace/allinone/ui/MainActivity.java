@@ -17,6 +17,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -90,6 +91,25 @@ public class MainActivity extends AppCompatActivity {
     //init();
 //    task.execute();
     AppLogger.e(rA.toString());
+
+
+  }
+
+  B b = new B(this);
+
+  @Override
+  protected void finalize() throws Throwable {
+    AppLogger.e("" + b.ower.get());
+    super.finalize();
+    AppLogger.e("" + b.ower.get());
+  }
+
+  static class B {
+    WeakReference<MainActivity> ower;
+
+    B(MainActivity ins) {
+        ower = new WeakReference<MainActivity>(ins);
+    }
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
