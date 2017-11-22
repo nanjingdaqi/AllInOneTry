@@ -19,6 +19,14 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
+
+    final int fi = new Integer(100);
+    Object app = new Object() {
+
+        public int foo() {
+            return fi;
+        }
+    };
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
