@@ -5,4 +5,8 @@
   <string name="hello_world">Hello world!</string>
   <string name="action_settings">Settings</string>
 
+  <string name="foo1">Hello World'</string>
+  <string name="foo2">Hello <b>World</b></string>
+  <string name="foo3">Make sure all the important items are backed up to your computer. All the data on this device will be erased during the reset. <b>You won’t be able to restore the items you haven’t backed up.</b></string>
+
 </resources>
