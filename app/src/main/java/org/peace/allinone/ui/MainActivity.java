@@ -33,12 +33,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.e("Peace", "doInBackground");
-            long cur = System.currentTimeMillis();
-            while (System.currentTimeMillis() < cur + 20 * 1000) {
-
-            }
-            Log.e("Peace", "end");
+            if (System.currentTimeMillis() > 0)
+                throw new AssertionError("foo");
             return null;
         }
 
