@@ -43,9 +43,10 @@ jobject obj;
 jobject obj2;
 
 void op_obj(JNIEnv* env) {
+    LOGE("op_obj get called");
     jclass cls = env->FindClass("org/peace/allinone/Daqi");
     jfieldID mid = (jfieldID) env->GetFieldID(cls, "msg", "Ljava/lang/String;");
-    LOGE("obj msg: %s", env->GetStringUTFChars((jstring) env->GetObjectField(obj2, mid), NULL));
+//    LOGE("obj msg: %s", env->GetStringUTFChars((jstring) env->GetObjectField(obj2, mid), NULL));
 }
 
 void alloc(JNIEnv* env) {
