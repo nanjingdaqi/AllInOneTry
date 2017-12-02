@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import me.ele.base.utils.AppLogger;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
             return fi;
         }
     };
+
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
@@ -34,11 +36,18 @@ public class MainActivity extends AppCompatActivity {
 //      A.foo();
 //      A a = new A();
 //      bb = a.aa;
+      foo2();
   }
 
   synchronized public void foo() {
       synchronized (this) {
           Toast.makeText(this, "foo" + A.foo(10, 10), Toast.LENGTH_SHORT).show();
       }
+  }
+
+  public static void foo2() {
+      Object obj = MainActivity.class;
+      AppLogger.e("foo2 invoke");
+      AppLogger.e("" + A.b);
   }
 }

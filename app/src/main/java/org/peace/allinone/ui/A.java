@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.util.Log;
+import me.ele.base.utils.AppLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,12 @@ import java.util.List;
  */
 
 public class A {
+
+    static {
+        AppLogger.e("A Cl_Init");
+    }
+
+    public static int b = 200;
 
     public int aa = 0;
 

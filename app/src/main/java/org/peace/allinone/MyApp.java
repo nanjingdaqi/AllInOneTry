@@ -10,10 +10,14 @@ import me.ele.base.utils.ResourceUtil;
  */
 public class MyApp extends Application {
 
+  public static MyApp app;
+
   @Override public void onCreate() {
     super.onCreate();
     AppLogger.debug = true;
     DimenUtil.init(this);
     ResourceUtil.init(this);
+
+    app = this;
   }
 }
