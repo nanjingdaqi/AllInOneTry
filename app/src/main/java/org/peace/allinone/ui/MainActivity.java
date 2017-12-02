@@ -32,10 +32,10 @@ public class MainActivity extends AppCompatActivity {
 
 //      alloc();
 
-      fromJava(daqi.msg);
+//      fromJava(daqi.msg);
   }
 
-  Daqi daqi = new Daqi();
+//  Daqi daqi = new Daqi();
 
   @OnClick(R.id.btn2) public void click2(View v) {
       op_obj();
