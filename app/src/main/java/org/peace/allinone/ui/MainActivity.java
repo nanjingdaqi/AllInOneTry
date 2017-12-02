@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -32,7 +33,7 @@ public class MainActivity extends Activity {
 //      finish();
 //    overridePendingTransition(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom);
 
-    doSth(5);
+//    doSth(5);
   }
 
   @Override protected void onResume() {
@@ -90,10 +91,19 @@ public class MainActivity extends Activity {
 
 //      btn.invalidate();
 
-    Intent intent = new Intent(this, SubActivity.class);
+    launchMainSettings();
+
+//    Intent intent = new Intent(this, SubActivity.class);
+//    startActivity(intent);
+//    overridePendingTransition(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom);
+//    finish();
+  }
+
+  void launchMainSettings() {
+    Intent intent = new Intent();
+    ComponentName cn = new ComponentName("com.android.settings", "com.android.settings.MainSettings");
+    intent.setComponent(cn);
     startActivity(intent);
-    overridePendingTransition(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom);
-    finish();
   }
 
   public void postDialog() {
