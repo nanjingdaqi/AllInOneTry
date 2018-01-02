@@ -4,5 +4,7 @@
   <string name="app_name">All In One Try</string>
   <string name="hello_world">Hello world!</string>
   <string name="action_settings">Settings</string>
+  <string name="accessibility_node_provider_instructions">Enable TalkBack and Explore-by-touch from accessibility
+    settings. Then touch the colored squares.</string>
 
 </resources>
