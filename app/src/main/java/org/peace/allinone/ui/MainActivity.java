@@ -7,6 +7,7 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import org.peace.allinone.Daqi;
+import org.peace.allinone.MyApp;
 import org.peace.allinone.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 //      alloc();
 
 //      fromJava(daqi.msg);
+      MyApp.doSth(10);
   }
 
 //  Daqi daqi = new Daqi();

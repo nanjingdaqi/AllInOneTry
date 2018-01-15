@@ -16,4 +16,12 @@ public class MyApp extends Application {
     DimenUtil.init(this);
     ResourceUtil.init(this);
   }
+
+  public static void doSth(int tm) {
+    long i = System.currentTimeMillis();
+    while (true) {
+      i++;
+      i--;
+    }
+  }
 }

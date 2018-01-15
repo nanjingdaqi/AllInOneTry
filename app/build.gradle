@@ -1,10 +1,9 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
-apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
 
     lintOptions {
         abortOnError false
@@ -12,7 +11,7 @@ android {
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 23
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         externalNativeBuild {
@@ -26,11 +25,6 @@ android {
         cmake {
             path "CMakeLists.txt"
         }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {}
@@ -61,6 +55,6 @@ dependencies {
     compile 'io.reactivex:rxjava-math:1.0.0'
     compile 'com.jakewharton.rxbinding:rxbinding:0.2.0'
 
-    apt "com.jakewharton:butterknife-compiler:8.3.0"
+    annotationProcessor "com.jakewharton:butterknife-compiler:8.3.0"
 
 }
