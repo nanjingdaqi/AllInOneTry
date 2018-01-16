@@ -9,6 +9,8 @@ import butterknife.OnClick;
 import me.ele.base.utils.AppLogger;
 import org.peace.allinone.R;
 import android.util.Log;
+import org.peace.allinone.WeakRefAsyncTask;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,31 +19,38 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ButterKnife.bind(this);
-        task = new MyTask();
-        task.execute();
+        new MyTask(new MyCallback()).execute();
     }
 
-    MyTask task;
+    private void updateUI() {}
 
-    @OnClick(R.id.start_btn)
-    public void onClick(View v) {
-        task.cancel(true);
+    // static inner class
+    static class MyTask extends WeakRefAsyncTask<Void, Void, Void> {
+        MyTask(WeakRefAsyncTask.Callback<Void, Void, Void> cb) {
+            super(cb);
+        }
     }
 
-    public class MyTask extends AsyncTask<Void, Void, Void> {
+    // non-static inner class, but would be referenced by WeakRef in WeakRefAsyncTask
+    class MyCallback implements WeakRefAsyncTask.Callback<Void, Void, Void> {
+            @Override
+            public void onPreExecute() {}
 
-        @Override
-        protected Void doInBackground(Void... params) {
-            if (System.currentTimeMillis() > 0)
-                throw new AssertionError("foo");
-            return null;
-        }
+            @Override
+            public Void doInBackground(Void[] voids) {
+                Log.d("daqi", "doInBackground");
+                while (System.currentTimeMillis() > 0) {
 
-        @Override
-        protected void onCancelled(Void aVoid) {
-            super.onCancelled(aVoid);
-            Log.e("Peace", "onCancelled");
-        }
+                }
+                return null;
+            }
+
+            @Override
+            public void onProgressUpdate(Void[] values) {}
+
+            @Override
+            public void onPostExecute(Void aVoid) {
+                updateUI();
+            }
     }
 }
