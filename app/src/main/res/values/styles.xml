@@ -23,8 +23,14 @@
         <item name="android:textColor">@android:color/holo_red_light</item>
     </style>
 
-    <style name="MyTheme2">
+    <style name="MyTheme1">
         <item name="android:textSize">30sp</item>
+    </style>
+
+    <style name="MyTheme1.MyTheme2" parent="Theme.AppCompat.Light.NoActionBar">
+    </style>
+
+    <style name="MyTheme1.MyTheme3">
     </style>
 
     <style name="TransStatusBar" parent="Theme.AppCompat.Light.NoActionBar">
