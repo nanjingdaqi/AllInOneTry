@@ -35,7 +35,7 @@
             android:id="@+id/tool_bar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/holo_red_dark"
+            android:background="@android:color/holo_blue_bright"
             app:layout_collapseMode="pin"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
@@ -48,7 +48,6 @@
               android:paddingRight="16dp"
               android:singleLine="true"
               android:text="Test test"
-              android:textSize="18sp"
               />
         </android.support.v7.widget.Toolbar>
 

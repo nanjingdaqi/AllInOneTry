@@ -21,6 +21,7 @@ import android.view.WindowManager;
 public class MainActivity extends AppCompatActivity {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
+    setTheme(R.style.MyTheme2);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     ButterKnife.bind(this);

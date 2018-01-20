@@ -15,11 +15,16 @@
     </style>
 
     <style name="MyAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@color/bg</item>
-        <item name="android:colorBackground">@android:color/transparent</item>
+        <!--<item name="android:backgroundDimEnabled">false</item>-->
+        <!--<item name="android:windowContentOverlay">@null</item>-->
+        <!--<item name="android:windowIsTranslucent">true</item>-->
+        <!--<item name="android:windowBackground">@color/bg</item>-->
+        <!--<item name="android:colorBackground">@android:color/transparent</item>-->
+        <item name="android:textColor">@android:color/holo_red_light</item>
+    </style>
+
+    <style name="MyTheme2">
+        <item name="android:textSize">30sp</item>
     </style>
 
     <style name="TransStatusBar" parent="Theme.AppCompat.Light.NoActionBar">
