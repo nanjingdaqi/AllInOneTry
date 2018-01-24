@@ -3,7 +3,7 @@
 
 #include <android/log.h>
 
-#define T "peace"
+#define T "daqi"
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,T,__VA_ARGS__)
 
 extern "C"
@@ -77,6 +77,7 @@ void registerNativeMethods(JNIEnv* env) {
 }
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+    printf("daqi JNI_OnLoad");
     JNIEnv* env;
     LOGE("JNI_OnLoad");
     vm->GetEnv((void **) &env, JNI_VERSION_1_4);
