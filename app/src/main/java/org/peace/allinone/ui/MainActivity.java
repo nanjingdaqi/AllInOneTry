@@ -14,12 +14,32 @@ import org.peace.allinone.WeakRefAsyncTask;
 
 public class MainActivity extends AppCompatActivity {
 
+    static int i = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        new MyTask(new MyCallback()).execute();
+//        new MyTask(new MyCallback()).execute();
+
+        for (int j = 0; j < 10; ++j) {
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Log.e("daqi", "i: " + i);
+                    i++;
+                    doSth(10);
+                }
+            });
+        }
+    }
+
+    void doSth(int tm) {
+        long t = System.currentTimeMillis();
+        while (System.currentTimeMillis() - t <= tm * 1000) {
+
+        }
     }
 
     private void updateUI() {}
