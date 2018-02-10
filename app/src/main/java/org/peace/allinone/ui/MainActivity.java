@@ -20,13 +20,19 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    ButterKnife.inject(this);
+    ButterKnife.bind(this);
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
     BottomSheetDialog dlg = new BottomSheetDialog(this);
     dlg.setContentView(R.layout.dlg);
     dlg.show();
+//    getWindow().getDecorView().postDelayed(new Runnable() {
+//      @Override
+//      public void run() {
+//          MainActivity.this.finish();
+//      }
+//    }, 5000);
   }
 }
 
