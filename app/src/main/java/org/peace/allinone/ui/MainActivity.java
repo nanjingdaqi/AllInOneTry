@@ -33,20 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
 
-    String uriStr = "android.resource://com.mipay.wallet/drawable/mipay_search_home";
-    Uri uri = Uri.parse(uriStr);
-    try {
-      Drawable d1 = Drawable.createFromResourceStream(getResources(), null, getContentResolver().openInputStream(uri), uriStr);
-        Drawable d2 = Drawable.createFromStream(getContentResolver().openInputStream(uri), uriStr);
-      BitmapFactory.Options options = new BitmapFactory.Options();
-      options.inDensity = DisplayMetrics.DENSITY_DEVICE_STABLE;
-      options.inScreenDensity = DisplayMetrics.DENSITY_DEVICE_STABLE;
-      options.inTargetDensity = DisplayMetrics.DENSITY_DEVICE_STABLE;
-      Drawable d3 = Drawable.createFromResourceStream(getResources(), null, getContentResolver().openInputStream(uri), uriStr, options);
-      AppLogger.e("" + d1 + d2 + d3);
-    } catch (FileNotFoundException e) {
-        throw new RuntimeException(e);
-    }
+
   }
 
   void shrinkDrawable(BitmapDrawable bitmapDrawable) {
