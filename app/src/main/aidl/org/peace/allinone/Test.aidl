@@ -5,5 +5,5 @@ package org.peace.allinone;
 
 interface Test {
 
-  void foo(String arg);
+  oneway void foo(String arg);
 }

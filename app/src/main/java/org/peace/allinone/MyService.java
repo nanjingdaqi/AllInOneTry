@@ -19,7 +19,7 @@ public class MyService extends Service {
   Test test = new Test.Stub() {
 
     @Override public void foo(String arg) throws RemoteException {
-        long uid = Binder.getCallingUid();
+        final long uid = Binder.getCallingUid();
         handler.post(new Runnable() {
             @Override
             public void run() {
