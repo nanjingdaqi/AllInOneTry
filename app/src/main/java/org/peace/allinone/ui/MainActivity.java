@@ -1,11 +1,14 @@
 package org.peace.allinone.ui;
 
-import android.content.Context;
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.ResourcesManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import butterknife.ButterKnife;
@@ -15,13 +18,14 @@ import org.peace.allinone.Data;
 import org.peace.allinone.R;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,9 +34,16 @@ public class MainActivity extends AppCompatActivity {
     String TAB = "  ";
     int MAX_LEN = 20;
 
-    List<Context> ctxs = new ArrayList<>();
-    Context settingsCtx;
+    Resources settingsRes;
+    Map<String, Resources> resMap = new LinkedHashMap<>();
+    File[] apks = {new File("/sdcard/Settings_l.apk"),
+            new File("/sdcard/Settings_m.apk"),
+            new File("/sdcard/Settings_n.apk"),
+            new File("/sdcard/Settings_o.apk")};
 
+    String[] results = {"res_l.txt", "res_m.txt", "res_n.txt", "res_o.txt"};
+
+    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,35 +51,42 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        try {
-            settingsCtx = createPackageContext("com.android.settings", CONTEXT_INCLUDE_CODE);
-            ctxs.add(settingsCtx);
-            ctxs.add(createPackageContext("com.miui.core", CONTEXT_INCLUDE_CODE | CONTEXT_IGNORE_SECURITY));
-            ctxs.add(createPackageContext("com.android.phone", CONTEXT_INCLUDE_CODE | CONTEXT_IGNORE_SECURITY));
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException(e);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
-        outFile = new File(getFilesDir(), "res_str.txt");
+    }
+
+    void doOp() {
     }
 
     @OnClick(R.id.start_btn)
     public void onClick(View v) {
         try {
-            InputStream is = settingsCtx.getAssets().open("index.json");
-            BufferedInputStream bis = new BufferedInputStream(is);
-            InputStreamReader reader = new InputStreamReader(bis);
-            Gson gson = new Gson();
-            Data data = gson.fromJson(reader, Data.class);
-            Log.d("daqi", data.toString());
-            Log.d("daqi", "son size: " + data.son.size());
+            for (int i = 0; i < apks.length; ++i) {
+                resMap.clear();
+                settingsRes = ResourcesManager.getInstance().getResources(null,
+                        apks[i].getAbsolutePath(), null, null,
+                        null, 0, null, null, getClassLoader());
+                resMap.put("com.android.settings", settingsRes);
+                resMap.put("miui", createPackageContext("com.miui.core", CONTEXT_INCLUDE_CODE | CONTEXT_IGNORE_SECURITY).getResources());
+                resMap.put("com.android.phone", createPackageContext("com.android.phone", CONTEXT_INCLUDE_CODE | CONTEXT_IGNORE_SECURITY).getResources());
 
-            StringBuilder sb = new StringBuilder();
-            print(data, sb, 0);
-            Log.d("daqi", "\n" + sb.toString());
+                outFile = new File(getFilesDir(), results[i]);
 
-            FileOutputStream fos = new FileOutputStream(outFile);
-            fos.write(sb.toString().getBytes());
-            fos.close();
+                InputStream is = settingsRes.getAssets().open("index.json");
+                BufferedInputStream bis = new BufferedInputStream(is);
+                InputStreamReader reader = new InputStreamReader(bis);
+                Gson gson = new Gson();
+                Data data = gson.fromJson(reader, Data.class);
+
+                StringBuilder sb = new StringBuilder();
+                print(data, sb, 0);
+
+                FileOutputStream fos = new FileOutputStream(outFile);
+                fos.write(sb.toString().getBytes());
+                fos.close();
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -91,10 +109,12 @@ public class MainActivity extends AppCompatActivity {
         sb.append(ARROW);
         int id = 0;
         String val = "0x0";
-        for (Context ctx : ctxs) {
-            id = ctx.getResources().getIdentifier(data.resource, "string", TextUtils.equals(ctx.getPackageName(), "com.miui.core") ? "miui" : ctx.getPackageName());
+        for (Map.Entry<String, Resources> entry : resMap.entrySet()) {
+            Resources res = entry.getValue();
+            String pkgName = entry.getKey();
+            id = res.getIdentifier(data.resource, "string", pkgName);
             if (id != 0) {
-                val = ctx.getResources().getString(id);
+                val = res.getString(id);
                 break;
             }
         }
