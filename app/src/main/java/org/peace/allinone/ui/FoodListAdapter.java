@@ -14,8 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
-import me.ele.commons.AppLogger;
-import me.ele.commons.CollectionsUtils;
+
+import me.ele.base.utils.AppLogger;
+import me.ele.base.utils.CollectionsUtils;
 import org.peace.allinone.R;
 
 import static android.view.View.MeasureSpec.UNSPECIFIED;
@@ -56,7 +57,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<RVVH>
     return new RVVH(item, viewType);
   }
 
-  @Override public void onBindViewHolder(RVVH vh, int position) {
+  @Override public void onBindViewHolder(final RVVH vh, final int position) {
     Object obj = getItem(position);
     vh.itemView.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {

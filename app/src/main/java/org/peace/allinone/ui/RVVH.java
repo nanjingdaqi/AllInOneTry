@@ -5,13 +5,13 @@ import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
+import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import org.peace.allinone.R;
 
 public class RVVH extends RecyclerView.ViewHolder {
 
-  @InjectView(R.id.t_v) public TextView tv;
+  @BindView(R.id.t_v) public TextView tv;
   public int type;
   private Resources res;
 
@@ -19,7 +19,7 @@ public class RVVH extends RecyclerView.ViewHolder {
     super(itemView);
     res = itemView.getResources();
     this.type = type;
-    ButterKnife.inject(this, itemView);
+    ButterKnife.bind(this, itemView);
   }
 
   public void bind(String str) {

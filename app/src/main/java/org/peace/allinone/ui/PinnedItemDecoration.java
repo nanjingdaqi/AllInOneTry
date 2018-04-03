@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-import me.ele.commons.AppLogger;
 
 //TODO support horizontal layout
 public class PinnedItemDecoration extends RecyclerView.ItemDecoration {

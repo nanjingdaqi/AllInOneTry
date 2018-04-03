@@ -26,6 +26,16 @@ public class MainActivity extends AppCompatActivity {
     ButterKnife.bind(this);
 
     setupRV();
+
+    rv.postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        RecyclerView.Adapter adapter = rv.getAdapter();
+
+        adapter.notifyDataSetChanged();
+
+      }
+    }, 5000);
   }
 
   public void setupRV() {
@@ -52,9 +62,12 @@ public class MainActivity extends AppCompatActivity {
     LinearLayoutManager lm = (LinearLayoutManager) rv.getLayoutManager();
     RecyclerView.Adapter adapter = rv.getAdapter();
     View v2 = lm.findViewByPosition(10);
-    if (v2 != null) {
-      rv.smoothScrollBy(0, v2.getTop());
-    }
+//    if (v2 != null) {
+//      rv.smoothScrollBy(0, v2.getTop());
+//    }
+
+    adapter.notifyDataSetChanged();
+
   }
 
 }
