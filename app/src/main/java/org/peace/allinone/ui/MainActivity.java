@@ -91,12 +91,24 @@ public class MainActivity extends Activity {
 
 //      btn.invalidate();
 
-    launchMainSettings();
+//    launchMainSettings();
 
 //    Intent intent = new Intent(this, SubActivity.class);
 //    startActivity(intent);
 //    overridePendingTransition(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom);
 //    finish();
+
+    testActivityResult();
+  }
+
+  private void testActivityResult() {
+      startActivityForResult(new Intent(this, SubActivity.class), 100);
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    Log.e("daqi", "request_code: " + requestCode + "result_code: " + resultCode);
   }
 
   void launchMainSettings() {

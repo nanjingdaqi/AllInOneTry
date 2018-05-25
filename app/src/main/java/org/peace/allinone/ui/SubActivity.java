@@ -23,16 +23,16 @@ public class SubActivity extends AppCompatActivity {
 
 
 
-    MyApp.doSth(5);
-
-    getWindow().getDecorView().postDelayed(new Runnable() {
-      @Override
-      public void run() {
-        setContentView(R.layout.activity_main);
-      }
-    }, 5000);
-
-      AppLogger.e("on create");
+//    MyApp.doSth(5);
+//
+//    getWindow().getDecorView().postDelayed(new Runnable() {
+//      @Override
+//      public void run() {
+//        setContentView(R.layout.activity_main);
+//      }
+//    }, 5000);
+//
+//      AppLogger.e("on create");
 
 //    ButterKnife.bind(this);
 
