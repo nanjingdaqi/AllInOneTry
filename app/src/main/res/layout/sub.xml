@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:background="#000"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <Button
+            android:id="@+id/btn"
+            android:text="点击关闭页面"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"/>
+
+    <EditText
+            android:text="普通框"
+            android:textColor="#fff"
+            android:textSize="30sp"
+            android:layout_marginTop="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
+
+    <Space
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"/>
+
+    <EditText
+            android:layout_gravity="bottom"
+            android:inputType="textPassword"
+            android:text="密码框"
+            android:textColor="#fff"
+            android:textSize="30sp"
+            android:layout_marginTop="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
+
+</LinearLayout>
