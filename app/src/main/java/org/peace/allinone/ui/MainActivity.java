@@ -17,6 +17,6 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @OnClick(R.id.start_btn) public void onClick(View v) {
-
+      android.util.Log.d("daqi", "File path: " + getExternalCacheDir().getPath());
   }
 }
