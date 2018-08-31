@@ -5,11 +5,13 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25"
 
+
     lintOptions {
         abortOnError false
     }
 
     defaultConfig {
+        applicationId "com.android.camera"
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
@@ -37,7 +39,7 @@ android {
 def support_version = "23.2.1"
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    provided fileTree(dir: 'libs', include: ['*.jar'])
 
     compile "com.android.support:appcompat-v7:${support_version}"
     compile "com.android.support:design:${support_version}"

@@ -1,8 +1,11 @@
 package org.peace.allinone.ui;
 
+import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import butterknife.ButterKnife;
@@ -39,13 +42,11 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.start_btn)
     public void onClick(View v) {
+        IPackageManager pm = ActivityThread.getPackageManager();
         try {
-            Class LocalPicker_cls = Class.forName("com.android.internal.app.LocalePicker");
-            Method updateLocale_mtd = LocalPicker_cls.getDeclaredMethod("updateLocale", Locale.class);
-            updateLocale_mtd.setAccessible(true);
-            Locale locale = new Locale("en", "US");
-            updateLocale_mtd.invoke(LocalPicker_cls, locale);
-        } catch (Exception e) {
+            pm.installPackageAsUser("/data/sdcard/app-debug.apk", null, 0, "", 0);
+            pm.installPackageAsUser("/data/sdcard/复现Demo.apk", null, 0, "", 0);
+        } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
     }
