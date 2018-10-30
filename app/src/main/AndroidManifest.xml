@@ -25,10 +25,15 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.SubActivity" android:label="SubActivity">
+        <activity android:name=".ui.SubActivity" android:label="SubActivity" android:directBootAware="true">
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.VIEW_LICENSE"/>
                 <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter android:priority="0">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
