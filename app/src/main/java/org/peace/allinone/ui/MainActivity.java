@@ -24,7 +24,7 @@ import org.peace.allinone.R;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 
-public class MainActivity extends AppCompatActivity implements ServiceConnection {
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,82 +34,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         ButterKnife.bind(this);
     }
 
-    public CountDownLatch latch = new CountDownLatch(1);
-
-    public class MyHandler extends Handler {
-        MyHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            latch.countDown();
-        }
-    }
-
-
-    HandlerThread handlerThread = new HandlerThread("handler_thread");
-
-    MyHandler myHandler;
-
-    public Messenger messenger;
-
     @OnClick(R.id.start_btn)
-    public void onClick(View v) {
-        Intent intent = new Intent(this, MyService.class);
-//    startService(intent);
-
-        handlerThread.start();
-        myHandler = new MyHandler(handlerThread.getLooper());
-        messenger = new Messenger(myHandler);
-//        intent.putExtra("messenger", messenger);
-        bindService(intent, this, BIND_AUTO_CREATE);
-        AppLogger.e("start waiting");
-//        try {
-//            latch.await();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-        handlerThread.quit();
-        AppLogger.e("waiting finish");
-    }
-
-    @OnClick(R.id.stop_btn)
-    public void onStop(View v) {
-//    stopService(new Intent(this, MyService.class));
-        unbindService(this);
-    }
-
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
-        final IFoo foo = IFoo.Stub.asInterface(service);
-        try {
-            Messenger msger = foo.getMessenger();
-            Message msg = Message.obtain();
-            msg.what = 333;
-            msg.replyTo = messenger;
-            msger.send(msg);
-
-            myHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        foo.setP(null);
-                    } catch (Exception e) {
-
-                    }
-                }
-            }, 10 * 1000);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-        Toast.makeText(this, "DisConnected", Toast.LENGTH_LONG).show();
+    public void onStart(View v) {
+        startService(new Intent(this, MyService.class));
     }
 }
