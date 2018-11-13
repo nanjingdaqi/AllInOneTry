@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     File apk = new File("/sdcard/wechat.apk");
-    File dm = new File("/sdcard/wechat.dm");
+//    File dm = new File("/sdcard/wechat.dm");
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @OnClick(R.id.start_btn)
@@ -77,15 +77,17 @@ public class MainActivity extends AppCompatActivity {
             session.fsync(os);
             is.close();
             os.close();
+            if (System.currentTimeMillis() > 0)
+                return;
 
-            os = session.openWrite("wechat.dm", 0, dm.length());
-            is = new FileInputStream(dm);
-            while ((len = is.read(buffer)) > 0) {
-                os.write(buffer, 0, len);
-            }
-            session.fsync(os);
-            is.close();
-            os.close();
+//            os = session.openWrite("wechat.dm", 0, dm.length());
+//            is = new FileInputStream(dm);
+//            while ((len = is.read(buffer)) > 0) {
+//                os.write(buffer, 0, len);
+//            }
+//            session.fsync(os);
+//            is.close();
+//            os.close();
 
             Intent broadcastIntent = new Intent("org.peace");
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
