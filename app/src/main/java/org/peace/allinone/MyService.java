@@ -2,6 +2,7 @@ package org.peace.allinone;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -24,7 +25,14 @@ public class MyService extends Service {
   @Nullable
   @Override
   public IBinder onBind(Intent intent) {
-    return null;
+    Log.d("daqi", "onBind");
+    return new Binder();
+  }
+
+  @Override
+  public boolean onUnbind(Intent intent) {
+    Log.d("daqi", "onUnbind");
+    return super.onUnbind(intent);
   }
 
   @Override
@@ -40,11 +48,11 @@ public class MyService extends Service {
     handler.postDelayed(new Runnable() {
       @Override
       public void run() {
-          Log.d("daqi", "stop self");
-          stopSelf();
+//          Log.d("daqi", "stop self");
+//          stopSelf();
       }
-    }, 30 * 1000);
-    return START_NOT_STICKY;
+    }, 60 * 1000);
+    return START_STICKY;
   }
 
   @Override

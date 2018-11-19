@@ -12,6 +12,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import butterknife.ButterKnife;
@@ -34,8 +35,30 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
     }
 
+    ServiceConnection con = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d("daqi", "service_connected");
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.d("daqi", "service_dis_connected");
+            }
+        };
+
     @OnClick(R.id.start_btn)
+    public void onBind(View v) {
+        bindService(new Intent(this, MyService.class), con, BIND_AUTO_CREATE);
+    }
+
+    @OnClick(R.id.start_btn2)
     public void onStart(View v) {
         startService(new Intent(this, MyService.class));
+    }
+
+    @OnClick(R.id.stop_btn)
+    public void onStop(View v) {
+        unbindService(con);
     }
 }
