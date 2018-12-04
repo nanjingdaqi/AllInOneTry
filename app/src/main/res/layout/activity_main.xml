@@ -23,27 +23,4 @@
       android:text="Start"
       />
 
-  <org.peace.allinone.ui.MyLayout
-      android:id="@+id/my_layout"
-      android:layout_width="match_parent"
-      android:layout_height="100dp"
-      android:background="@android:color/holo_blue_light"
-      android:padding="10dp"
-      />
-
-  <org.peace.allinone.ui.MyView
-      android:layout_width="match_parent"
-      android:layout_height="100dp"
-      android:background="@android:color/holo_blue_dark"
-      />
-
-  <org.peace.allinone.ui.ShopLogoView
-      android:id="@+id/logo"
-      android:layout_width="100dp"
-      android:layout_height="100dp"
-      android:layout_marginTop="100dp"
-      android:src="@drawable/ic_launcher"
-      android:background="@android:color/holo_red_light"
-      />
-
 </LinearLayout>
