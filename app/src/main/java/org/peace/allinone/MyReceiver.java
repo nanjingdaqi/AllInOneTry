@@ -3,6 +3,7 @@ package org.peace.allinone;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 import me.ele.base.utils.AppLogger;
 
@@ -15,8 +16,12 @@ public class MyReceiver extends BroadcastReceiver {
   public String value = "MyReceiver";
 
   @Override public void onReceive(Context context, Intent intent) {
-    AppLogger.e("me: " + hashCode());
-    AppLogger.e("value: " + value);
-    Toast.makeText(context, "hello", Toast.LENGTH_SHORT).show();
+      Log.d("daqi", "my_recei");
+
+      try {
+          Thread.sleep(5 * 1000);
+      } catch (Exception e) {
+
+      }
   }
 }
