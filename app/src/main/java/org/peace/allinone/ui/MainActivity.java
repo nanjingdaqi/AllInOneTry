@@ -35,11 +35,19 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        LR receiver = new LR();
-        for (int i = 0; i < 200000; i++) {
-            IntentFilter filter = new IntentFilter("daqi");
-            registerReceiver(receiver, filter);
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                LR receiver = new LR();
+                for (int i = 0; i < 200000; i++) {
+                    if (i % 1000 == 0) {
+                        Log.d("daqi", "number: " + i);
+                    }
+                    IntentFilter filter = new IntentFilter("daqi");
+                    registerReceiver(receiver, filter);
+                }
+            }
+        }).start();
     }
 
     @OnClick(R.id.start_btn)
