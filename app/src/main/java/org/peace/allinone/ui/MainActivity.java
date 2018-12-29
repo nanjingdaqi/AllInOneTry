@@ -1,6 +1,7 @@
 package org.peace.allinone.ui;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -14,11 +15,31 @@ import io.reactivex.schedulers.Schedulers;
 import org.peace.allinone.R;
 import android.os.Process;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 public class MainActivity extends AppCompatActivity {
 
     static void L(Object msg) {
         Log.d("daqi", "" + msg + " tid: " + Process.myTid());
     }
+
+
+    Executor e1 = new Executor() {
+        @Override
+        public void execute(@NonNull Runnable command) {
+            Thread t1 = new Thread(command, "T1");
+            t1.start();
+        }
+    };
+
+    Executor e2 = new Executor() {
+        @Override
+        public void execute(@NonNull Runnable command) {
+            Thread t2 = new Thread(command, "T2");
+            t2.start();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +49,19 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Observable.fromCallable(() -> {
-            Log.d("daqi", "tid: " + Process.myTid());
+            Log.d("daqi", "Observable: " + Process.myTid() + ", thread name: " + Thread.currentThread().getName());
             return "Hello";
-        }).subscribeOn(Schedulers.computation())
+        })
+                .subscribeOn(Schedulers.from(e1))
+                .map(v -> {
+                    Log.d("daqi", "map1: " + Process.myTid() + ", thread name: " + Thread.currentThread().getName());
+                    return "Map result";
+                })
+                .subscribeOn(Schedulers.from(e2))
+                .map(v -> {
+                    Log.d("daqi", "map2: " + Process.myTid() + ", thread name: " + Thread.currentThread().getName());
+                    return "Map2 result";
+                })
                 .observeOn(Schedulers.io())
                 .subscribe(new Observer<String>() {
                     @Override
