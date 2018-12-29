@@ -21,24 +21,23 @@ import java.util.concurrent.Executors;
 public class MainActivity extends AppCompatActivity {
 
     static void L(Object msg) {
-        Log.d("daqi", "" + msg + " tid: " + Process.myTid());
+        Log.d("daqi", "" + msg + " tid: " + Process.myTid() + ", thread_name: " + Thread.currentThread().getName());
     }
 
 
-    Executor e1 = new Executor() {
-        @Override
-        public void execute(@NonNull Runnable command) {
-            Thread t1 = new Thread(command, "T1");
-            t1.start();
-        }
+    Executor e1 = command -> {
+        Thread t1 = new Thread(command, "T1");
+        t1.start();
     };
 
-    Executor e2 = new Executor() {
-        @Override
-        public void execute(@NonNull Runnable command) {
-            Thread t2 = new Thread(command, "T2");
-            t2.start();
-        }
+    Executor e2 = command -> {
+        Thread t2 = new Thread(command, "T2");
+        t2.start();
+    };
+
+    Executor e3 = command -> {
+        Thread t3 = new Thread(command, "T3");
+        t3.start();
     };
 
     @Override
@@ -53,16 +52,17 @@ public class MainActivity extends AppCompatActivity {
             return "Hello";
         })
                 .subscribeOn(Schedulers.from(e1))
+                .observeOn(Schedulers.from(e2))
                 .map(v -> {
                     Log.d("daqi", "map1: " + Process.myTid() + ", thread name: " + Thread.currentThread().getName());
                     return "Map result";
                 })
-                .subscribeOn(Schedulers.from(e2))
+                .subscribeOn(Schedulers.from(e1))
+                .observeOn(Schedulers.from(e3))
                 .map(v -> {
                     Log.d("daqi", "map2: " + Process.myTid() + ", thread name: " + Thread.currentThread().getName());
                     return "Map2 result";
                 })
-                .observeOn(Schedulers.io())
                 .subscribe(new Observer<String>() {
                     @Override
                     public void onSubscribe(Disposable disposable) {
