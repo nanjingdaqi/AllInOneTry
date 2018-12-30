@@ -7,12 +7,16 @@ import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import org.peace.allinone.R;
 
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executor;
 
 import static android.os.Process.myTid;
@@ -34,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     Executor e2 = command -> {
-        Log.d("daqi", "exec cmd at e2 tid: " + myTid(), new Exception());
+        Log.d("daqi", "exec cmd at e2 tid: " + myTid());
         Thread t2 = new Thread(() -> {
             Log.d("daqi", "T2 runs at tid: " + myTid());
             command.run();
@@ -43,7 +47,11 @@ public class MainActivity extends AppCompatActivity {
     };
 
     Executor e3 = command -> {
-        Thread t3 = new Thread(command, "T3");
+        Log.d("daqi", "exec cmd at e3 tid: " + myTid());
+        Thread t3 = new Thread(() -> {
+            Log.d("daqi", "T3 runs at tid: " + myTid());
+            command.run();
+        }, "T3");
         t3.start();
     };
 
@@ -103,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void testFlatMap() {
+        CyclicBarrier barrier = new CyclicBarrier(5);
         Observable<Integer> source = Observable.fromArray(1, 2, 3, 4, 5);
         Function<Integer, Observable<Integer>> fm = val -> {
             Log.d("daqi", "flat_map for: " + val + ", thread_name: " + Thread.currentThread().getName());
@@ -110,14 +119,29 @@ public class MainActivity extends AppCompatActivity {
 //            asyncJob(val * 1);
 //            asyncJob(1);observe
 //            cpt(100);
-            return Observable.fromArray(val, val * val);
+            Observable<Integer> s2 = Observable.create(emitter -> {
+                e3.execute(() -> {
+//                    try {
+//                        barrier.await();
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    } catch (BrokenBarrierException e) {
+//                        e.printStackTrace();
+//                    }
+                    Log.d("daqi", "emit val: " + val);
+                    emitter.onNext(val);
+                    emitter.onNext(val * val);
+                    emitter.onComplete();
+                });
+            });
+            return s2;
         };
 
         source
                 .observeOn(Schedulers.from(e1))
-                .flatMap(fm)
+//                .flatMap(fm)
+                .concatMap(fm)
                 .observeOn(Schedulers.from(e2))
-//                .concatMap(fm)
                 .subscribe((integer) -> {
                     cpt(100);
                     Log.d("daqi", "" + integer + "  " + myTid() + ", tname: " + Thread.currentThread().getName());
