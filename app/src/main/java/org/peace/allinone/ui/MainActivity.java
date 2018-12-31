@@ -1,11 +1,17 @@
 package org.peace.allinone.ui;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.FlowableEmitter;
+import io.reactivex.FlowableOnSubscribe;
+import io.reactivex.FlowableSubscriber;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -14,6 +20,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import org.peace.allinone.R;
+import org.reactivestreams.Subscription;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -148,6 +155,49 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    public void testFlowable() {
+        Flowable<Integer> s = Flowable.create(emitter -> {
+            for (int i = 1; i <= 5; ++i) {
+                emitter.onNext(i);
+            }
+            emitter.onComplete();
+        }, BackpressureStrategy.LATEST);
+
+        s.subscribe(new FlowableSubscriber<Integer>() {
+
+            Subscription s;
+
+            @Override
+            public void onSubscribe(Subscription s) {
+                this.s = s;
+                Log.d("daqi", "onSubScribe with s: " + s.getClass().getSimpleName());
+                s.request(3);
+            }
+
+            @Override
+            public void onNext(Integer integer) {
+                Log.d("daqi", "int: " + integer);
+//                if (integer == 3) {
+//                    s.request(1);
+//                }
+
+                if (integer == 3) {
+                    new Handler(getMainLooper()).post(() -> s.request(1));
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d("daqi", "onComplete");
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -157,7 +207,9 @@ public class MainActivity extends AppCompatActivity {
 
 //        testThread();
 
-        testFlatMap();
+//        testFlatMap();
+
+        testFlowable();
     }
 
     @OnClick(R.id.start_btn)
