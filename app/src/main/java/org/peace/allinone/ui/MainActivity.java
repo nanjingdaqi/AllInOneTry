@@ -38,7 +38,12 @@ public class MainActivity extends AppCompatActivity {
 //  Daqi daqi = new Daqi();
 
   @OnClick(R.id.btn2) public void click2(View v) {
-      op_obj();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                op_obj();
+            }
+        }, "jni").start();
   }
 
   public native void fromJava(String obj);

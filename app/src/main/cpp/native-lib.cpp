@@ -42,11 +42,20 @@ jstring native_hello(JNIEnv* env) {
 jobject obj;
 jobject obj2;
 
+void loop() {
+    int count = 0;
+    while (count >= 0) {
+        if (count % 100 == 0) count = 0;
+        count++;
+    }
+}
+
 void op_obj(JNIEnv* env) {
     LOGE("op_obj get called");
     jclass cls = env->FindClass("org/peace/allinone/Daqi");
     jfieldID mid = (jfieldID) env->GetFieldID(cls, "msg", "Ljava/lang/String;");
 //    LOGE("obj msg: %s", env->GetStringUTFChars((jstring) env->GetObjectField(obj2, mid), NULL));
+    loop();
 }
 
 void alloc(JNIEnv* env) {
