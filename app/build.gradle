@@ -23,18 +23,18 @@ def support_version = "23.2.1"
 dependencies {
   implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-  implementation "com.android.support:appcompat-v7:${support_version}"
-  implementation "com.android.support:design:${support_version}"
+//  implementation "com.android.support:appcompat-v7:${support_version}"
+//  implementation "com.android.support:design:${support_version}"
 
-  implementation "com.android.support:cardview-v7:${support_version}"
-  implementation "com.android.support:recyclerview-v7:${support_version}"
+//  implementation "com.android.support:cardview-v7:${support_version}"
+//  implementation "com.android.support:recyclerview-v7:${support_version}"
 
   implementation 'com.jakewharton:butterknife:8.3.0'
-  implementation 'com.afollestad.material-dialogs:core:0.9.3.0'
-  implementation 'com.afollestad.material-dialogs:commons:0.9.3.0'
-  implementation 'com.squareup.okhttp3:okhttp:3.3.0'
-  implementation 'com.squareup.retrofit2:retrofit:2.1.0'
-  implementation 'com.google.code.gson:gson:2.3.1'
+//  implementation 'com.afollestad.material-dialogs:core:0.9.3.0'
+//  implementation 'com.afollestad.material-dialogs:commons:0.9.3.0'
+//  implementation 'com.squareup.okhttp3:okhttp:3.3.0'
+//  implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+//  implementation 'com.google.code.gson:gson:2.3.1'
 
   annotationProcessor "com.jakewharton:butterknife-compiler:8.3.0"
 
