@@ -9,7 +9,6 @@ import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -31,12 +30,6 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
 
     private MyGLSurfaceView mGLView;
     int mInputBufferSize = 0;
-
-
-    @Override
-    public void doFrame(long frameTimeNanos) {
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
             }
         } else {
             // Permission has already been granted
-            playAudio();
+//            playAudio();
         }
     }
 
@@ -79,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                playAudio();
+//                playAudio();
             } else {
                 // permission denied, boo! Disable the
                 // functionality that depends on this permission.
@@ -281,5 +274,10 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
         // If you de-allocated graphic objects for onPause()
         // this is a good place to re-allocate them.
         mGLView.onResume();
+    }
+
+    @Override
+    public void doFrame(long frameTimeNanos) {
+
     }
 }

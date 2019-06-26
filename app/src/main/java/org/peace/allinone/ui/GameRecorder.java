@@ -16,21 +16,15 @@
 
 package org.peace.allinone.ui;
 
-import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
-import android.opengl.GLES20;
-import android.opengl.Matrix;
 import android.os.Trace;
 import android.util.Log;
 
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 
 /**
@@ -46,7 +40,7 @@ public class GameRecorder {
     private static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
     private static final int FRAME_RATE = 30;               // 30fps
     private static final int IFRAME_INTERVAL = 10;          // 10 seconds between I-frames
-    private static final int VIDEO_WIDTH = 1080;            // 720p
+    private static final int VIDEO_WIDTH = 1080;
     private static final int VIDEO_HEIGHT = 2076;
     private static final int BIT_RATE = 6000000;            // 6Mbps
 
@@ -59,10 +53,6 @@ public class GameRecorder {
     private MediaMuxer mMuxer;
     private int mTrackIndex;
     private boolean mMuxerStarted;
-
-    private int mViewportWidth, mViewportHeight;
-    private int mViewportXoff, mViewportYoff;
-    private final float mProjectionMatrix[] = new float[16];
 
 
     /** singleton */
@@ -82,12 +72,6 @@ public class GameRecorder {
         return sInstance;
     }
 
-    /**
-     * Creates a new encoder, and prepares the output file.
-     * <p>
-     * We can't set up the InputSurface yet, because we want the EGL contexts to share stuff,
-     * and the primary context may not have been configured yet.
-     */
     public void prepareEncoder() {
         MediaCodec encoder;
         MediaMuxer muxer;
@@ -102,39 +86,17 @@ public class GameRecorder {
         mBufferInfo = new MediaCodec.BufferInfo();
 
         try {
-
             // Create and configure the MediaFormat.
             MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE,
                     VIDEO_WIDTH, VIDEO_HEIGHT);
-//            format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
-//                    MediaCodecInfo.CodecCapabilities.COLOR_Format24bitARGB1887);
-            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, 0x15);
-//            format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
-//                    MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
+                    MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
             format.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
             format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
 
-
-            MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-            for (MediaCodecInfo codecInfo : codecList.getCodecInfos()) {
-                if (!codecInfo.isEncoder()) continue;
-
-                Log.d(TAG, "Name: " + codecInfo.getName() + ", supported types: " + Arrays.deepToString(codecInfo.getSupportedTypes()));
-                for (String supportedType : codecInfo.getSupportedTypes()) {
-                    if (supportedType.equals(MIME_TYPE)) {
-                        ArrayList<String> out = new ArrayList<>();
-                        for (int colorFormat : codecInfo.getCapabilitiesForType(MIME_TYPE).colorFormats) {
-                            out.add(Integer.toHexString(colorFormat));
-                        }
-                        Log.d(TAG, "support the type: " + Arrays.deepToString(out.toArray()));
-                    }
-                }
-            }
-
             // Create a MediaCodec encoder, and configure it with our format.
-//            encoder = MediaCodec.createEncoderByType(MIME_TYPE);
-            encoder = MediaCodec.createByCodecName("OMX.qcom.video.encoder.avc");
+            encoder = MediaCodec.createEncoderByType(MIME_TYPE);
             encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 
             // Create a MediaMuxer.  We can't add the video track and start() the muxer here,
@@ -153,30 +115,6 @@ public class GameRecorder {
             releaseEncoder();
             throw new RuntimeException(ex);
         }
-    }
-
-    /**
-     * Releases encoder resources.  May be called after partial / failed initialization.
-     */
-    public void releaseEncoder() {
-        Log.d(TAG, "releasing encoder objects");
-        if (mEncoder != null) {
-            mEncoder.stop();
-            mEncoder.release();
-            mEncoder = null;
-        }
-        if (mMuxer != null) {
-            mMuxer.stop();
-            mMuxer.release();
-            mMuxer = null;
-        }
-    }
-
-    /**
-     * Returns true if a recording is in progress.
-     */
-    public boolean isRecording() {
-        return mEncoder != null;
     }
 
     public int frameIndex = 1;
@@ -209,11 +147,6 @@ public class GameRecorder {
         }
 
         Trace.beginSection("drainEncoder");
-
-//        if (endOfStream) {
-//            if (VERBOSE) Log.d(TAG, "sending EOS to encoder");
-//            mEncoder.signalEndOfInputStream();
-//        }
 
         //Log.d(TAG, "GameRecorder drainEncoder " + endOfStream);
         ByteBuffer[] encoderOutputBuffers = mEncoder.getOutputBuffers();
@@ -281,13 +214,26 @@ public class GameRecorder {
     }
 
     /**
-     * Handles activity pauses (could be leaving the game, could be switching back to the
-     * main activity).  Stop recording, shut the codec down.
+     * Releases encoder resources.  May be called after partial / failed initialization.
      */
-    public void gamePaused() {
-        Log.d(TAG, "GameRecorder gamePaused");
+    public void releaseEncoder() {
+        Log.d(TAG, "releasing encoder objects");
+        if (mEncoder != null) {
+            mEncoder.stop();
+            mEncoder.release();
+            mEncoder = null;
+        }
+        if (mMuxer != null) {
+            mMuxer.stop();
+            mMuxer.release();
+            mMuxer = null;
+        }
+    }
 
-        drainEncoder(true);
-        releaseEncoder();
+    /**
+     * Returns true if a recording is in progress.
+     */
+    public boolean isRecording() {
+        return mEncoder != null;
     }
 }

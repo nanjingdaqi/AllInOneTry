@@ -39,7 +39,7 @@ import java.nio.ByteOrder;
  * <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceChanged}</li>
  * </ul>
  */
-public class MyGLRenderer implements GLSurfaceView.Renderer, Choreographer.FrameCallback {
+public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "daqi";
     private Triangle mTriangle;
@@ -61,10 +61,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer, Choreographer.Frame
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-
         // Set the background frame color
         GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
         mTriangle = new Triangle();
         mSquare = new Square();
     }
@@ -106,47 +104,43 @@ public class MyGLRenderer implements GLSurfaceView.Renderer, Choreographer.Frame
 
         GLES30.glFinish();
 
-//        tmpBuffer.clear();
         if (!inited) {
             mht.start();
             mh = new MH(mht.getLooper());
             recorder.prepareEncoder();
             inited = true;
         }
+        tmpBuffer.clear();
         GLES30.glReadPixels(0, 0, w, h, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, tmpBuffer);
-        Log.d(TAG, "read pixels, fetching buffer sz: " + tmpBuffer.array().length + ", w: " + w + ", h: " + h);
+        Log.d(TAG, "read pixels, fetching buffer: " + tmpBuffer + ", w: " + w + ", h: " + h);
         checkGlError("readPixels");
         recorder.feedInputBuffer(tmpBuffer);
         mh.sendEmptyMessage(0);
+    }
 
+    @Override
+    public void onSurfaceChanged(GL10 unused, int width, int height) {
+        // Adjust the viewport based on geometry changes,
+        // such as screen rotation
+        GLES30.glViewport(0, 0, width, height);
 
-        if (System.currentTimeMillis() > 0) return;
+        float ratio = (float) width / height;
 
-        if (!inited) {
-            Looper.prepare();
-            recorder.prepareEncoder();
-            Log.d(TAG, "inject frame callback");
-            Handler h = new Handler(Looper.getMainLooper());
-            h.post(new Runnable() {
-                @Override
-                public void run() {
-                    Choreographer.getInstance().postFrameCallback(MyGLRenderer.this);
-                }
-            });
-            h.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    stop = true;
-                }
-            }, 5 * 1000);
-            inited = true;
-        }
+        // this projection matrix is applied to object coordinates
+        // in the onDrawFrame() method
+        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+
+        w = width;
+        h = height;
+        Log.d(TAG, "w: " + width + ", h: " + height);
+        tmpBuffer = ByteBuffer.allocateDirect(width * height * 3/2);
+        tmpBuffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
     public GameRecorder recorder = GameRecorder.getInstance();
+    ByteBuffer tmpBuffer;
 
     public int w, h;
-    boolean stop = false;
 
     public MHT mht = new MHT("encoder");
     public MH mh;
@@ -167,50 +161,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer, Choreographer.Frame
         public void handleMessage(Message msg) {
             recorder.drainEncoder(false);
         }
-    }
-
-    @Override
-    public void doFrame(long frameTimeNanos) {
-        glSurfaceView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                while (!stop) {
-                    tmpBuffer.clear();
-                    GLES30.glReadPixels(0, 0, w, h, GLES30.GL_RGB_INTEGER, GLES30.GL_UNSIGNED_BYTE, tmpBuffer);
-                    Log.d(TAG, "read pixels, fetching buffer sz: " + tmpBuffer.position());
-                    Choreographer.getInstance().postFrameCallback(MyGLRenderer.this);
-
-                    Log.d(TAG, "Recording gl.");
-//            recorder.feedInputBuffer(tmpBuffer);
-//            recorder.drainEncoder(false);
-                }
-                Log.d(TAG, "quit recording");
-                recorder.drainEncoder(true);
-                recorder.releaseEncoder();
-            }
-        });
-    }
-
-
-    ByteBuffer tmpBuffer;
-
-    @Override
-    public void onSurfaceChanged(GL10 unused, int width, int height) {
-        // Adjust the viewport based on geometry changes,
-        // such as screen rotation
-        GLES30.glViewport(0, 0, width, height);
-
-        float ratio = (float) width / height;
-
-        // this projection matrix is applied to object coordinates
-        // in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
-
-        w = width;
-        h = height;
-        Log.d(TAG, "w: " + width + ", h: " + height);
-        tmpBuffer = ByteBuffer.allocateDirect(width * height * 4);
-        tmpBuffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
     /**
