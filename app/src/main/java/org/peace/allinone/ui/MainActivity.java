@@ -16,21 +16,27 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Choreographer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Choreographer.FrameCallback {
     static final boolean VERBOSE = true;
     static String TAG = "daqi";
     private static final long TIMEOUT_US = 10000;
 
     static final String MP3_FILE = "/sdcard/test.mp3";
 
-    private GLSurfaceView mGLView;
+    private MyGLSurfaceView mGLView;
     int mInputBufferSize = 0;
 
+
+    @Override
+    public void doFrame(long frameTimeNanos) {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         // as the ContentView for this Activity
         mGLView = new MyGLSurfaceView(this);
         setContentView(mGLView);
+
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -275,5 +282,4 @@ public class MainActivity extends AppCompatActivity {
         // this is a good place to re-allocate them.
         mGLView.onResume();
     }
-
 }

@@ -18,25 +18,32 @@ package org.peace.allinone.ui;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
+import android.view.Choreographer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Provides drawing instructions for a GLSurfaceView object. This class
  * must override the OpenGL ES drawing lifecycle methods:
  * <ul>
- *   <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceCreated}</li>
- *   <li>{@link android.opengl.GLSurfaceView.Renderer#onDrawFrame}</li>
- *   <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceChanged}</li>
+ * <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceCreated}</li>
+ * <li>{@link android.opengl.GLSurfaceView.Renderer#onDrawFrame}</li>
+ * <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceChanged}</li>
  * </ul>
  */
-public class MyGLRenderer implements GLSurfaceView.Renderer {
+public class MyGLRenderer implements GLSurfaceView.Renderer, Choreographer.FrameCallback {
 
-    private static final String TAG = "MyGLRenderer";
+    private static final String TAG = "daqi";
     private Triangle mTriangle;
-    private Square   mSquare;
+    private Square mSquare;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
@@ -46,6 +53,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private float mAngle;
 
+    public MyGLSurfaceView glSurfaceView;
+
+    public MyGLRenderer(MyGLSurfaceView glSurfaceView) {
+        this.glSurfaceView = glSurfaceView;
+    }
+
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
@@ -53,8 +66,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         mTriangle = new Triangle();
-        mSquare   = new Square();
+        mSquare = new Square();
     }
+
+    boolean inited = false;
 
     @Override
     public void onDrawFrame(GL10 unused) {
@@ -88,7 +103,96 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Draw triangle
         mTriangle.draw(scratch);
+
+        GLES30.glFinish();
+
+//        tmpBuffer.clear();
+        if (!inited) {
+            mht.start();
+            mh = new MH(mht.getLooper());
+            recorder.prepareEncoder();
+            inited = true;
+        }
+        GLES30.glReadPixels(0, 0, w, h, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, tmpBuffer);
+        Log.d(TAG, "read pixels, fetching buffer sz: " + tmpBuffer.array().length + ", w: " + w + ", h: " + h);
+        checkGlError("readPixels");
+        recorder.feedInputBuffer(tmpBuffer);
+        mh.sendEmptyMessage(0);
+
+
+        if (System.currentTimeMillis() > 0) return;
+
+        if (!inited) {
+            Looper.prepare();
+            recorder.prepareEncoder();
+            Log.d(TAG, "inject frame callback");
+            Handler h = new Handler(Looper.getMainLooper());
+            h.post(new Runnable() {
+                @Override
+                public void run() {
+                    Choreographer.getInstance().postFrameCallback(MyGLRenderer.this);
+                }
+            });
+            h.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    stop = true;
+                }
+            }, 5 * 1000);
+            inited = true;
+        }
     }
+
+    public GameRecorder recorder = GameRecorder.getInstance();
+
+    public int w, h;
+    boolean stop = false;
+
+    public MHT mht = new MHT("encoder");
+    public MH mh;
+
+    public class MHT extends HandlerThread {
+        public MHT(String name) {
+            super(name);
+        }
+    }
+
+    public class MH extends Handler {
+
+        public MH(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            recorder.drainEncoder(false);
+        }
+    }
+
+    @Override
+    public void doFrame(long frameTimeNanos) {
+        glSurfaceView.queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                while (!stop) {
+                    tmpBuffer.clear();
+                    GLES30.glReadPixels(0, 0, w, h, GLES30.GL_RGB_INTEGER, GLES30.GL_UNSIGNED_BYTE, tmpBuffer);
+                    Log.d(TAG, "read pixels, fetching buffer sz: " + tmpBuffer.position());
+                    Choreographer.getInstance().postFrameCallback(MyGLRenderer.this);
+
+                    Log.d(TAG, "Recording gl.");
+//            recorder.feedInputBuffer(tmpBuffer);
+//            recorder.drainEncoder(false);
+                }
+                Log.d(TAG, "quit recording");
+                recorder.drainEncoder(true);
+                recorder.releaseEncoder();
+            }
+        });
+    }
+
+
+    ByteBuffer tmpBuffer;
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
@@ -102,6 +206,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // in the onDrawFrame() method
         Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
 
+        w = width;
+        h = height;
+        Log.d(TAG, "w: " + width + ", h: " + height);
+        tmpBuffer = ByteBuffer.allocateDirect(width * height * 4);
+        tmpBuffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
     /**
@@ -110,11 +219,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
      * <p><strong>Note:</strong> When developing shaders, use the checkGlError()
      * method to debug shader coding errors.</p>
      *
-     * @param type - Vertex or fragment shader type.
+     * @param type       - Vertex or fragment shader type.
      * @param shaderCode - String containing the shader code.
      * @return - Returns an id for the shader.
      */
-    public static int loadShader(int type, String shaderCode){
+    public static int loadShader(int type, String shaderCode) {
 
         // create a vertex shader type (GLES30.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES30.GL_FRAGMENT_SHADER)
@@ -128,17 +237,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /**
-    * Utility method for debugging OpenGL calls. Provide the name of the call
-    * just after making it:
-    *
-    * <pre>
-    * mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor");
-    * MyGLRenderer.checkGlError("glGetUniformLocation");</pre>
-    *
-    * If the operation is not successful, the check throws an error.
-    *
-    * @param glOperation - Name of the OpenGL call to check.
-    */
+     * Utility method for debugging OpenGL calls. Provide the name of the call
+     * just after making it:
+     *
+     * <pre>
+     * mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor");
+     * MyGLRenderer.checkGlError("glGetUniformLocation");</pre>
+     * <p>
+     * If the operation is not successful, the check throws an error.
+     *
+     * @param glOperation - Name of the OpenGL call to check.
+     */
     public static void checkGlError(String glOperation) {
         int error;
         while ((error = GLES30.glGetError()) != GLES30.GL_NO_ERROR) {
@@ -162,5 +271,4 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void setAngle(float angle) {
         mAngle = angle;
     }
-
 }
