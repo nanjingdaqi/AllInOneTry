@@ -104,6 +104,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         GLES30.glFinish();
 
+        if (System.currentTimeMillis() > 0) return;
+
         if (!inited) {
             mht.start();
             mh = new MH(mht.getLooper());

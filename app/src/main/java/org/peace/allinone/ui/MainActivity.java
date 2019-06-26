@@ -10,6 +10,8 @@ import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -17,6 +19,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Choreographer;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
@@ -27,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
     private static final long TIMEOUT_US = 10000;
 
     static final String MP3_FILE = "/sdcard/test.mp3";
+    static final String AAC_FILE = "/sdcard/out_test.aac";
 
     private MyGLSurfaceView mGLView;
     int mInputBufferSize = 0;
@@ -62,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
             }
         } else {
             // Permission has already been granted
-//            playAudio();
+            playAudio();
         }
     }
 
@@ -72,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                playAudio();
+                playAudio();
             } else {
                 // permission denied, boo! Disable the
                 // functionality that depends on this permission.
@@ -80,15 +85,48 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
         }
     }
 
+    AacEncode aacEncode;
+    File outAudioFile = new File("/sdcard/out_test.m4a");
+    FileOutputStream fos;
+    boolean stopRecording = false;
+    boolean PLAY_AAC = false;
+
     void playAudio() {
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                if (!PLAY_AAC) {
+                    aacEncode = new AacEncode(outAudioFile.getAbsolutePath());
+                    aacEncode.start();
+//                    try {
+//                        if (outAudioFile.exists()) outAudioFile.delete();
+//                        outAudioFile.createNewFile();
+////                        fos = new FileOutputStream(outAudioFile);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+                    Looper.prepare();
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Log.d(TAG, "stop Record!");
+                                stopRecording = true;
+//                                aacEncode.stop = true;
+                                aacEncode.close();
+//                                fos.flush();
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }, 10000);
+                }
+
                 AudioTrack audioTrack = null;
                 MediaExtractor audioExtractor = new MediaExtractor();
                 MediaCodec audioCodec = null;
                 try {
-                    audioExtractor.setDataSource(MP3_FILE);
+                    audioExtractor.setDataSource(PLAY_AAC ? AAC_FILE : MP3_FILE);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -99,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
                         audioExtractor.selectTrack(i);
                         int audioChannels = mediaFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
                         int audioSampleRate = mediaFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+                        Log.e(TAG, "sample rate: " + audioSampleRate);
                         int minBufferSize = AudioTrack.getMinBufferSize(audioSampleRate,
                                 (audioChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO),
                                 AudioFormat.ENCODING_PCM_16BIT);
@@ -154,11 +193,6 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
                     if (!isAudioEOS) {
                         isAudioEOS = decodeMediaData(audioExtractor, audioCodec, inputBuffers);
                     }
-
-                    // 解码
-                    if (!isAudioEOS) {
-                        isAudioEOS = decodeMediaData(audioExtractor, audioCodec, inputBuffers);
-                    }
                     // 获取解码后的数据
                     int outputBufferIndex = audioCodec.dequeueOutputBuffer(audioBufferInfo, TIMEOUT_US);
                     switch (outputBufferIndex) {
@@ -187,6 +221,22 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
                                 if (mAudioOutTempBuf.length < audioBufferInfo.size) {
                                     mAudioOutTempBuf = new byte[audioBufferInfo.size];
                                 }
+
+                                if (!stopRecording && !PLAY_AAC) {
+//                        Log.d(TAG, "raw inputBuffer: " + inputBuffer);
+                                    byte[] copiedBuffer = new byte[audioBufferInfo.size];
+                                    for (int i = 0; i < audioBufferInfo.size; ++i) {
+                                        copiedBuffer[i] = outputBuffer.get();
+                                    }
+                                    Log.d(TAG, "write buffer sz: " + copiedBuffer.length + ", sample sz: " + audioBufferInfo.size + ", buffer: " + outputBuffer);
+                                    aacEncode.offerEncoder(copiedBuffer, sampleTime);
+//                        if (outBuffer != null && outBuffer.length > 0) {
+//                            fos.write(outBuffer);
+//                        }
+                                    outputBuffer.flip();
+//                        Log.d(TAG, "flipped inputBuffer: " + inputBuffer);
+                                }
+
                                 outputBuffer.position(0);
                                 outputBuffer.get(mAudioOutTempBuf, 0, audioBufferInfo.size);
                                 outputBuffer.clear();
@@ -229,15 +279,9 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
         }
     }
 
-    /**
-     * 解复用，得到需要解码的数据
-     *
-     * @param extractor
-     * @param decoder
-     * @param inputBuffers
-     * @return
-     */
-    private static boolean decodeMediaData(MediaExtractor extractor, MediaCodec decoder, ByteBuffer[] inputBuffers) {
+    public long sampleTime;
+
+    private boolean decodeMediaData(MediaExtractor extractor, MediaCodec decoder, ByteBuffer[] inputBuffers) {
         boolean isMediaEOS = false;
         int inputBufferIndex = decoder.dequeueInputBuffer(TIMEOUT_US);
         if (inputBufferIndex >= 0) {
@@ -250,8 +294,15 @@ public class MainActivity extends AppCompatActivity implements Choreographer.Fra
                     Log.d(TAG, "end of stream");
                 }
             } else {
-                decoder.queueInputBuffer(inputBufferIndex, 0, sampleSize, extractor.getSampleTime(), 0);
-                extractor.advance();
+                try {
+                    sampleTime = extractor.getSampleTime();
+
+                    decoder.queueInputBuffer(inputBufferIndex, 0, sampleSize, sampleTime, 0);
+                    extractor.advance();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             }
         }
         return isMediaEOS;
