@@ -5,6 +5,7 @@ import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
+import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.util.Log
@@ -19,11 +20,12 @@ class AudioPlayer {
     }
 
     interface Listener {
-        fun onNewBuffer()
+        fun onNewBuffer(buffer: ByteBuffer, sampleTime: Long)
     }
 
     private val worker = Executors.newSingleThreadExecutor()
     private val listeners = mutableListOf<Listener>()
+    private var sampleTime: Long = -1
 
     public fun play(fd: AssetFileDescriptor) {
         worker.execute {
@@ -71,9 +73,9 @@ class AudioPlayer {
                                     eos = true
                                     CodecContext.FeedInfo(true)
                                 } else {
-                                    val tm = extractor.sampleTime
+                                    sampleTime = extractor.sampleTime
                                     extractor.advance()
-                                    CodecContext.FeedInfo(size = sz, presentationTimeUs = tm)
+                                    CodecContext.FeedInfo(size = sz, presentationTimeUs = sampleTime)
                                 }
                             }
 
@@ -84,11 +86,18 @@ class AudioPlayer {
 
                         var tmpBuffer: ByteArray? = null
                         coderCtx.drainOutputBuffer(10000, false, object : CodecContext.DrainBufferListener {
-                            override fun availBuffer(buffer: ByteBuffer) {
+                            override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
                                 val sz = buffer.limit() - buffer.position()
                                 if (tmpBuffer == null || tmpBuffer!!.size < sz) {
                                     tmpBuffer = ByteArray(sz)
                                 }
+                                val st = System.currentTimeMillis()
+                                if (listeners.size > 0) {
+                                    listeners.forEach {
+                                        it.onNewBuffer(buffer, sampleTime)
+                                    }
+                                }
+                                Log.w(T, "feed one encoded buffer consume: " + (System.currentTimeMillis() - st) + " ms")
                                 buffer.get(tmpBuffer, 0, sz)
                                 buffer.clear()
                                 track.write(tmpBuffer, 0, sz)
@@ -98,7 +107,7 @@ class AudioPlayer {
                                 Log.d(T, "audio output buffer changed")
                             }
 
-                            override fun formatChanged() {
+                            override fun formatChanged(mediaFormat: MediaFormat) {
                                 Log.d(T, "audio output format changed")
                             }
 
@@ -111,6 +120,7 @@ class AudioPlayer {
                     track.run {
                         stop()
                         release()
+                        coderCtx.finish()
                     }
                 }
             } catch (e: Exception) {

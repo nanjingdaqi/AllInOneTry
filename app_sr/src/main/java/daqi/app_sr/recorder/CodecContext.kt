@@ -21,7 +21,7 @@ class CodecContext {
 
         public fun createEncoder(mime: String, format: MediaFormat): CodecContext {
             return CodecContext().apply {
-                coder = MediaCodec.createDecoderByType(mime)
+                coder = MediaCodec.createEncoderByType(mime)
                 coder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
                 bufferInfo = MediaCodec.BufferInfo()
             }
@@ -37,11 +37,11 @@ class CodecContext {
     }
 
     interface DrainBufferListener {
-        fun availBuffer(buffer: ByteBuffer)
+        fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo)
 
         fun bufferChanged()
 
-        fun formatChanged()
+        fun formatChanged(mediaFormat: MediaFormat)
 
         fun bufferTimeOut()
     }
@@ -51,6 +51,13 @@ class CodecContext {
         coder.start()
         inputBuffers = coder.inputBuffers
         outputBuffers = coder.outputBuffers
+    }
+
+    fun finish() {
+        coder.run {
+            stop()
+            release()
+        }
     }
 
     fun feedInputBuffer(timeoutUs: Long, listener: FeedBufferListener) {
@@ -82,7 +89,7 @@ class CodecContext {
             } else if (index == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                 listener.bufferChanged()
             } else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                listener.formatChanged()
+                listener.formatChanged(coder.outputFormat)
             } else if (index < 0) {
                 // todo logging ignore
             } else {
@@ -96,7 +103,7 @@ class CodecContext {
                     outData.limit(bufferInfo.offset + bufferInfo.size)
                 }
 
-                listener.availBuffer(outData)
+                listener.availBuffer(outData, bufferInfo)
 
                 coder.releaseOutputBuffer(index, false)
             }
