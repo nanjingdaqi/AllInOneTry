@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initUI()
+        playAudio()
     }
 
     private fun initUI() {
@@ -57,6 +58,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }.start()
         }
+    }
+
+    private fun playAudio() {
+        AudioPlayer().play(resources.assets.openFd("test.mp3"))
     }
 
     private fun startRecord() {
