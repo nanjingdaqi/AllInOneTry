@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">app_sr</string>
+    <dimen name="btn_w">60dp</dimen>
+</resources>
