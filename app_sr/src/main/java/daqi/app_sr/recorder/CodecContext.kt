@@ -2,6 +2,7 @@ package daqi.app_sr.recorder
 
 import android.media.MediaCodec
 import android.media.MediaFormat
+import android.view.Surface
 import java.nio.ByteBuffer
 
 class CodecContext {
@@ -46,6 +47,8 @@ class CodecContext {
         fun bufferTimeOut()
     }
 
+
+    fun createInputSurface(): Surface = coder.createInputSurface()
 
     fun prepare() {
         coder.start()

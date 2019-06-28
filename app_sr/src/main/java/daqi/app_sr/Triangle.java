@@ -15,7 +15,7 @@
  */
 package daqi.app_sr;
 
-import android.opengl.GLES30;
+import android.opengl.GLES20;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -83,33 +83,33 @@ public class Triangle {
         vertexBuffer.position(0);
 
         // prepare shaders and OpenGL program
-        int vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-        mProgram = GLES30.glCreateProgram();             // create empty OpenGL Program
-        GLES30.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
-        GLES30.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-        GLES30.glLinkProgram(mProgram);                  // create OpenGL program executables
+        mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
+        GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
+        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
+        GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
 
     }
 
     public static int loadShader(int type, String shaderCode) {
 
-        // create a vertex shader type (GLES30.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES30.GL_FRAGMENT_SHADER)
-        int shader = GLES30.glCreateShader(type);
+        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        int shader = GLES20.glCreateShader(type);
 
         // add the source code to the shader and compile it
-        GLES30.glShaderSource(shader, shaderCode);
-        GLES30.glCompileShader(shader);
+        GLES20.glShaderSource(shader, shaderCode);
+        GLES20.glCompileShader(shader);
 
         return shader;
     }
 
     public static void checkGlError(String glOperation) {
         int error;
-        while ((error = GLES30.glGetError()) != GLES30.GL_NO_ERROR) {
-            throw new RuntimeException(glOperation + ": glError " + error);
+        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+            throw new RuntimeException(glOperation + ": glError " + Integer.toHexString(error));
         }
     }
 
@@ -121,39 +121,39 @@ public class Triangle {
      */
     public void draw(float[] mvpMatrix) {
         // Add program to OpenGL environment
-        GLES30.glUseProgram(mProgram);
+        GLES20.glUseProgram(mProgram);
 
         // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES30.glGetAttribLocation(mProgram, "vPosition");
+        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 
         // Enable a handle to the triangle vertices
-        GLES30.glEnableVertexAttribArray(mPositionHandle);
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
-        GLES30.glVertexAttribPointer(
+        GLES20.glVertexAttribPointer(
                 mPositionHandle, COORDS_PER_VERTEX,
-                GLES30.GL_FLOAT, false,
+                GLES20.GL_FLOAT, false,
                 vertexStride, vertexBuffer);
 
         // get handle to fragment shader's vColor member
-        mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor");
+        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES30.glUniform4fv(mColorHandle, 1, color, 0);
+        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 
         // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
-        GLES30.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
         checkGlError("glUniformMatrix4fv");
 
         // Draw the triangle
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, vertexCount);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
 
         // Disable vertex array
-        GLES30.glDisableVertexAttribArray(mPositionHandle);
+        GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
 }
