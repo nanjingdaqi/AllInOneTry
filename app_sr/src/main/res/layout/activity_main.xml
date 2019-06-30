@@ -7,9 +7,9 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-    <android.opengl.GLSurfaceView android:id="@+id/gl"
-                                  android:layout_width="match_parent"
-                                  android:layout_height="match_parent"/>
+    <SurfaceView android:id="@+id/gl"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"/>
 
     <Button android:id="@+id/btn"
             android:text="开始录制"

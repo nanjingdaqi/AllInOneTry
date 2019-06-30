@@ -97,7 +97,7 @@ class AudioPlayer {
                                         it.onNewBuffer(buffer, sampleTime)
                                     }
                                 }
-                                Log.w(T, "feed one encoded buffer consume: " + (System.currentTimeMillis() - st) + " ms")
+                                Log.i(T, "feed one encoded buffer consume: " + (System.currentTimeMillis() - st) + " ms")
                                 buffer.get(tmpBuffer, 0, sz)
                                 buffer.clear()
                                 track.write(tmpBuffer, 0, sz)

@@ -35,7 +35,9 @@ class MuxerContext {
     }
 
     fun writeSampleData(coder: CodecContext, buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-        muxer.writeSampleData(trackIdMap[coder]!!, buffer, bufferInfo)
+        if (started) {
+            muxer.writeSampleData(trackIdMap[coder]!!, buffer, bufferInfo)
+        }
     }
 
     fun finish() {
