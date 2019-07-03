@@ -23,7 +23,6 @@ import daqi.app_sr.MainActivity.Companion.MSG_INVOKE_DRAIN
 import daqi.app_sr.MainActivity.Companion.MSG_SIGNAL_EOS
 import daqi.app_sr.MainActivity.Companion.T
 import daqi.app_sr.recorder.CodecContext
-import daqi.app_sr.recorder.InputSurface
 import daqi.app_sr.recorder.MuxerContext
 import gles.Drawable2d
 import gles.EglCore

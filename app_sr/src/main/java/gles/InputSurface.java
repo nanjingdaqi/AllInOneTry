@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package daqi.app_sr.recorder;
+package gles;
 
 import android.opengl.EGL14;
 import android.opengl.EGLExt;
