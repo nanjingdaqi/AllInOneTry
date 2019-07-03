@@ -262,7 +262,7 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Choreographer.
         stopWaiter.await()
         audioRecorder!!.finish()
         render!!.mHandler!!.setRecordingEnabled(false, inputSurface!!)
-        muxer!!.finish()
+        muxer!!.mayFinish()
         Log.d(T, "Stop is done.")
     }
 

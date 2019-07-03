@@ -83,12 +83,8 @@ class CodecContext {
         out_loop@ while (true) {
             val index = coder.dequeueOutputBuffer(bufferInfo, timeoutUs)
             if (index == MediaCodec.INFO_TRY_AGAIN_LATER) {
-                if (!eos) {
-                    listener.bufferTimeOut()
-                    break@out_loop
-                } else {
-                    // todo logging
-                }
+                listener.bufferTimeOut()
+                break@out_loop
             } else if (index == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                 listener.bufferChanged()
             } else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {

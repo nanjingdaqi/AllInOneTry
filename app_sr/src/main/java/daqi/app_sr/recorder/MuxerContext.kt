@@ -10,6 +10,7 @@ class MuxerContext {
     private val trackIdMap = mutableMapOf<CodecContext, Int>()
     private var trackCount: Int = 0
     private var started = false
+    private var finishedCount = 0
 
     companion object {
         public fun createMuxer(outputFilePath: String, inputTrackCount: Int): MuxerContext {
@@ -40,10 +41,13 @@ class MuxerContext {
         }
     }
 
-    fun finish() {
-        muxer.run {
-            stop()
-            release()
+    fun mayFinish() {
+        if (++finishedCount == trackCount) {
+            finishedCount = 0
+            muxer.run {
+                stop()
+                release()
+            }
         }
     }
 }
