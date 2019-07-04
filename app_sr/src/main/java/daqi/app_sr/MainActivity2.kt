@@ -12,16 +12,22 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import daqi.app_sr.recorder.AudioConfig
+import daqi.app_sr.recorder.AudioObserver
+import daqi.app_sr.recorder.AudioSource
 import daqi.app_sr.recorder.ScreenRecorder
 import daqi.app_sr.recorder.VideoConfig
 import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
+import java.nio.ByteBuffer
 
 class MainActivity2 : AppCompatActivity() {
+
+    private var audioPlayer: AudioPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.content_main2)
+        playAudio()
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)) {
@@ -65,8 +71,44 @@ class MainActivity2 : AppCompatActivity() {
                         MediaCodecInfo.CodecProfileLevel.AVCProfileMain),
                 "/sdcard/test_${System.currentTimeMillis()}.mp4",
                 projectionManager.getMediaProjection(resultCode, data!!)).apply {
-            prepare()
+            prepare(audioSource)
+//            prepare()
             start()
+            audioPlayer!!.addListener(object : AudioPlayer.Listener {
+                override fun onNewBuffer(buffer: ByteBuffer, sampleTime: Long) {
+                    audioSource.observers.forEach {
+                        buffer.mark()
+                        it.onAudioAvail(ByteBuffer.allocate(buffer.limit() - buffer.position()).apply {
+                            put(buffer)
+                            flip()
+                        })
+                        buffer.reset()
+                    }
+                }
+            })
+        }
+    }
+
+    val audioSource = AudioAdapter()
+
+    private fun playAudio() {
+        if (audioPlayer == null) {
+            audioPlayer = AudioPlayer()
+        }
+        audioPlayer!!.run {
+            play(resources.assets.openFd("test.mp3"))
+        }
+    }
+
+    class AudioAdapter : AudioSource {
+        val observers = mutableListOf<AudioObserver>()
+
+        override fun subscribe(observer: AudioObserver) {
+            observers.add(observer)
+        }
+
+        override fun unsubscribe(observer: AudioObserver) {
+            observers.remove(observer)
         }
     }
 }
