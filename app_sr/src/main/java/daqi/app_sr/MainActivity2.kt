@@ -16,6 +16,8 @@ import daqi.app_sr.recorder.AudioObserver
 import daqi.app_sr.recorder.AudioSource
 import daqi.app_sr.recorder.ScreenRecorder
 import daqi.app_sr.recorder.VideoConfig
+import kotlinx.android.synthetic.main.content_main2.pause
+import kotlinx.android.synthetic.main.content_main2.resume
 import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
 import java.nio.ByteBuffer
@@ -57,6 +59,12 @@ class MainActivity2 : AppCompatActivity() {
         stop.setOnClickListener {
             recorder.stop()
         }
+        pause.setOnClickListener {
+            recorder.pause()
+        }
+        resume.setOnClickListener {
+            recorder.resume()
+        }
     }
 
     lateinit var recorder: ScreenRecorder
@@ -72,7 +80,6 @@ class MainActivity2 : AppCompatActivity() {
                 "/sdcard/test_${System.currentTimeMillis()}.mp4",
                 projectionManager.getMediaProjection(resultCode, data!!)).apply {
             prepare(audioSource)
-//            prepare()
             start()
             audioPlayer!!.addListener(object : AudioPlayer.Listener {
                 override fun onNewBuffer(buffer: ByteBuffer, sampleTime: Long) {
