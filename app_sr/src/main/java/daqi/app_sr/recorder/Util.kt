@@ -4,15 +4,15 @@ import android.util.Log
 
 object Util {
 
-    public var level = 1
+    public var logLevel = 1
 
     // debug log
     fun logd(tag: String, msg: String) {
-        if (level >= 3) Log.d(tag, msg)
+        if (logLevel >= 3) Log.d(tag, msg)
     }
 
     // key log
     fun logk(tag: String, msg: String) {
-        if (level >= 1) Log.w(tag, msg)
+        if (logLevel >= 1) Log.w(tag, msg)
     }
 }

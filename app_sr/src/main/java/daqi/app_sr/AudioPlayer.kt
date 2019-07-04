@@ -92,7 +92,7 @@ class AudioPlayer {
                                     tmpBuffer = ByteArray(sz)
                                 }
                                 val st = System.currentTimeMillis()
-                                Log.w(T, "buffer info buffer: $buffer, buffer_info sz: ${bufferInfo.size}, offset: ${bufferInfo.offset}")
+//                                Log.w(T, "buffer info buffer: $buffer, buffer_info sz: ${bufferInfo.size}, offset: ${bufferInfo.offset}")
                                 listeners.forEach {
                                     it.onNewBuffer(buffer, sampleTime)
                                 }
