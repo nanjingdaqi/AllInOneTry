@@ -1,4 +1,4 @@
-package daqi.app_sr.recorder
+package com.bytedance.ttgame.module.screenrecord
 
 import android.util.Log
 

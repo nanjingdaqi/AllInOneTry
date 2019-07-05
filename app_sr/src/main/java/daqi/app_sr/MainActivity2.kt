@@ -11,11 +11,11 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import daqi.app_sr.recorder.AudioConfig
-import daqi.app_sr.recorder.AudioObserver
-import daqi.app_sr.recorder.AudioSource
-import daqi.app_sr.recorder.ScreenRecorder
-import daqi.app_sr.recorder.VideoConfig
+import com.bytedance.ttgame.module.screenrecord.AudioConfig
+import com.bytedance.ttgame.module.screenrecord.AudioObserver
+import com.bytedance.ttgame.module.screenrecord.AudioSource
+import com.bytedance.ttgame.module.screenrecord.ScreenRecorder
+import com.bytedance.ttgame.module.screenrecord.VideoConfig
 import kotlinx.android.synthetic.main.content_main2.pause
 import kotlinx.android.synthetic.main.content_main2.resume
 import kotlinx.android.synthetic.main.content_main2.start

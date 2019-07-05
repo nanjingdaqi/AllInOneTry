@@ -9,7 +9,7 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.util.Log
-import daqi.app_sr.recorder.CodecContext
+import com.bytedance.ttgame.module.screenrecord.CodecContext
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
@@ -44,7 +44,7 @@ class AudioPlayer {
                     val inputSampleRate = inputFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE)
                     val minBufferSize = AudioTrack.getMinBufferSize(inputSampleRate,
                             if (channels == 1) AudioFormat.CHANNEL_OUT_MONO else AudioFormat.CHANNEL_OUT_STEREO,
-                            AudioFormat.ENCODING_PCM_16BIT)
+                            AudioFormat.ENCODING_PCM_FLOAT)
                     val maxBufferSize = inputFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE)
                     inputBufferSize = if (minBufferSize > 0) minBufferSize * 4 else maxBufferSize
                     val frameSizeInBytes = channels * 2
@@ -56,12 +56,13 @@ class AudioPlayer {
                             .build()
                     val outFormat = AudioFormat.Builder()
                             .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
-                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                            .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
                             .setSampleRate(outSampleRate)
                             .build()
                     track = AudioTrack(attr, outFormat, minBufferSize, AudioTrack.MODE_STREAM, AudioManager.AUDIO_SESSION_ID_GENERATE)
                     track.play()
 
+                    inputFormat.setInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_FLOAT)
                     val coderCtx = CodecContext.createDecoder(mime, inputFormat)
                     coderCtx.prepare()
                     var eos = false
@@ -84,22 +85,25 @@ class AudioPlayer {
                             }
                         })
 
-                        var tmpBuffer: ByteArray? = null
+                        var tmpBuffer: FloatArray? = null
                         coderCtx.drainOutputBuffer(10000, false, object : CodecContext.DrainBufferListener {
                             override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-                                val sz = buffer.limit() - buffer.position()
-                                if (tmpBuffer == null || tmpBuffer!!.size < sz) {
-                                    tmpBuffer = ByteArray(sz)
-                                }
-                                val st = System.currentTimeMillis()
+//                                val st = System.currentTimeMillis()
 //                                Log.w(T, "buffer info buffer: $buffer, buffer_info sz: ${bufferInfo.size}, offset: ${bufferInfo.offset}")
                                 listeners.forEach {
                                     it.onNewBuffer(buffer, sampleTime)
                                 }
 //                                Log.i(T, "feed one encoded buffer consume: " + (System.currentTimeMillis() - st) + " ms")
-                                buffer.get(tmpBuffer, 0, sz)
-                                buffer.clear()
-                                track.write(tmpBuffer, 0, sz)
+                                buffer.asFloatBuffer().run {
+                                    val sz = limit() - position()
+                                    if (tmpBuffer == null || tmpBuffer!!.size < sz) {
+                                        tmpBuffer = FloatArray(limit() - position())
+                                    }
+//                                    Util.logk("daqi", "float buffer info: $this")
+                                    get(tmpBuffer, 0, limit() - position())
+                                    clear()
+                                    track.write(tmpBuffer, 0, sz, AudioTrack.WRITE_BLOCKING)
+                                }
                             }
 
                             override fun bufferChanged() {

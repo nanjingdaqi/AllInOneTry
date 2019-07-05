@@ -22,8 +22,8 @@ import android.view.SurfaceHolder
 import daqi.app_sr.MainActivity.Companion.MSG_INVOKE_DRAIN
 import daqi.app_sr.MainActivity.Companion.MSG_SIGNAL_EOS
 import daqi.app_sr.MainActivity.Companion.T
-import daqi.app_sr.recorder.CodecContext
-import daqi.app_sr.recorder.MuxerContext
+import com.bytedance.ttgame.module.screenrecord.CodecContext
+import com.bytedance.ttgame.module.screenrecord.MuxerContext
 import gles.Drawable2d
 import gles.EglCore
 import gles.FlatShadedProgram

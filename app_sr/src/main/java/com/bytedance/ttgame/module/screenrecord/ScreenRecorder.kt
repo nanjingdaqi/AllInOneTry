@@ -1,7 +1,8 @@
-package daqi.app_sr.recorder
+package com.bytedance.ttgame.module.screenrecord
 
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.media.AudioFormat
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
@@ -11,10 +12,10 @@ import android.os.HandlerThread
 import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
-import daqi.app_sr.recorder.ScreenRecorder.Companion.MSG_DRAIN
-import daqi.app_sr.recorder.ScreenRecorder.Companion.MSG_FEED
-import daqi.app_sr.recorder.ScreenRecorder.Companion.MSG_FINISH
-import daqi.app_sr.recorder.ScreenRecorder.Companion.T
+import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_DRAIN
+import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_FEED
+import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_FINISH
+import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.T
 import java.nio.ByteBuffer
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
@@ -105,8 +106,9 @@ class ScreenRecorder(val audioConfig: AudioConfig, val videoConfig: VideoConfig,
         audioConfig.run {
             MediaFormat.createAudioFormat(mime, sampleRate, channelCount).run {
                 setInteger(MediaFormat.KEY_AAC_PROFILE, profileLevel)
-                setInteger(MediaFormat.KEY_BIT_RATE, bitrate)
+                setInteger(MediaFormat.KEY_BIT_RATE, sampleRate * channelCount * 4)
                 setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, inputSize)
+                setInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_FLOAT)
                 audioCoder = CodecContext.createEncoder(mime, this)
                 audioQueue = LinkedBlockingQueue(AUDIO_QUEUE_CAPACITY)
                 audioObserver = object : AudioObserver {
