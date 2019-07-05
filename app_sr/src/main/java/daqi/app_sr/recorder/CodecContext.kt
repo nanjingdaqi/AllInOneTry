@@ -12,6 +12,8 @@ class CodecContext {
     lateinit var outputBuffers: Array<ByteBuffer>
 
     companion object {
+        const val T = "CodecContext"
+
         public fun createDecoder(mime: String, format: MediaFormat): CodecContext {
             return CodecContext().apply {
                 coder = MediaCodec.createDecoderByType(mime)
@@ -86,11 +88,12 @@ class CodecContext {
                 listener.bufferTimeOut()
                 break@out_loop
             } else if (index == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+                outputBuffers = coder.outputBuffers
                 listener.bufferChanged()
             } else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 listener.formatChanged(coder.outputFormat)
             } else if (index < 0) {
-                // todo logging ignore
+                Util.logd(T, "dequeue output buffers return invalid index")
             } else {
                 val outData = outputBuffers[index]
                 if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {

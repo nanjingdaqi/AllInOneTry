@@ -8,11 +8,11 @@ object Util {
 
     // debug log
     fun logd(tag: String, msg: String) {
-        if (logLevel >= 3) Log.d(tag, msg)
+        if (logLevel <= 1) Log.d(tag, msg)
     }
 
     // key log
     fun logk(tag: String, msg: String) {
-        if (logLevel >= 1) Log.w(tag, msg)
+        if (logLevel <= 3) Log.w(tag, msg)
     }
 }

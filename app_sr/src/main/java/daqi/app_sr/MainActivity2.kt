@@ -79,7 +79,8 @@ class MainActivity2 : AppCompatActivity() {
                         MediaCodecInfo.CodecProfileLevel.AVCProfileMain),
                 "/sdcard/test_${System.currentTimeMillis()}.mp4",
                 projectionManager.getMediaProjection(resultCode, data!!)).apply {
-            prepare(audioSource)
+            prepareVideo()
+            prepareAudio(audioSource)
             start()
             audioPlayer!!.addListener(object : AudioPlayer.Listener {
                 override fun onNewBuffer(buffer: ByteBuffer, sampleTime: Long) {
