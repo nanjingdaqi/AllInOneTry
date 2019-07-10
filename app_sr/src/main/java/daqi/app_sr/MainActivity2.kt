@@ -72,15 +72,16 @@ class MainActivity2 : AppCompatActivity() {
 
 
     fun startRecord(resultCode: Int, data: Intent?) {
-        recorder = ScreenRecorder(AudioConfig(MediaFormat.MIMETYPE_AUDIO_AAC, 44100, 2,
-                96000, MediaCodecInfo.CodecProfileLevel.AACObjectLC, 1024 * 1024),
-                VideoConfig("video/avc", 1080, 2340, 30, 6000000,
-                        MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR, 10,
-                        MediaCodecInfo.CodecProfileLevel.AVCProfileMain),
-                "/sdcard/test_${System.currentTimeMillis()}.mp4",
-                projectionManager.getMediaProjection(resultCode, data!!)).apply {
-            prepareVideo()
-            prepareAudio(audioSource)
+        val ac = AudioConfig(MediaFormat.MIMETYPE_AUDIO_AAC, 44100, 2,
+                MediaCodecInfo.CodecProfileLevel.AACObjectLC, 1024 * 1024)
+        val vc = VideoConfig("video/avc", 1080, 2340, 30, 6000000,
+                MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR, 10,
+                MediaCodecInfo.CodecProfileLevel.AVCProfileMain)
+        val mp4 = "/sdcard/test_${System.currentTimeMillis()}.mp4"
+        val mp = projectionManager.getMediaProjection(resultCode, data!!)
+        recorder = ScreenRecorder(mp4).apply {
+            prepareVideo(vc, mp)
+            prepareAudio(audioSource, ac)
             start()
             audioPlayer!!.addListener(object : AudioPlayer.Listener {
                 override fun onNewBuffer(buffer: ByteBuffer, sampleTime: Long) {

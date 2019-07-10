@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
  *
  * 2. audio会从unity层不断接收pcm byte array，为了避免block，这里额外开辟了一块buffer queue
  */
-class ScreenRecorder(val audioConfig: AudioConfig, val videoConfig: VideoConfig, val outMp4Path: String, val mp: MediaProjection) {
+class ScreenRecorder(val outMp4Path: String) {
 
     companion object {
         const val T = "daqi-ScreenRecorder"
@@ -45,6 +45,8 @@ class ScreenRecorder(val audioConfig: AudioConfig, val videoConfig: VideoConfig,
 
         const val ERROR_NO = 0
         const val ERROR_USED = 1
+
+        val ONLY_PCM_16 = android.os.Build.VERSION.SDK_INT < 24
     }
 
     enum class State {
@@ -69,6 +71,11 @@ class ScreenRecorder(val audioConfig: AudioConfig, val videoConfig: VideoConfig,
     private var audioSource: AudioSource? = null
     private var audioObserver: AudioObserver? = null
 
+    private lateinit var audioConfig: AudioConfig
+    private lateinit var videoConfig: VideoConfig
+
+    private lateinit var mp: MediaProjection
+
     init {
         Util.logLevel = 1
     }
@@ -76,21 +83,21 @@ class ScreenRecorder(val audioConfig: AudioConfig, val videoConfig: VideoConfig,
     /**
      * 完成初始化，如果有问题，返回错误码。
      */
-    fun prepareVideo(): Int {
+    fun prepareVideo(videoConfig: VideoConfig, mp: MediaProjection): Int {
         if (state != State.UNSTARTED) {
             return ERROR_USED
         }
-        videoConfig.run {
+        this.videoConfig = videoConfig.apply {
             MediaFormat.createVideoFormat(mime, width, height).run {
                 setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
                 setInteger(MediaFormat.KEY_BIT_RATE, bitrate)
                 setInteger(MediaFormat.KEY_BITRATE_MODE, bitrateMode)
                 setInteger(MediaFormat.KEY_FRAME_RATE, frameRate)
                 setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iframeInterval)
-                videoCoder = CodecContext.createEncoder(mime, this).apply {
-                }
+                videoCoder = CodecContext.createEncoder(mime, this)
             }
         }
+        this.mp = mp
         HandlerThread(THREAD_VIDEO_NAME).run {
             start()
             videoH = VideoH(looper, this@ScreenRecorder)
@@ -98,17 +105,21 @@ class ScreenRecorder(val audioConfig: AudioConfig, val videoConfig: VideoConfig,
         return ERROR_NO
     }
 
-    fun prepareAudio(audioSource: AudioSource): Int {
+    fun prepareAudio(audioSource: AudioSource, audioConfig: AudioConfig): Int {
         if (state != State.UNSTARTED) {
             return ERROR_USED
         }
         this.audioSource = audioSource
-        audioConfig.run {
+        this.audioConfig = audioConfig.apply {
             MediaFormat.createAudioFormat(mime, sampleRate, channelCount).run {
                 setInteger(MediaFormat.KEY_AAC_PROFILE, profileLevel)
-                setInteger(MediaFormat.KEY_BIT_RATE, sampleRate * channelCount * 4)
-                setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, inputSize)
-                setInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_FLOAT)
+                if (ONLY_PCM_16) {
+                    setInteger(MediaFormat.KEY_BIT_RATE, sampleRate * 16 * channelCount)
+                } else {
+                    setInteger(MediaFormat.KEY_BIT_RATE, sampleRate * 32 * channelCount)
+                    setInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_FLOAT)
+                }
+                setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, maxInputSize)
                 audioCoder = CodecContext.createEncoder(mime, this)
                 audioQueue = LinkedBlockingQueue(AUDIO_QUEUE_CAPACITY)
                 audioObserver = object : AudioObserver {
@@ -299,7 +310,7 @@ class ScreenRecorder(val audioConfig: AudioConfig, val videoConfig: VideoConfig,
 }
 
 data class AudioConfig(val mime: String, val sampleRate: Int, val channelCount: Int,
-                       val bitrate: Int, val profileLevel: Int, val inputSize: Int)
+                       val profileLevel: Int, val maxInputSize: Int)
 
 data class VideoConfig(val mime: String, val width: Int, val height: Int,
                        val frameRate: Int, val bitrate: Int, val bitrateMode: Int,

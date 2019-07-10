@@ -45,10 +45,10 @@ class AudioPlayer {
                     val minBufferSize = AudioTrack.getMinBufferSize(inputSampleRate,
                             if (channels == 1) AudioFormat.CHANNEL_OUT_MONO else AudioFormat.CHANNEL_OUT_STEREO,
                             AudioFormat.ENCODING_PCM_FLOAT)
-                    val maxBufferSize = inputFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE)
-                    inputBufferSize = if (minBufferSize > 0) minBufferSize * 4 else maxBufferSize
-                    val frameSizeInBytes = channels * 2
-                    inputBufferSize = (inputBufferSize / frameSizeInBytes) * frameSizeInBytes
+//                    val maxBufferSize = inputFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE)
+//                    inputBufferSize = if (minBufferSize > 0) minBufferSize * 4 else maxBufferSize
+//                    val frameSizeInBytes = channels * 2
+//                    inputBufferSize = (inputBufferSize / frameSizeInBytes) * frameSizeInBytes
 
                     val outSampleRate = 44100
                     val attr = AudioAttributes.Builder()
