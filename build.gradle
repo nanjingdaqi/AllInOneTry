@@ -20,5 +20,7 @@ allprojects {
         maven {
             url "https://jitpack.io"
         }
+        maven {url "http://maven.byted.org/nexus/content/repositories/ugc_android/"}
+        maven {url "https://maven.byted.org/nexus/content/repositories/ss_app_android/"}
     }
 }

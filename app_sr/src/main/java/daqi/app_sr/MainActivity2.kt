@@ -17,11 +17,15 @@ import com.bytedance.ttgame.module.screenrecord.AudioObserver
 import com.bytedance.ttgame.module.screenrecord.AudioSource
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder
 import com.bytedance.ttgame.module.screenrecord.VideoConfig
+import com.bytedance.ttgame.module.screenrecord.VideoManager
+import com.ss.android.vesdk.VEListener
+import kotlinx.android.synthetic.main.content_main2.cut
 import kotlinx.android.synthetic.main.content_main2.img
 import kotlinx.android.synthetic.main.content_main2.pause
 import kotlinx.android.synthetic.main.content_main2.resume
 import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
+import java.io.File
 import java.nio.ByteBuffer
 
 class MainActivity2 : AppCompatActivity() {
@@ -66,6 +70,9 @@ class MainActivity2 : AppCompatActivity() {
     }
 
     fun init() {
+        val dir = File("/sdcard/a_g_game")
+        dir.mkdirs()
+        VideoManager.init(application, dir.absolutePath)
         start.setOnClickListener {
             projectionManager = (getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager).apply {
                 startActivityForResult(createScreenCaptureIntent(), 1)
@@ -79,6 +86,37 @@ class MainActivity2 : AppCompatActivity() {
         }
         resume.setOnClickListener {
             recorder.resume()
+        }
+        cut.setOnClickListener {
+            VideoManager.run {
+                val dir = File("/sdcard/a_g_game")
+                init(application, dir.absolutePath)
+                var index = 0
+                mutableListOf<VideoManager.CropInfo>().apply {
+                    add(VideoManager.CropInfo(0, 5000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                    add(VideoManager.CropInfo(5000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                    add(VideoManager.CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                    add(VideoManager.CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                    add(VideoManager.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                }.run {
+                    var stMil = System.currentTimeMillis()
+                    crop("/sdcard/test_1562833951373.mp4", this, object : VideoManager.CropListener {
+                        override fun onFinish() {
+                            android.util.Log.w("daqi", "onFinish")
+                        }
+
+                        override fun onProgress(finishedCount: Int, totalCount: Int) {
+                            android.util.Log.w("daqi", "progress index: $finishedCount of total: $totalCount, time: ${System.currentTimeMillis() - stMil}")
+                            stMil = System.currentTimeMillis()
+                        }
+
+                        override fun onError(errorCode: Int) {
+                            android.util.Log.w("daqi", "error: $errorCode")
+                        }
+
+                    })
+                }
+            }
         }
     }
 

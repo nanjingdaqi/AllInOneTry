@@ -15,6 +15,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+        applicationId "ggame.test"
     }
 
     buildTypes {}
@@ -30,4 +31,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.android.support:design:28.0.0'
+    compile 'com.bytedance.ugc.framework.libs:vesdk:4.7.0.56'
 }
