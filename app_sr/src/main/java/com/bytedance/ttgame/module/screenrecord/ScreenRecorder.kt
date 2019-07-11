@@ -75,6 +75,8 @@ class ScreenRecorder(val outMp4Path: String) {
     private lateinit var videoConfig: VideoConfig
 
     private lateinit var mp: MediaProjection
+    // todo sync among threads
+    private var firstTimeStampUs: Long = -1
 
     init {
         Util.logLevel = 1
@@ -91,7 +93,7 @@ class ScreenRecorder(val outMp4Path: String) {
             MediaFormat.createVideoFormat(mime, width, height).run {
                 setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
                 setInteger(MediaFormat.KEY_BIT_RATE, bitrate)
-                setInteger(MediaFormat.KEY_BITRATE_MODE, bitrateMode)
+//                setInteger(MediaFormat.KEY_BITRATE_MODE, bitrateMode)
                 setInteger(MediaFormat.KEY_FRAME_RATE, frameRate)
                 setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iframeInterval)
                 videoCoder = CodecContext.createEncoder(mime, this)
@@ -216,6 +218,20 @@ class ScreenRecorder(val outMp4Path: String) {
                 })
             }
         }
+        if (state == State.STOPPED) {
+            Util.logk(T, "audio feed eos")
+            audioCoder.feedInputBuffer(DRAIN_TIMEOUT, object : CodecContext.FeedBufferListener {
+                override fun availBuffer(buffer: ByteBuffer): CodecContext.FeedInfo {
+                    Util.logk(T, "audio last feed avail")
+                    return CodecContext.FeedInfo(true, 0, 0)
+                }
+
+                override fun bufferTimeout() {
+                    Util.logk(T, "audio last feed buffer timeout")
+                }
+
+            })
+        }
     }
 
     fun drainAudioCoderUntilStop() {
@@ -235,7 +251,7 @@ class ScreenRecorder(val outMp4Path: String) {
         audioCoder.drainOutputBuffer(DRAIN_TIMEOUT, false, object : CodecContext.DrainBufferListener {
             override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
                 Util.logd(T, "audio avail buffer sz: ${bufferInfo.size}, pre tm: ${bufferInfo.presentationTimeUs}")
-                bufferInfo.presentationTimeUs = SystemClock.elapsedRealtime() * 1000
+                bufferInfo.presentationTimeUs = computeTimeStampUs()
                 muxer.writeSampleData(audioCoder, buffer, bufferInfo)
             }
 
@@ -253,6 +269,16 @@ class ScreenRecorder(val outMp4Path: String) {
                 Util.logd(T, "audio buffer timeout")
             }
         })
+    }
+
+    private fun computeTimeStampUs(): Long {
+        if (firstTimeStampUs == -1L) {
+            firstTimeStampUs = SystemClock.elapsedRealtime() * 1000
+            return 0
+        }
+        val ts = SystemClock.elapsedRealtime() * 1000 - firstTimeStampUs
+        android.util.Log.d(T, "ts: $ts")
+        return ts
     }
 
     fun drainVideoCoderUntilStop() {
@@ -273,7 +299,7 @@ class ScreenRecorder(val outMp4Path: String) {
         videoCoder.drainOutputBuffer(DRAIN_TIMEOUT, eos, object : CodecContext.DrainBufferListener {
             override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
                 Util.logd(T, "video avail buffer, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
-                bufferInfo.presentationTimeUs = SystemClock.elapsedRealtime() * 1000
+                bufferInfo.presentationTimeUs = computeTimeStampUs()
                 muxer.writeSampleData(videoCoder, buffer, bufferInfo)
             }
 
@@ -323,6 +349,7 @@ class AudioFeedH(looper: Looper, val recorder: ScreenRecorder) : Handler(looper)
                 recorder.feedAudioCoderUntilStop()
             }
             MSG_FINISH -> {
+                recorder.feedAudioCoderUntilStop()
                 recorder.audioFinishCountDownLatch.countDown()
                 Looper.myLooper().quit()
             }

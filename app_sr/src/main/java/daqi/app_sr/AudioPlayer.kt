@@ -75,6 +75,7 @@ class AudioPlayer {
                                     CodecContext.FeedInfo(true)
                                 } else {
                                     sampleTime = extractor.sampleTime
+                                    Log.d(T, "sample time: $sampleTime")
                                     extractor.advance()
                                     CodecContext.FeedInfo(size = sz, presentationTimeUs = sampleTime)
                                 }

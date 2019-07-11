@@ -1,6 +1,7 @@
 package daqi.app_sr
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,6 +17,7 @@ import com.bytedance.ttgame.module.screenrecord.AudioObserver
 import com.bytedance.ttgame.module.screenrecord.AudioSource
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder
 import com.bytedance.ttgame.module.screenrecord.VideoConfig
+import kotlinx.android.synthetic.main.content_main2.img
 import kotlinx.android.synthetic.main.content_main2.pause
 import kotlinx.android.synthetic.main.content_main2.resume
 import kotlinx.android.synthetic.main.content_main2.start
@@ -29,6 +31,7 @@ class MainActivity2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.content_main2)
+        startAnim()
         playAudio()
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -48,6 +51,18 @@ class MainActivity2 : AppCompatActivity() {
         } else if (requestCode == 1) {
             startRecord(resultCode, data)
         }
+    }
+
+    fun startAnim() {
+        ValueAnimator.ofFloat(.0f, 360f).apply {
+            repeatMode = ValueAnimator.RESTART
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = null
+            duration = 3 * 1000
+            addUpdateListener {
+                img.rotation = it.animatedValue as Float
+            }
+        }.start()
     }
 
     fun init() {
