@@ -101,6 +101,10 @@ class MainActivity2 : AppCompatActivity() {
                 }.run {
                     var stMil = System.currentTimeMillis()
                     crop("/sdcard/test_1562833951373.mp4", this, object : VideoManager.CropListener {
+                        override fun onError(errors: List<VideoManager.CropError>) {
+                            android.util.Log.w("daqi", "error")
+                        }
+
                         override fun onFinish() {
                             android.util.Log.w("daqi", "onFinish")
                         }
@@ -109,11 +113,6 @@ class MainActivity2 : AppCompatActivity() {
                             android.util.Log.w("daqi", "progress index: $finishedCount of total: $totalCount, time: ${System.currentTimeMillis() - stMil}")
                             stMil = System.currentTimeMillis()
                         }
-
-                        override fun onError(errorCode: Int) {
-                            android.util.Log.w("daqi", "error: $errorCode")
-                        }
-
                     })
                 }
             }
