@@ -47,7 +47,11 @@ object VideoManager {
                         prepare()
                         compile(crop.outPath,
                                 null,
-                                VEVideoEncodeSettings.Builder(VEVideoEncodeSettings.USAGE_COMPILE).build(),
+                                VEVideoEncodeSettings.Builder(VEVideoEncodeSettings.USAGE_COMPILE)
+                                        .setHwEnc(false)
+                                        .setVideoBitrateMode(VEVideoEncodeSettings.ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF)
+                                        .setSWCRF(15)
+                                        .build(),
                                 // compile listener 会在主线程得到回调
                                 object : VEListener.VEEditorCompileListener {
                                     override fun onCompileDone() {
