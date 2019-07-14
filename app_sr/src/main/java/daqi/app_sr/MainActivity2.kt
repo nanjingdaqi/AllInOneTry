@@ -5,20 +5,17 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaCodecInfo
-import android.media.MediaFormat
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import com.bytedance.ttgame.module.screenrecord.AudioConfig
-import com.bytedance.ttgame.module.screenrecord.AudioObserver
-import com.bytedance.ttgame.module.screenrecord.AudioSource
+import android.util.Log
+import android.widget.Toast
+import com.bytedance.ttgame.module.screenrecord.Quality
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder
-import com.bytedance.ttgame.module.screenrecord.VideoConfig
+import com.bytedance.ttgame.module.screenrecord.VideoEditor
 import com.bytedance.ttgame.module.screenrecord.VideoManager
-import com.ss.android.vesdk.VEListener
 import kotlinx.android.synthetic.main.content_main2.cut
 import kotlinx.android.synthetic.main.content_main2.img
 import kotlinx.android.synthetic.main.content_main2.pause
@@ -27,6 +24,7 @@ import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
 import java.io.File
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class MainActivity2 : AppCompatActivity() {
 
@@ -53,7 +51,7 @@ class MainActivity2 : AppCompatActivity() {
         if (requestCode == 0) {
             init()
         } else if (requestCode == 1) {
-            startRecord(resultCode, data)
+            VideoManager.onActivityResult(resultCode, data!!)
         }
     }
 
@@ -72,36 +70,34 @@ class MainActivity2 : AppCompatActivity() {
     fun init() {
         val dir = File("/sdcard/a_g_game")
         dir.mkdirs()
-        VideoManager.init(application, dir.absolutePath)
+        VideoEditor.init(application, dir.absolutePath)
         start.setOnClickListener {
-            projectionManager = (getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager).apply {
-                startActivityForResult(createScreenCaptureIntent(), 1)
-            }
+            startRecord()
         }
         stop.setOnClickListener {
-            recorder.stop()
+            VideoManager.stopScreenRecord()
         }
         pause.setOnClickListener {
-            recorder.pause()
+            //            recorder.pause()
         }
         resume.setOnClickListener {
-            recorder.resume()
+            //            recorder.resume()
         }
         cut.setOnClickListener {
-            VideoManager.run {
+            VideoEditor.run {
                 val dir = File("/sdcard/a_g_game")
                 init(application, dir.absolutePath)
                 var index = 0
-                mutableListOf<VideoManager.CropInfo>().apply {
-                    add(VideoManager.CropInfo(0, 5000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-                    add(VideoManager.CropInfo(5000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-                    add(VideoManager.CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-                    add(VideoManager.CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-                    add(VideoManager.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                mutableListOf<VideoEditor.CropInfo>().apply {
+                    add(VideoEditor.CropInfo(0, 5000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                    add(VideoEditor.CropInfo(5000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                    add(VideoEditor.CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                    add(VideoEditor.CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                    add(VideoEditor.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
                 }.run {
                     var stMil = System.currentTimeMillis()
-                    crop("/sdcard/test_1562833951373.mp4", this, object : VideoManager.CropListener {
-                        override fun onError(errors: List<VideoManager.CropError>) {
+                    crop("/sdcard/test_1562833951373.mp4", this, object : VideoEditor.CropListener {
+                        override fun onError(errors: List<VideoEditor.CropError>) {
                             android.util.Log.w("daqi", "error")
                         }
 
@@ -119,38 +115,16 @@ class MainActivity2 : AppCompatActivity() {
         }
     }
 
-    lateinit var recorder: ScreenRecorder
-    lateinit var projectionManager: MediaProjectionManager
-
-
-    fun startRecord(resultCode: Int, data: Intent?) {
-        val ac = AudioConfig(MediaFormat.MIMETYPE_AUDIO_AAC, 44100, 2,
-                MediaCodecInfo.CodecProfileLevel.AACObjectLC, 1024 * 1024)
-        val vc = VideoConfig("video/avc", 1080, 2340, 30, 6000000,
-                MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR, 10,
-                MediaCodecInfo.CodecProfileLevel.AVCProfileMain)
-        val mp4 = "/sdcard/test_${System.currentTimeMillis()}.mp4"
-        val mp = projectionManager.getMediaProjection(resultCode, data!!)
-        recorder = ScreenRecorder(mp4).apply {
-            prepareVideo(vc, mp)
-            prepareAudio(audioSource, ac)
-            start()
-            audioPlayer!!.addListener(object : AudioPlayer.Listener {
-                override fun onNewBuffer(buffer: ByteBuffer, sampleTime: Long) {
-                    audioSource.observers.forEach {
-                        buffer.mark()
-                        it.onAudioAvail(ByteBuffer.allocate(buffer.limit() - buffer.position()).apply {
-                            put(buffer)
-                            flip()
-                        })
-                        buffer.reset()
-                    }
-                }
-            })
+    fun startRecord() {
+        VideoManager.run {
+            if (init(this@MainActivity2.application) != INIT_RESULT_OK) {
+                Toast.makeText(applicationContext, "该设备不支持录屏，请检查log.", Toast.LENGTH_LONG).show()
+                return
+            }
+            selectQuality(Quality.HIGH!!)
+            prepareVideo(this@MainActivity2, 1)
         }
     }
-
-    val audioSource = AudioAdapter()
 
     private fun playAudio() {
         if (audioPlayer == null) {
@@ -158,18 +132,34 @@ class MainActivity2 : AppCompatActivity() {
         }
         audioPlayer!!.run {
             play(resources.assets.openFd("test.mp3"))
-        }
-    }
-
-    class AudioAdapter : AudioSource {
-        val observers = mutableListOf<AudioObserver>()
-
-        override fun subscribe(observer: AudioObserver) {
-            observers.add(observer)
-        }
-
-        override fun unsubscribe(observer: AudioObserver) {
-            observers.remove(observer)
+            addListener(object : AudioPlayer.Listener {
+                override fun onNewBuffer(buffer: ByteBuffer, sampleTime: Long) {
+                    buffer.run {
+                        mark()
+                        order(ByteOrder.nativeOrder())
+                        if (Quality.ONLY_PCM_16) {
+                            asShortBuffer().run {
+                                ShortArray(limit() - position()).apply {
+                                    get(this)
+                                    val fa = FloatArray(size)
+                                    for (i in 0 until size) {
+                                        fa[i] = this[i] * 1.0f / 32767
+                                    }
+                                    VideoManager.onAudioBuffer(fa, size, sampleRate)
+                                }
+                            }
+                        } else {
+                            asFloatBuffer().run {
+                                FloatArray(limit() - position()).run {
+                                    get(this)
+                                    VideoManager.onAudioBuffer(this, size, sampleRate)
+                                }
+                            }
+                        }
+                        reset()
+                    }
+                }
+            })
         }
     }
 }

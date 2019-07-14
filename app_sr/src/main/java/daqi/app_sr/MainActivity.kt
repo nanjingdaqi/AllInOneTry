@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Choreographer.
                     setInteger(MediaFormat.KEY_BIT_RATE, 96000)
                     setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 1024 * 1024)
                 }
-                audioRecorder = CodecContext.createEncoder(MediaFormat.MIMETYPE_AUDIO_AAC, format)
+                audioRecorder = CodecContext.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC, format)
             }
             if (videoRecorder == null) {
                 // Create and configure the MediaFormat.
@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Choreographer.
                     setInteger(MediaFormat.KEY_FRAME_RATE, 30)
                     setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10)
                 }
-                videoRecorder = CodecContext.createEncoder("video/avc", format)
+                videoRecorder = CodecContext.createEncoderByType("video/avc", format)
                 inputSurface = videoRecorder!!.createInputSurface()
             }
             if (muxer == null) {

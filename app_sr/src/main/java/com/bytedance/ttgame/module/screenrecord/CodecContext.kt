@@ -22,9 +22,17 @@ class CodecContext {
             }
         }
 
-        public fun createEncoder(mime: String, format: MediaFormat): CodecContext {
+        public fun createEncoderByType(mime: String, format: MediaFormat): CodecContext {
             return CodecContext().apply {
                 coder = MediaCodec.createEncoderByType(mime)
+                coder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+                bufferInfo = MediaCodec.BufferInfo()
+            }
+        }
+
+        public fun createEncoderByName(name: String, format: MediaFormat): CodecContext {
+            return CodecContext().apply {
+                coder = MediaCodec.createByCodecName(name)
                 coder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
                 bufferInfo = MediaCodec.BufferInfo()
             }

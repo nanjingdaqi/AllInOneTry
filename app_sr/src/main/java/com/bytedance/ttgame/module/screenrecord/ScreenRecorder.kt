@@ -2,9 +2,7 @@ package com.bytedance.ttgame.module.screenrecord
 
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
-import android.media.AudioFormat
 import android.media.MediaCodec
-import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.projection.MediaProjection
 import android.os.Handler
@@ -12,6 +10,7 @@ import android.os.HandlerThread
 import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
+import android.util.Log
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_DRAIN
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_FEED
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_FINISH
@@ -30,6 +29,8 @@ class ScreenRecorder(val outMp4Path: String) {
 
     companion object {
         const val T = "daqi-ScreenRecorder"
+        // todo
+        const val DEBUG = true
 
         const val MSG_DRAIN = 1
         const val MSG_FINISH = 2
@@ -45,8 +46,7 @@ class ScreenRecorder(val outMp4Path: String) {
 
         const val ERROR_NO = 0
         const val ERROR_USED = 1
-
-        val ONLY_PCM_16 = android.os.Build.VERSION.SDK_INT < 24
+        const val ERROR_CREATE_VIDEO_ENCODER = 2
     }
 
     enum class State {
@@ -71,9 +71,6 @@ class ScreenRecorder(val outMp4Path: String) {
     private var audioSource: AudioSource? = null
     private var audioObserver: AudioObserver? = null
 
-    private lateinit var audioConfig: AudioConfig
-    private lateinit var videoConfig: VideoConfig
-
     private lateinit var mp: MediaProjection
     // todo sync among threads
     private var firstTimeStampUs: Long = -1
@@ -85,19 +82,16 @@ class ScreenRecorder(val outMp4Path: String) {
     /**
      * 完成初始化，如果有问题，返回错误码。
      */
-    fun prepareVideo(videoConfig: VideoConfig, mp: MediaProjection): Int {
+    fun prepareVideo(codecName: String, videoFormat: MediaFormat, mp: MediaProjection): Int {
         if (state != State.UNSTARTED) {
             return ERROR_USED
         }
-        this.videoConfig = videoConfig.apply {
-            MediaFormat.createVideoFormat(mime, width, height).run {
-                setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-                setInteger(MediaFormat.KEY_BIT_RATE, bitrate)
-//                setInteger(MediaFormat.KEY_BITRATE_MODE, bitrateMode)
-                setInteger(MediaFormat.KEY_FRAME_RATE, frameRate)
-                setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iframeInterval)
-                videoCoder = CodecContext.createEncoder(mime, this)
-            }
+        try {
+            videoCoder = CodecContext.createEncoderByName(codecName, videoFormat)
+        } catch (e: Exception) {
+            if (DEBUG) throw RuntimeException(e)
+            e.printStackTrace()
+            return ERROR_CREATE_VIDEO_ENCODER
         }
         this.mp = mp
         HandlerThread(THREAD_VIDEO_NAME).run {
@@ -107,31 +101,19 @@ class ScreenRecorder(val outMp4Path: String) {
         return ERROR_NO
     }
 
-    fun prepareAudio(audioSource: AudioSource, audioConfig: AudioConfig): Int {
+    fun prepareAudio(audioSource: AudioSource, codecName: String, audioFormat: MediaFormat): Int {
         if (state != State.UNSTARTED) {
             return ERROR_USED
         }
         this.audioSource = audioSource
-        this.audioConfig = audioConfig.apply {
-            MediaFormat.createAudioFormat(mime, sampleRate, channelCount).run {
-                setInteger(MediaFormat.KEY_AAC_PROFILE, profileLevel)
-                if (ONLY_PCM_16) {
-                    setInteger(MediaFormat.KEY_BIT_RATE, sampleRate * 16 * channelCount)
-                } else {
-                    setInteger(MediaFormat.KEY_BIT_RATE, sampleRate * 32 * channelCount)
-                    setInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_FLOAT)
-                }
-                setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, maxInputSize)
-                audioCoder = CodecContext.createEncoder(mime, this)
-                audioQueue = LinkedBlockingQueue(AUDIO_QUEUE_CAPACITY)
-                audioObserver = object : AudioObserver {
-                    override fun onAudioAvail(audioData: ByteBuffer) {
-                        handleIncomingAudio(audioData)
-                    }
-                }.apply {
-                    audioSource.subscribe(this)
-                }
+        audioCoder = CodecContext.createEncoderByName(codecName, audioFormat)
+        audioQueue = LinkedBlockingQueue(AUDIO_QUEUE_CAPACITY)
+        audioObserver = object : AudioObserver {
+            override fun onAudioAvail(audioData: ByteBuffer) {
+                handleIncomingAudio(audioData)
             }
+        }.apply {
+            audioSource.subscribe(this)
         }
         HandlerThread(THREAD_AUDIO_FEED_NAME).run {
             start()
@@ -144,10 +126,10 @@ class ScreenRecorder(val outMp4Path: String) {
         return ERROR_NO
     }
 
-    fun start(): Int {
+    fun start(displayWidth: Int, displayHeight: Int): Int {
         state = State.RECORDING
-        virtualDisplay = mp.createVirtualDisplay("screen-recorder", videoConfig.width,
-                videoConfig.height, 1,
+        virtualDisplay = mp.createVirtualDisplay("screen-recorder", displayWidth,
+                displayHeight, 1,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                 videoCoder.createInputSurface(),
                 null, null)
@@ -203,6 +185,7 @@ class ScreenRecorder(val outMp4Path: String) {
                 audioCoder.feedInputBuffer(DRAIN_TIMEOUT, object : CodecContext.FeedBufferListener {
                     override fun availBuffer(inputBuffer: ByteBuffer): CodecContext.FeedInfo {
                         inputBuffer.clear()
+                        Log.w("daqi", "audio input buffer: $inputBuffer")
                         inputBuffer.put(curData)
                         inputBuffer.flip()
                         if (!audioDrainH.hasMessages(MSG_DRAIN)) {
@@ -334,13 +317,6 @@ class ScreenRecorder(val outMp4Path: String) {
         muxer.mayFinish()
     }
 }
-
-data class AudioConfig(val mime: String, val sampleRate: Int, val channelCount: Int,
-                       val profileLevel: Int, val maxInputSize: Int)
-
-data class VideoConfig(val mime: String, val width: Int, val height: Int,
-                       val frameRate: Int, val bitrate: Int, val bitrateMode: Int,
-                       val iframeInterval: Int, val profileLevel: Int)
 
 class AudioFeedH(looper: Looper, val recorder: ScreenRecorder) : Handler(looper) {
     override fun handleMessage(msg: Message?) {

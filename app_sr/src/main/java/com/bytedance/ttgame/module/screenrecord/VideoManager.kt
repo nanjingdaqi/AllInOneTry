@@ -1,110 +1,226 @@
 package com.bytedance.ttgame.module.screenrecord
 
+import android.app.Activity
 import android.app.Application
+import android.content.Context
+import android.content.Intent
+import android.media.MediaCodecInfo
+import android.media.MediaFormat
+import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
 import android.os.Handler
 import android.os.Looper
+import android.util.DisplayMetrics
 import android.util.Log
-import com.ss.android.vesdk.VEEditor
-import com.ss.android.vesdk.VEListener
-import com.ss.android.vesdk.VESDK
-import com.ss.android.vesdk.VEVideoEncodeSettings
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicInteger
+import android.view.WindowManager
+import android.widget.Toast
+import java.io.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import kotlin.math.abs
 
 object VideoManager {
 
+    public const val DEBUG = true
+
     const val TAG = "VideoManager"
 
-    lateinit var workspaceDir: String
+    const val DIR = "g_screen_records"
+    const val ORG_MP4_PREFIX = "org_screen_record_"
+    const val CROP_MP4_PREFIX = "cropped_scree_record_"
 
-    public fun init(app: Application, workspaceDir: String) {
-        this.workspaceDir = workspaceDir
-        VESDK.init(app, workspaceDir)
+    const val INIT_RESULT_OK = 0
+    const val INIT_RESULT_OS_UNSURPPORT = 1
+    const val INIT_RESULT_NO_VIDEO_ENCODER = 2
+
+    private var initResult = Int.MIN_VALUE
+
+    lateinit var app: Application
+    lateinit var projectionManager: MediaProjectionManager
+    lateinit var recorder: ScreenRecorder
+    lateinit var orgMp4Path: String
+    lateinit var audioAdapter: AudioAdapter
+
+    var recorderStarted = false
+    var mp: MediaProjection? = null
+
+    var selectedQuality: Quality? = null
+
+    var dm: DisplayMetrics? = null
+
+    fun init(app: Application): Int {
+        if (initResult != Int.MIN_VALUE) {
+            return initResult
+        }
+        if (android.os.Build.VERSION.SDK_INT < 21) {
+            initResult = INIT_RESULT_OS_UNSURPPORT
+            return initResult
+        }
+        Quality.apply {
+            this.init(app)
+            if (HIGH == null) {
+                initResult = INIT_RESULT_NO_VIDEO_ENCODER
+                return initResult
+            }
+        }
+        this.app = app
+        initResult = INIT_RESULT_OK
+        selectedQuality = Quality.HIGH
+        dm = DisplayMetrics().apply {
+            (app.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(this)
+        }
+        initOutFile()
+        return initResult
     }
 
-    public fun crop(inVideoPath: String, cropInfos: List<CropInfo>,
-                    listener: CropListener, listenerHandler: Handler = Handler(Looper.getMainLooper())) {
-        if (cropInfos.isEmpty()) return
+    private fun initOutFile() {
+        File(if (!DEBUG) app.filesDir else File("/sdcard"), DIR).apply {
+            removeDir(absolutePath)
+            mkdirs()
+            orgMp4Path = File(this, "${ORG_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
+        }
+    }
 
-        Executors.newFixedThreadPool(1) {
-            Thread(null, it, "Video-Crop-Controller")
-        }.execute {
-            val outLatch = CountDownLatch(cropInfos.size)
-            var index = 1
-            val workers = Executors.newCachedThreadPool(ThreadFactory())
-            val errorCrops = mutableListOf<CropError>()
-
-            cropInfos.forEach { crop ->
-                workers.execute {
-                    Log.w("daqi", "running crop $crop")
-                    VEEditor(workspaceDir).run {
-                        val latch = CountDownLatch(1)
-                        init2(arrayOf(inVideoPath),
-                                arrayOf(crop.stMilli).toIntArray(), arrayOf(crop.edMilli).toIntArray(), null,
-                                null, null, null,
-                                VEEditor.VIDEO_RATIO.VIDEO_OUT_RATIO_ORIGINAL)
-                        prepare()
-                        compile(crop.outPath,
-                                null,
-                                VEVideoEncodeSettings.Builder(VEVideoEncodeSettings.USAGE_COMPILE)
-                                        .setHwEnc(false)
-                                        .setVideoBitrateMode(VEVideoEncodeSettings.ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF)
-                                        .setSWCRF(15)
-                                        .build(),
-                                // compile listener 会在主线程得到回调
-                                object : VEListener.VEEditorCompileListener {
-                                    override fun onCompileDone() {
-                                        Log.w("daqi", "compile done, $crop")
-                                        latch.countDown()
-                                    }
-
-                                    override fun onCompileProgress(p0: Float) {
-
-                                    }
-
-                                    override fun onCompileError(error: Int, p1: Int, p2: Float, msg: String?) {
-                                        Log.w("daqi", "compile error, $crop")
-                                        errorCrops.add(CropError(error, crop))
-                                        latch.countDown()
-                                    }
-
-                                })
-                        latch.await()
-                        Log.w("daqi", "crop destroying, $crop")
-                        destroy()
-                        Log.w("daqi", "crop destroying succ, $crop")
-                        listenerHandler.post {
-                            listener.onProgress(index++, cropInfos.size)
-                        }
-                        outLatch.countDown()
-                    }
+    // todo
+    fun removeDir(dir: String) {
+        // 定义文件路径
+        val file = File(dir)
+        // 判断是文件还是目录
+        if (file.exists() && file.isDirectory) {
+            val subs = file.listFiles()
+            val length = subs.size
+            for (i in 0 until length) {
+                if (subs[i].isDirectory) {
+                    removeDir(subs[i].absolutePath)
+                } else {
+                    subs[i].delete()
                 }
             }
+            file.delete()
+        }
+    }
 
-            outLatch.await()
-            Log.w("daqi", "crop finish")
-            listenerHandler.post {
-                if (errorCrops.isEmpty()) listener.onFinish() else listener.onError(errorCrops)
+    fun isScreenRecordSupport(activity: Activity): Boolean {
+        checkState()
+        return initResult == INIT_RESULT_OK
+    }
+
+    private fun checkState() {
+        if (initResult == Int.MIN_VALUE) {
+            throw IllegalStateException("Please invoke init method at first.")
+        }
+    }
+
+    fun selectQuality(quality: Quality) {
+        selectedQuality = quality
+    }
+
+    fun prepareVideo(activity: Activity, requestCode: Int) {
+        projectionManager = app.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        activity.startActivityForResult(projectionManager.createScreenCaptureIntent(), requestCode)
+    }
+
+    fun onActivityResult(resultCode: Int, data: Intent) {
+        if (resultCode == Activity.RESULT_OK) {
+            createMediaProjection(resultCode, data)
+        } else {
+            Log.v(TAG, "User did not choose OK for screen recording.")
+        }
+    }
+
+    fun createMediaProjection(resultCode: Int, data: Intent) {
+        Log.w("daqi", "start screen record")
+        mp = projectionManager.getMediaProjection(resultCode, data)
+    }
+
+    fun onAudioBuffer(buffer: FloatArray, length: Int, sampleRate: Int) {
+        if (mp == null) {
+            return
+        }
+        if (!recorderStarted) {
+            recorderStarted = true
+            startRecorder(sampleRate)
+        } else {
+            for (observer in audioAdapter.observers) {
+                try {
+                    if (Quality.ONLY_PCM_16) {
+                        // 转为pcm_16
+                        val sa = ShortArray(buffer.size).apply {
+                            for (i in 0 until buffer.size) {
+                                if (abs(x = buffer[i]) > 1.0) {
+                                    Log.e("daqi", "one float is too big: ${buffer[i]}")
+                                }
+                                set(i, (buffer[i] * 32767).toShort())
+                            }
+                        }
+                        ByteBuffer.allocate(sa.size * 2).run {
+                            order(ByteOrder.nativeOrder())
+                            val sb = asShortBuffer().apply {
+                                put(sa)
+                                flip()
+                            }
+                            flip()
+                            limit((sb.limit() - sb.position()) * 2)
+                            observer.onAudioAvail(this)
+                        }
+                    } else {
+                        ByteBuffer.allocate(length * 4).run {
+                            order(ByteOrder.nativeOrder())
+                            val fb = asFloatBuffer().apply {
+                                put(buffer)
+                                flip()
+                            }
+                            flip()
+                            limit((fb.limit() - fb.position()) * 4)
+                            observer.onAudioAvail(this)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "exception: ", e)
+                }
             }
         }
     }
 
-    data class CropInfo(val stMilli: Int, val edMilli: Int, val outPath: String)
-
-    interface CropListener {
-        fun onFinish()
-        fun onProgress(finishedCount: Int, totalCount: Int)
-        fun onError(errors: List<CropError>)
+    fun startRecorder(audioSampleRate: Int) {
+        checkState()
+        if (DEBUG) {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(app, "输出视频地址：$orgMp4Path", Toast.LENGTH_LONG).show()
+            }
+        }
+        recorder = ScreenRecorder(orgMp4Path).apply {
+            selectedQuality!!.videoFormat.run {
+                setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+                prepareVideo(Quality.videoCodec!!, this, mp!!)
+            }
+            selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
+                audioAdapter = AudioAdapter()
+                prepareAudio(audioAdapter, Quality.audioCodec!!, this)
+            }
+            start(dm!!.widthPixels, dm!!.heightPixels)
+        }
     }
 
-    data class CropError(val errorCode: Int, val cropInfo: CropInfo)
+    public fun stopScreenRecord() {
+        Log.w(TAG, "stop screen record.")
+        if (DEBUG) {
+            Toast.makeText(app, "录屏结束, 文件地址：$orgMp4Path", Toast.LENGTH_LONG).show()
+        }
+        recorder.stop()
+        recorderStarted = false
+        mp = null
+    }
 
-    private class ThreadFactory : java.util.concurrent.ThreadFactory {
-        private val poolNumber = AtomicInteger(1)
+    class AudioAdapter : AudioSource {
+        var observers = mutableListOf<AudioObserver>()
 
-        override fun newThread(r: Runnable?): Thread =
-                Thread(null, r, "Video-Crop-Worker-${poolNumber.getAndIncrement()}")
+        override fun subscribe(observer: AudioObserver) {
+            observers.add(observer)
+        }
 
+        override fun unsubscribe(observer: AudioObserver) {
+            observers.remove(observer)
+        }
     }
 }

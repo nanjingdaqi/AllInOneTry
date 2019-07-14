@@ -8,8 +8,10 @@ import android.media.AudioTrack
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import android.support.v7.view.menu.ListMenuItemView
 import android.util.Log
 import com.bytedance.ttgame.module.screenrecord.CodecContext
+import com.bytedance.ttgame.module.screenrecord.Quality
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
@@ -26,6 +28,7 @@ class AudioPlayer {
     private val worker = Executors.newSingleThreadExecutor()
     private val listeners = mutableListOf<Listener>()
     private var sampleTime: Long = -1
+    public var sampleRate: Int = -1
 
     public fun play(fd: AssetFileDescriptor) {
         worker.execute {
@@ -41,8 +44,8 @@ class AudioPlayer {
 
                     extractor.selectTrack(i)
                     val channels = inputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
-                    val inputSampleRate = inputFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE)
-                    val minBufferSize = AudioTrack.getMinBufferSize(inputSampleRate,
+                    sampleRate = inputFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE)
+                    val minBufferSize = AudioTrack.getMinBufferSize(sampleRate,
                             if (channels == 1) AudioFormat.CHANNEL_OUT_MONO else AudioFormat.CHANNEL_OUT_STEREO,
                             AudioFormat.ENCODING_PCM_FLOAT)
 //                    val maxBufferSize = inputFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE)
@@ -54,15 +57,17 @@ class AudioPlayer {
                     val attr = AudioAttributes.Builder()
                             .setLegacyStreamType(AudioManager.STREAM_MUSIC)
                             .build()
-                    val outFormat = AudioFormat.Builder()
-                            .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
-                            .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-                            .setSampleRate(outSampleRate)
-                            .build()
+                    val outFormat = AudioFormat.Builder().apply {
+                        setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
+                        setEncoding(if (Quality.ONLY_PCM_16) AudioFormat.ENCODING_PCM_16BIT else AudioFormat.ENCODING_PCM_FLOAT)
+                        setSampleRate(outSampleRate)
+                    }.build()
                     track = AudioTrack(attr, outFormat, minBufferSize, AudioTrack.MODE_STREAM, AudioManager.AUDIO_SESSION_ID_GENERATE)
                     track.play()
 
-                    inputFormat.setInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_FLOAT)
+                    if (!Quality.ONLY_PCM_16) {
+                        inputFormat.setInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_FLOAT)
+                    }
                     val coderCtx = CodecContext.createDecoder(mime, inputFormat)
                     coderCtx.prepare()
                     var eos = false
@@ -75,7 +80,7 @@ class AudioPlayer {
                                     CodecContext.FeedInfo(true)
                                 } else {
                                     sampleTime = extractor.sampleTime
-                                    Log.d(T, "sample time: $sampleTime")
+                                    Log.d(T, "audio player sample time: $sampleTime, sz: $sz")
                                     extractor.advance()
                                     CodecContext.FeedInfo(size = sz, presentationTimeUs = sampleTime)
                                 }
@@ -95,15 +100,25 @@ class AudioPlayer {
                                     it.onNewBuffer(buffer, sampleTime)
                                 }
 //                                Log.i(T, "feed one encoded buffer consume: " + (System.currentTimeMillis() - st) + " ms")
-                                buffer.asFloatBuffer().run {
-                                    val sz = limit() - position()
-                                    if (tmpBuffer == null || tmpBuffer!!.size < sz) {
-                                        tmpBuffer = FloatArray(limit() - position())
-                                    }
+                                if (!Quality.ONLY_PCM_16) {
+                                    buffer.asFloatBuffer().run {
+                                        val sz = limit() - position()
+                                        if (tmpBuffer == null || tmpBuffer!!.size < sz) {
+                                            tmpBuffer = FloatArray(limit() - position())
+                                        }
 //                                    Util.logk("daqi", "float buffer info: $this")
-                                    get(tmpBuffer, 0, limit() - position())
-                                    clear()
-                                    track.write(tmpBuffer, 0, sz, AudioTrack.WRITE_BLOCKING)
+                                        get(tmpBuffer, 0, limit() - position())
+                                        clear()
+                                        track.write(tmpBuffer, 0, sz, AudioTrack.WRITE_BLOCKING)
+                                    }
+                                } else {
+                                    buffer.run {
+                                        val sz = limit() - position()
+                                        val ba = ByteArray(sz)
+                                        get(ba, 0, sz)
+                                        clear()
+                                        track.write(ba, 0, sz)
+                                    }
                                 }
                             }
 
