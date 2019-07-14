@@ -83,7 +83,7 @@ class Quality {
             val height = min(dm.heightPixels, videoCap!!.supportedHeights.upper)
             val fpsBest = min(30, videoCap!!.supportedFrameRates.upper)
             val bitrateBest = videoCap!!.bitrateRange.upper
-            val iFrameInterval = 10
+            val iFrameInterval = fpsBest // 按照vesdk的建议，设置为fps大小，得到的视频的I帧就是1s的周期
             if (DEBUG) {
                 Log.w(TAG, "width: $width, height: $height, fps: $fpsBest, bit_rate: $bitrateBest, iFrameInterval: $iFrameInterval")
             }
@@ -98,14 +98,14 @@ class Quality {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest / 2)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest / 2)
-                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval)
+                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval / 2)
                 }
             }
             LOW = Quality().apply {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest / 3)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest / 3)
-                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval)
+                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval / 3)
                 }
             }
         }
