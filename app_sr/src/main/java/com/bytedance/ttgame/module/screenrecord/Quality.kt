@@ -24,7 +24,6 @@ class Quality {
         const val AUDIO_TYPE = MediaFormat.MIMETYPE_AUDIO_AAC
 
         val ONLY_PCM_16 = android.os.Build.VERSION.SDK_INT < 24
-//        val ONLY_PCM_16 = true
 
         const val DEBUG = true
         const val TAG = "daqi-Quality"
