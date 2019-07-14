@@ -1,6 +1,5 @@
 package com.bytedance.ttgame.module.screenrecord
 
-import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.media.AudioFormat
@@ -79,8 +78,14 @@ class Quality {
             }
             val dm = DisplayMetrics()
             (app.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(dm)
-            val width = min(dm.widthPixels, videoCap!!.supportedWidths.upper)
-            val height = min(dm.heightPixels, videoCap!!.supportedHeights.upper)
+            var width = min(dm.widthPixels, videoCap!!.supportedWidths.upper)
+            if (videoCap!!.widthAlignment > 0) {
+                width = Util.alignDown(width, videoCap!!.widthAlignment)
+            }
+            var height = min(dm.heightPixels, videoCap!!.supportedHeights.upper)
+            if (videoCap!!.heightAlignment > 0) {
+                height = Util.alignDown(height, videoCap!!.heightAlignment)
+            }
             val fpsBest = min(30, videoCap!!.supportedFrameRates.upper)
             val bitrateBest = videoCap!!.bitrateRange.upper
             val iFrameInterval = fpsBest // 按照vesdk的建议，设置为fps大小，得到的视频的I帧就是1s的周期

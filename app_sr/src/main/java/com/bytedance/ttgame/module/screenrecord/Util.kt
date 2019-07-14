@@ -15,4 +15,9 @@ object Util {
     fun logk(tag: String, msg: String) {
         if (logLevel <= 3) Log.w(tag, msg)
     }
+
+    // 向下对齐
+    fun alignDown(i: Int, factor: Int): Int {
+        return (i / factor) * factor
+    }
 }
