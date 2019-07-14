@@ -192,7 +192,7 @@ class Quality {
 
     lateinit var videoFormat: MediaFormat
 
-    public fun getAudioFormat(sampleRate: Int): MediaFormat? {
+    fun getAudioFormat(sampleRate: Int): MediaFormat? {
         if (!audioCap!!.supportedSampleRates.contains(sampleRate)) {
             Log.e(TAG, "Input sample rate($sampleRate) is not supported by current encoder that supported: ${audioCap!!.supportedSampleRates.map { it.toString() }}")
             return null
@@ -204,9 +204,8 @@ class Quality {
                 setInteger(MediaFormat.KEY_BIT_RATE, sampleRate * 32 * 2)
                 setInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_FLOAT)
             }
+            setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 32768) // 参考HeliumDemo
             setInteger(MediaFormat.KEY_SAMPLE_RATE, sampleRate)
-            // todo
-            setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 1024 * 1024)
         }
     }
 }

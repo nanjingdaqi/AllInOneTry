@@ -11,6 +11,12 @@ import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
 import android.util.Log
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_AUDIO_ENCODE_FAIL
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_AUDIO_ENCODER
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_VIDEO_ENCODER
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_IN_USE
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_NO
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_VIDEO_ENCODE_FAIL
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_DRAIN
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_FEED
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_FINISH
@@ -29,7 +35,6 @@ class ScreenRecorder(val outMp4Path: String) {
 
     companion object {
         const val T = "daqi-ScreenRecorder"
-        // todo
         const val DEBUG = true
 
         const val MSG_DRAIN = 1
@@ -43,10 +48,6 @@ class ScreenRecorder(val outMp4Path: String) {
         const val THREAD_AUDIO_FEED_NAME = "audio-encoder-feed"
         const val THREAD_AUDIO_DRAIN_NAME = "audio-encoder-drain"
         const val THREAD_VIDEO_NAME = "video-encoder-drain"
-
-        const val ERROR_NO = 0
-        const val ERROR_USED = 1
-        const val ERROR_CREATE_VIDEO_ENCODER = 2
     }
 
     enum class State {
@@ -84,7 +85,7 @@ class ScreenRecorder(val outMp4Path: String) {
      */
     fun prepareVideo(codecName: String, videoFormat: MediaFormat, mp: MediaProjection): Int {
         if (state != State.UNSTARTED) {
-            return ERROR_USED
+            return ERROR_IN_USE
         }
         try {
             videoCoder = CodecContext.createEncoderByName(codecName, videoFormat)
@@ -95,6 +96,7 @@ class ScreenRecorder(val outMp4Path: String) {
         }
         this.mp = mp
         HandlerThread(THREAD_VIDEO_NAME).run {
+            configThread(this, true)
             start()
             videoH = VideoH(looper, this@ScreenRecorder)
         }
@@ -103,10 +105,16 @@ class ScreenRecorder(val outMp4Path: String) {
 
     fun prepareAudio(audioSource: AudioSource, codecName: String, audioFormat: MediaFormat): Int {
         if (state != State.UNSTARTED) {
-            return ERROR_USED
+            return ERROR_IN_USE
         }
         this.audioSource = audioSource
-        audioCoder = CodecContext.createEncoderByName(codecName, audioFormat)
+        try {
+            audioCoder = CodecContext.createEncoderByName(codecName, audioFormat)
+        } catch (e: Exception) {
+            if (DEBUG) throw RuntimeException(e)
+            e.printStackTrace()
+            return ERROR_CREATE_AUDIO_ENCODER
+        }
         audioQueue = LinkedBlockingQueue(AUDIO_QUEUE_CAPACITY)
         audioObserver = object : AudioObserver {
             override fun onAudioAvail(audioData: ByteBuffer) {
@@ -116,14 +124,23 @@ class ScreenRecorder(val outMp4Path: String) {
             audioSource.subscribe(this)
         }
         HandlerThread(THREAD_AUDIO_FEED_NAME).run {
+            configThread(this, false)
             start()
             audioFeedH = AudioFeedH(looper, this@ScreenRecorder)
         }
         HandlerThread(THREAD_AUDIO_DRAIN_NAME).run {
+            configThread(this, false)
             start()
             audioDrainH = AudioDrainH(looper, this@ScreenRecorder)
         }
         return ERROR_NO
+    }
+
+    private fun configThread(td: Thread, videoT: Boolean) {
+        td.setUncaughtExceptionHandler { t, e ->
+            Util.logk(T, "Thread ${t.name} exception", e)
+            VideoManager.listener?.onFail(if (videoT) ERROR_VIDEO_ENCODE_FAIL else ERROR_AUDIO_ENCODE_FAIL, e)
+        }
     }
 
     fun start(displayWidth: Int, displayHeight: Int): Int {
@@ -260,7 +277,6 @@ class ScreenRecorder(val outMp4Path: String) {
             return 0
         }
         val ts = SystemClock.elapsedRealtime() * 1000 - firstTimeStampUs
-        android.util.Log.d(T, "ts: $ts")
         return ts
     }
 

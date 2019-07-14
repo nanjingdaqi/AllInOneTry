@@ -45,6 +45,15 @@ object VideoManager {
     var mp: MediaProjection? = null
 
     var selectedQuality: Quality? = null
+        set(value) {
+            checkState()
+            field = value
+        }
+    var listener: Listener? = null
+        set(value) {
+            checkState()
+            field = value
+        }
 
     var dm: DisplayMetrics? = null
 
@@ -75,34 +84,10 @@ object VideoManager {
 
     private fun initOutFile() {
         File(if (!DEBUG) app.filesDir else File("/sdcard"), DIR).apply {
-            removeDir(absolutePath)
+            Util.removeDir(absolutePath)
             mkdirs()
             orgMp4Path = File(this, "${ORG_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
         }
-    }
-
-    // todo
-    fun removeDir(dir: String) {
-        // 定义文件路径
-        val file = File(dir)
-        // 判断是文件还是目录
-        if (file.exists() && file.isDirectory) {
-            val subs = file.listFiles()
-            val length = subs.size
-            for (i in 0 until length) {
-                if (subs[i].isDirectory) {
-                    removeDir(subs[i].absolutePath)
-                } else {
-                    subs[i].delete()
-                }
-            }
-            file.delete()
-        }
-    }
-
-    fun isScreenRecordSupport(activity: Activity): Boolean {
-        checkState()
-        return initResult == INIT_RESULT_OK
     }
 
     private fun checkState() {
@@ -111,11 +96,8 @@ object VideoManager {
         }
     }
 
-    fun selectQuality(quality: Quality) {
-        selectedQuality = quality
-    }
-
     fun prepareVideo(activity: Activity, requestCode: Int) {
+        checkState()
         projectionManager = app.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         activity.startActivityForResult(projectionManager.createScreenCaptureIntent(), requestCode)
     }
@@ -133,6 +115,7 @@ object VideoManager {
         mp = projectionManager.getMediaProjection(resultCode, data)
     }
 
+    // 面向Unity环境，使用这个接口
     fun onAudioBuffer(buffer: FloatArray, length: Int, sampleRate: Int) {
         if (mp == null) {
             return
@@ -192,17 +175,26 @@ object VideoManager {
         recorder = ScreenRecorder(orgMp4Path).apply {
             selectedQuality!!.videoFormat.run {
                 setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-                prepareVideo(Quality.videoCodec!!, this, mp!!)
+                prepareVideo(Quality.videoCodec!!, this, mp!!).apply {
+                    if (this != Listener.ERROR_NO) {
+                        listener?.onFail(this)
+                    }
+                }
             }
+            // audio codec可能为空，此时降级为只录取视频
             selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
                 audioAdapter = AudioAdapter()
-                prepareAudio(audioAdapter, Quality.audioCodec!!, this)
+                prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
+                    if (this != Listener.ERROR_NO) {
+                        listener?.onFail(this)
+                    }
+                }
             }
             start(dm!!.widthPixels, dm!!.heightPixels)
         }
     }
 
-    public fun stopScreenRecord() {
+    fun stopScreenRecord() {
         Log.w(TAG, "stop screen record.")
         if (DEBUG) {
             Toast.makeText(app, "录屏结束, 文件地址：$orgMp4Path", Toast.LENGTH_LONG).show()

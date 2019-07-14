@@ -12,6 +12,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
+import com.bytedance.ttgame.module.screenrecord.Listener
 import com.bytedance.ttgame.module.screenrecord.Quality
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
@@ -23,6 +24,8 @@ import kotlinx.android.synthetic.main.content_main2.resume
 import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
 import java.io.File
+import java.lang.Exception
+import java.lang.RuntimeException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -121,7 +124,17 @@ class MainActivity2 : AppCompatActivity() {
                 Toast.makeText(applicationContext, "该设备不支持录屏，请检查log.", Toast.LENGTH_LONG).show()
                 return
             }
-            selectQuality(Quality.HIGH!!)
+            selectedQuality = Quality.HIGH!!
+            listener = object : Listener {
+                override fun onSucc(videoFiles: List<File>) {
+                    Log.w(TAG, "recording onSucc: $videoFiles")
+                }
+
+                override fun onFail(error: Int, exception: Throwable?) {
+                    Log.w(TAG, "recording onFail, error: $error", exception)
+                    throw RuntimeException(exception)
+                }
+            }
             prepareVideo(this@MainActivity2, 1)
         }
     }
