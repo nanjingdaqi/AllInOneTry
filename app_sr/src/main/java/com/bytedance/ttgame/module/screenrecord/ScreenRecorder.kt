@@ -12,6 +12,7 @@ import android.os.Message
 import android.os.SystemClock
 import android.util.Log
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_AUDIO_ENCODE_FAIL
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_AUDIO_FINISH_FAIL
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_AUDIO_ENCODER
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_VIDEO_ENCODER
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_IN_USE
@@ -183,7 +184,12 @@ class ScreenRecorder(val outMp4Path: String) {
             audioDrainH.removeMessages(MSG_DRAIN)
             audioDrainH.sendEmptyMessage(MSG_FINISH)
             audioFinishCountDownLatch.await()
-            finishAudioCoder()
+            try {
+                finishAudioCoder()
+            } catch (e: Throwable) {
+                e.printStackTrace()
+                VideoManager.listener?.onFail(ERROR_AUDIO_FINISH_FAIL, e)
+            }
         }
     }
 
@@ -320,7 +326,7 @@ class ScreenRecorder(val outMp4Path: String) {
         })
     }
 
-    fun finishAudioCoder() {
+    private fun finishAudioCoder() {
         Util.logk(T, "finish audio coding")
         audioSource!!.unsubscribe(audioObserver!!)
         audioCoder.finish()
@@ -367,11 +373,11 @@ class VideoH(looper: Looper, val recorder: ScreenRecorder) : Handler(looper) {
     override fun handleMessage(msg: Message?) {
         when (msg!!.what) {
             MSG_DRAIN -> {
-                Util.logk(T, "Handling msg_drain")
+                Util.logk(T, "Handling video msg_drain")
                 recorder.drainVideoCoderUntilStop()
             }
             MSG_FINISH -> {
-                Util.logk(T, "Handling msg_finish")
+                Util.logk(T, "Handling video msg_finish")
                 recorder.finishVideoCoder()
                 Looper.myLooper().quit()
             }

@@ -42,11 +42,13 @@ class MuxerContext {
     }
 
     fun mayFinish() {
-        if (++finishedCount == trackCount) {
-            finishedCount = 0
-            muxer.run {
-                stop()
-                release()
+        synchronized(this) {
+            if (++finishedCount == trackCount) {
+                finishedCount = 0
+                muxer.run {
+                    stop()
+                    release()
+                }
             }
         }
     }
