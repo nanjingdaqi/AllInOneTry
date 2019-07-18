@@ -11,6 +11,7 @@ import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_AUDIO_ENCODE_FAIL
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_AUDIO_ENCODER
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_VIDEO_ENCODER
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_IN_USE
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_NO
@@ -19,8 +20,9 @@ import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_STA
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_STOP
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.T
 import java.nio.ByteBuffer
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
-// 暂时先不支持audio
 class ScreenRecorder(val outMp4Path: String) {
 
     companion object {
@@ -30,7 +32,10 @@ class ScreenRecorder(val outMp4Path: String) {
         const val MSG_START = 1
         const val MSG_STOP = 2
 
-        const val THREAD_VIDEO_NAME = "video-encoder"
+        const val AUDIO_QUEUE_CAPACITY = 3
+
+        const val THREAD_ENCODE_NAME = "screen-encoder"
+        const val THREAD_AUDIO_FEED_NAME = "audio-feed"
     }
 
     enum class State {
@@ -40,40 +45,99 @@ class ScreenRecorder(val outMp4Path: String) {
     private var state = State.UNSTARTED
     private var pauseLock = Object()
 
+    var audioCoder: CodecContext? = null
     lateinit var videoCoder: CodecContext
 
     lateinit var muxer: MuxerContext
     private lateinit var virtualDisplay: VirtualDisplay
-    private lateinit var videoH: Handler
+    private lateinit var recorderH: Handler
+    private var audioFeedH: Handler? = null
+
+    var audioSource: AudioSource? = null
+    private var audioObserver: AudioObserver? = null
+    private var audioQueue: LinkedBlockingQueue<ByteBuffer>? = null
 
     private lateinit var mp: MediaProjection
     private var firstTimeStampUs: Long = -1
 
     private val videoCodecCallback = object : CodecContext.AbstraceCallback() {
         override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, bufferInfo: MediaCodec.BufferInfo) {
-            if (state == State.RECORDING) {
-                Util.logd(T, "video avail buffer, index: $index, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
-                val buffer = codec.getOutputBuffer(index)
-                bufferInfo.presentationTimeUs = computeTimeStampUs()
-                muxer.writeSampleData(videoCoder, buffer, bufferInfo)
-                codec.releaseOutputBuffer(index, false)
-                if ((bufferInfo.flags.and(MediaCodec.BUFFER_FLAG_END_OF_STREAM)) != 0) {
-                    Util.logk(T, "video encoder eos")
-                    finishVideoCoder(false)
+            recorderH.post {
+                if (state == State.RECORDING) {
+                    Util.logd(T, "video avail buffer, index: $index, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
+                    codec.getOutputBuffer(index)?.run {
+                        bufferInfo.presentationTimeUs = computeTimeStampUs()
+                        muxer.writeSampleData(videoCoder, this, bufferInfo)
+                        codec.releaseOutputBuffer(index, false)
+                        if ((bufferInfo.flags.and(MediaCodec.BUFFER_FLAG_END_OF_STREAM)) != 0) {
+                            Util.logk(T, "video encoder eos")
+                        }
+                    }
                 }
             }
         }
 
         override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
-            Util.logk(T, "video format changed")
-            muxer.run {
-                addTrack(format, videoCoder)
-                mayStart()
+            recorderH.post {
+                Util.logk(T, "video format changed")
+                muxer.run {
+                    addTrack(format, videoCoder)
+                    mayStart()
+                }
             }
         }
 
         override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
             Util.logk(T, "video encoder on error", e)
+        }
+    }
+
+    private val audioCodecCallback = object : CodecContext.AbstraceCallback() {
+        override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
+            audioFeedH?.post {
+                while (state == State.RECORDING) {
+                    audioQueue?.poll(1, TimeUnit.SECONDS)?.run {
+                        val data = this
+                        codec.getInputBuffer(index)?.run {
+                            Util.logd(T, "audio feed one buffer: $this")
+                            put(data)
+                            flip()
+                            codec.queueInputBuffer(index, 0, limit(), 0, 0)
+                        }
+                        return@post
+                    }
+                }
+            }
+        }
+
+        override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, bufferInfo: MediaCodec.BufferInfo) {
+            recorderH.post {
+                if (state == State.RECORDING) {
+                    Util.logd(T, "audio avail buffer, index: $index, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
+                    codec.getOutputBuffer(index)?.run {
+                        bufferInfo.presentationTimeUs = computeTimeStampUs()
+                        muxer.writeSampleData(audioCoder!!, this, bufferInfo)
+                        codec.releaseOutputBuffer(index, false)
+                        if ((bufferInfo.flags.and(MediaCodec.BUFFER_FLAG_END_OF_STREAM)) != 0) {
+                            Util.logk(T, "audio encoder eos")
+                        }
+                    }
+                }
+            }
+        }
+
+        override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
+            recorderH.post {
+                Util.logk(T, "audio format changed")
+                muxer.run {
+                    addTrack(format, audioCoder!!)
+                    mayStart()
+                }
+            }
+        }
+
+        override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
+            Util.logk(T, "audio encoder on error", e)
         }
     }
 
@@ -96,11 +160,40 @@ class ScreenRecorder(val outMp4Path: String) {
             return ERROR_CREATE_VIDEO_ENCODER
         }
         this.mp = mp
-        HandlerThread(THREAD_VIDEO_NAME).run {
+        HandlerThread(THREAD_ENCODE_NAME).run {
             configThread(this, true)
             start()
-            videoH = VideoH(looper, this@ScreenRecorder)
+            recorderH = VideoH(looper, this@ScreenRecorder)
         }
+        return ERROR_NO
+    }
+
+    fun prepareAudio(audioSource: AudioSource, codecName: String, audioFormat: MediaFormat): Int {
+        if (state != State.UNSTARTED) {
+            return ERROR_IN_USE
+        }
+        this.audioSource = audioSource
+        try {
+            audioCoder = CodecContext.createEncoderByName(codecName, audioFormat, audioCodecCallback)
+        } catch (e: Exception) {
+            if (DEBUG) throw RuntimeException(e)
+            e.printStackTrace()
+            return ERROR_CREATE_AUDIO_ENCODER
+        }
+        audioQueue = LinkedBlockingQueue(AUDIO_QUEUE_CAPACITY)
+        audioObserver = object : AudioObserver {
+            override fun onAudioAvail(audioData: ByteBuffer) {
+                audioQueue?.offer(audioData)
+            }
+        }.apply {
+            audioSource.subscribe(this)
+        }
+        audioFeedH = HandlerThread(THREAD_AUDIO_FEED_NAME).run {
+            start()
+            configThread(this, false)
+            Handler(looper)
+        }
+
         return ERROR_NO
     }
 
@@ -118,7 +211,7 @@ class ScreenRecorder(val outMp4Path: String) {
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                 videoCoder.createInputSurface(),
                 null, null)
-        videoH.sendEmptyMessage(MSG_START)
+        recorderH.sendEmptyMessage(MSG_START)
         return ERROR_NO
     }
 
@@ -138,7 +231,7 @@ class ScreenRecorder(val outMp4Path: String) {
         synchronized(pauseLock) {
             pauseLock.notifyAll()
         }
-        videoH.sendEmptyMessage(MSG_STOP)
+        recorderH.sendEmptyMessage(MSG_STOP)
     }
 
     private fun computeTimeStampUs(): Long {
@@ -150,18 +243,23 @@ class ScreenRecorder(val outMp4Path: String) {
         return ts
     }
 
-    fun finishVideoCoder(eos: Boolean) {
-        Util.logk(T, "finish video coding")
+    fun writeEos(coder: CodecContext) {
+        MediaCodec.BufferInfo().apply {
+            set(0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+            muxer.writeSampleData(coder, ByteBuffer.allocate(0), this)
+        }
+    }
+
+    fun finishAll() {
+        Util.logk(T, "finish all resource")
         virtualDisplay.release()
         mp.stop()
         videoCoder.stop()
-        if (eos) {
-            MediaCodec.BufferInfo().apply {
-                set(0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
-                muxer.writeSampleData(videoCoder, ByteBuffer.allocate(0), this)
-            }
-        }
         muxer.mayFinish()
+        audioCoder?.run {
+            stop()
+            muxer.mayFinish()
+        }
     }
 }
 
@@ -171,14 +269,31 @@ class VideoH(looper: Looper, val recorder: ScreenRecorder) : Handler(looper) {
             MSG_START -> {
                 recorder.run {
                     videoCoder.start()
-                    muxer = MuxerContext.createMuxer(outMp4Path, 1)
+                    audioCoder?.start()
+                    muxer = MuxerContext.createMuxer(outMp4Path, if (audioCoder != null) 2 else 1)
                 }
             }
             MSG_STOP -> {
-                Util.logk(T, "Handling video msg_stop")
-                recorder.finishVideoCoder(true)
-                looper.quitSafely()
+                Util.logk(T, "Handling msg_stop")
+                recorder.run {
+                    writeEos(videoCoder)
+                    audioCoder?.run {
+                        writeEos(this)
+                    }
+                    finishAll()
+                    looper.quitSafely()
+                }
             }
         }
     }
 }
+
+interface AudioSource {
+    fun subscribe(observer: AudioObserver)
+    fun unsubscribe(observer: AudioObserver)
+}
+
+interface AudioObserver {
+    fun onAudioAvail(audioData: ByteBuffer)
+}
+

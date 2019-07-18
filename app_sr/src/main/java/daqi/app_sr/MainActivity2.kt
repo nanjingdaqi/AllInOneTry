@@ -75,10 +75,7 @@ class MainActivity2 : AppCompatActivity() {
             prepareRecord()
         }
         start.setOnClickListener {
-            VideoManager.startScreenRecord(false, 0)
-            start.postDelayed({
-                VideoManager.stopScreenRecord()
-            }, 10 * 1000)
+            VideoManager.startScreenRecord(true, audioPlayer!!.sampleRate)
         }
         stop.setOnClickListener {
             VideoManager.stopScreenRecord()

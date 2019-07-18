@@ -105,43 +105,46 @@ class AudioPlayer {
                 var tmpBuffer: FloatArray? = null
                 coder = CodecContext.createDecoder(mime, inputFormat, object : CodecContext.AbstraceCallback() {
                     override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
-                        val buffer = codec.getInputBuffer(index)
-                        val sz = extractor.readSampleData(buffer, 0)
-                        if (sz < 0) {
-                            codec.queueInputBuffer(index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
-                        } else {
-                            sampleTime = extractor.sampleTime
-                            Log.d(T, "audio player sample time: $sampleTime, sz: $sz")
-                            extractor.advance()
-                            codec.queueInputBuffer(index, 0, sz, sampleTime, 0)
+                        handler.post {
+                            val buffer = codec.getInputBuffer(index)
+                            val sz = extractor.readSampleData(buffer, 0)
+                            if (sz < 0) {
+                                codec.queueInputBuffer(index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                            } else {
+                                sampleTime = extractor.sampleTime
+                                extractor.advance()
+                                codec.queueInputBuffer(index, 0, sz, sampleTime, 0)
+                            }
                         }
                     }
 
                     override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo) {
-                        val buffer = codec.getOutputBuffer(index)
-                        listeners.forEach {
-                            it.onNewBuffer(buffer, sampleTime)
-                        }
-                        if (!Quality.ONLY_PCM_16) {
-                            buffer.asFloatBuffer().run {
-                                val sz = limit() - position()
-                                if (tmpBuffer == null || tmpBuffer!!.size < sz) {
-                                    tmpBuffer = FloatArray(limit() - position())
+                        handler.post {
+                            val buffer = codec.getOutputBuffer(index)
+                            listeners.forEach {
+                                it.onNewBuffer(buffer, sampleTime)
+                            }
+                            if (!Quality.ONLY_PCM_16) {
+                                buffer.asFloatBuffer().run {
+                                    val sz = limit() - position()
+                                    if (tmpBuffer == null || tmpBuffer!!.size < sz) {
+                                        tmpBuffer = FloatArray(limit() - position())
+                                    }
+                                    get(tmpBuffer, 0, limit() - position())
+                                    clear()
+                                    audioTrack.write(tmpBuffer, 0, sz, AudioTrack.WRITE_BLOCKING)
                                 }
-                                get(tmpBuffer, 0, limit() - position())
-                                clear()
-                                audioTrack.write(tmpBuffer, 0, sz, AudioTrack.WRITE_BLOCKING)
+                            } else {
+                                buffer.run {
+                                    val sz = limit() - position()
+                                    val ba = ByteArray(sz)
+                                    get(ba, 0, sz)
+                                    clear()
+                                    audioTrack.write(ba, 0, sz)
+                                }
                             }
-                        } else {
-                            buffer.run {
-                                val sz = limit() - position()
-                                val ba = ByteArray(sz)
-                                get(ba, 0, sz)
-                                clear()
-                                audioTrack.write(ba, 0, sz)
-                            }
+                            codec.releaseOutputBuffer(index, false)
                         }
-                        codec.releaseOutputBuffer(index, false)
                     }
 
                     override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {

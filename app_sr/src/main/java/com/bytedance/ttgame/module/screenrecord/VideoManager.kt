@@ -45,7 +45,7 @@ object VideoManager {
     lateinit var projectionManager: MediaProjectionManager
     lateinit var recorder: ScreenRecorder
     lateinit var orgMp4Path: String
-//    lateinit var audioAdapter: AudioAdapter
+    lateinit var audioAdapter: AudioAdapter
 
     var mp: MediaProjection? = null
     var started: Boolean = false
@@ -165,17 +165,16 @@ object VideoManager {
                         }
                     }
                 }
-                // todo
                 if (withAudio) {
                     // audio codec可能为空，此时降级为只录取视频
-//                    selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
-//                        audioAdapter = AudioAdapter()
-//                        prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
-//                            if (this != Listener.ERROR_NO) {
-//                                listener?.onFail(this)
-//                            }
-//                        }
-//                    }
+                    selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
+                        audioAdapter = AudioAdapter()
+                        prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
+                            if (this != Listener.ERROR_NO) {
+                                listener?.onFail(this)
+                            }
+                        }
+                    }
                 }
                 start(dm!!.widthPixels, dm!!.heightPixels)
             }
@@ -189,45 +188,44 @@ object VideoManager {
         if (!started || !withAudio) {
             return
         }
-        // todo
-//        for (observer in audioAdapter.observers) {
-//            try {
-//                if (Quality.ONLY_PCM_16) {
-//                    // 转为pcm_16
-//                    val sa = ShortArray(buffer.size).apply {
-//                        for (i in 0 until buffer.size) {
-//                            if (abs(x = buffer[i]) > 1.0) {
-//                                Log.e("daqi", "one float is too big: ${buffer[i]}")
-//                            }
-//                            set(i, (buffer[i] * 32767).toShort())
-//                        }
-//                    }
-//                    ByteBuffer.allocate(sa.size * 2).run {
-//                        order(ByteOrder.nativeOrder())
-//                        val sb = asShortBuffer().apply {
-//                            put(sa)
-//                            flip()
-//                        }
-//                        flip()
-//                        limit((sb.limit() - sb.position()) * 2)
-//                        observer.onAudioAvail(this)
-//                    }
-//                } else {
-//                    ByteBuffer.allocate(buffer.size * 4).run {
-//                        order(ByteOrder.nativeOrder())
-//                        val fb = asFloatBuffer().apply {
-//                            put(buffer)
-//                            flip()
-//                        }
-//                        flip()
-//                        limit((fb.limit() - fb.position()) * 4)
-//                        observer.onAudioAvail(this)
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                Log.w(TAG, "exception: ", e)
-//            }
-//        }
+        for (observer in audioAdapter.observers) {
+            try {
+                if (Quality.ONLY_PCM_16) {
+                    // 转为pcm_16
+                    val sa = ShortArray(buffer.size).apply {
+                        for (i in 0 until buffer.size) {
+                            if (abs(x = buffer[i]) > 1.0) {
+                                Log.e("daqi", "one float is too big: ${buffer[i]}")
+                            }
+                            set(i, (buffer[i] * 32767).toShort())
+                        }
+                    }
+                    ByteBuffer.allocate(sa.size * 2).run {
+                        order(ByteOrder.nativeOrder())
+                        val sb = asShortBuffer().apply {
+                            put(sa)
+                            flip()
+                        }
+                        flip()
+                        limit((sb.limit() - sb.position()) * 2)
+                        observer.onAudioAvail(this)
+                    }
+                } else {
+                    ByteBuffer.allocate(buffer.size * 4).run {
+                        order(ByteOrder.nativeOrder())
+                        val fb = asFloatBuffer().apply {
+                            put(buffer)
+                            flip()
+                        }
+                        flip()
+                        limit((fb.limit() - fb.position()) * 4)
+                        observer.onAudioAvail(this)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "exception: ", e)
+            }
+        }
     }
 
     fun stopScreenRecord() {
@@ -240,16 +238,15 @@ object VideoManager {
         mp = null
     }
 
-    // todo
-//    class AudioAdapter : AudioSource {
-//        var observers = mutableListOf<AudioObserver>()
-//
-//        override fun subscribe(observer: AudioObserver) {
-//            observers.add(observer)
-//        }
-//
-//        override fun unsubscribe(observer: AudioObserver) {
-//            observers.remove(observer)
-//        }
-//    }
+    class AudioAdapter : AudioSource {
+        var observers = mutableListOf<AudioObserver>()
+
+        override fun subscribe(observer: AudioObserver) {
+            observers.add(observer)
+        }
+
+        override fun unsubscribe(observer: AudioObserver) {
+            observers.remove(observer)
+        }
+    }
 }
