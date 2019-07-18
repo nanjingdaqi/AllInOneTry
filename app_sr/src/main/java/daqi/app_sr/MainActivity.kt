@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Choreographer.
                     setInteger(MediaFormat.KEY_BIT_RATE, 96000)
                     setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 1024 * 1024)
                 }
-                audioRecorder = CodecContext.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC, format)
+//                audioRecorder = CodecContext.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC, format)
             }
             if (videoRecorder == null) {
                 // Create and configure the MediaFormat.
@@ -154,127 +154,127 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Choreographer.
                     setInteger(MediaFormat.KEY_FRAME_RATE, 30)
                     setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10)
                 }
-                videoRecorder = CodecContext.createEncoderByType("video/avc", format)
+//                videoRecorder = CodecContext.createEncoderByType("video/avc", format)
                 inputSurface = videoRecorder!!.createInputSurface()
             }
             if (muxer == null) {
                 muxer = MuxerContext.createMuxer("/sdcard/out2.mp4", 2)
             }
-            audioRecorder!!.prepare()
-            videoRecorder!!.prepare()
-            audioPlayer!!.addListener(audioListener)
+            audioRecorder!!.start()
+            videoRecorder!!.start()
+//            audioPlayer!!.addListener(audioListener)
             render!!.mHandler!!.setRecordingEnabled(true, inputSurface!!)
             render!!.controller = this
         }
     }
 
     var firstTimeStamp: Long = -1
-    val audioListener = object : AudioPlayer.Listener {
-        override fun onNewBuffer(buffer: ByteBuffer, inputSampleTime: Long) {
-//            recorderFeedWorker.execute {
-            if (firstTimeStamp == -1L) {
-                firstTimeStamp = System.currentTimeMillis()
-            }
-            audioRecorder!!.feedInputBuffer(10000, object : CodecContext.FeedBufferListener {
-                override fun availBuffer(inputBuffer: ByteBuffer): CodecContext.FeedInfo {
-                    inputBuffer.clear()
-                    val tmpArray = ByteArray(buffer.limit() - buffer.position())
-                    for (i in 0 until buffer.limit() - buffer.position()) {
-//                            inputBuffer.put(buffer.get())
-                        tmpArray[i] = buffer.get()
-                    }
-                    inputBuffer.put(tmpArray)
-                    buffer.flip()
-                    mH.sendEmptyMessage(MSG_INVOKE_DRAIN)
+//    val audioListener = object : AudioPlayer.Listener {
+//        override fun onNewBuffer(buffer: ByteBuffer, inputSampleTime: Long) {
+////            recorderFeedWorker.execute {
+//            if (firstTimeStamp == -1L) {
+//                firstTimeStamp = System.currentTimeMillis()
+//            }
+//            audioRecorder!!.feedInputBuffer(10000, object : CodecContext.FeedBufferListener {
+//                override fun availBuffer(inputBuffer: ByteBuffer): CodecContext.FeedInfo {
+//                    inputBuffer.clear()
+//                    val tmpArray = ByteArray(buffer.limit() - buffer.position())
+//                    for (i in 0 until buffer.limit() - buffer.position()) {
+////                            inputBuffer.put(buffer.get())
+//                        tmpArray[i] = buffer.get()
+//                    }
+//                    inputBuffer.put(tmpArray)
+//                    buffer.flip()
+//                    mH.sendEmptyMessage(MSG_INVOKE_DRAIN)
+//
+//                    val tmOffset = System.currentTimeMillis() - firstTimeStamp
+//                    return CodecContext.FeedInfo(false, buffer.limit() - buffer.position(), tmOffset * 1000)
+//                }
+//
+//                override fun bufferTimeout() {
+//                    Log.v(T, "audio recorder timeout")
+//                }
+//            })
+//        }
+////        }
+//    }
 
-                    val tmOffset = System.currentTimeMillis() - firstTimeStamp
-                    return CodecContext.FeedInfo(false, buffer.limit() - buffer.position(), tmOffset * 1000)
-                }
-
-                override fun bufferTimeout() {
-                    Log.v(T, "audio recorder timeout")
-                }
-            })
-        }
+    fun invokeDecodeJob(eos: Boolean = false) {
+//        recorderDrainWorker.execute {
+//            if (!recording) {
+//                stopWaiter.countDown()
+//            }
+//            if (recording) {
+//                audioRecorder!!.drainOutputBuffer(10000, false, object : CodecContext.DrainBufferListener {
+//                    override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
+//                        Log.i(T, "audio encoder buffer available")
+//                        muxer!!.writeSampleData(audioRecorder!!, buffer, bufferInfo)
+//                    }
+//
+//                    override fun bufferChanged() {
+//                        Log.d(T, "audio recorder buffer changed")
+//                    }
+//
+//                    override fun formatChanged(mediaFormat: MediaFormat) {
+//                        Log.w(T, "audio encoder format change")
+//                        muxer!!.addTrack(mediaFormat, audioRecorder!!)
+//                        muxer!!.mayStart()
+//                    }
+//
+//                    override fun bufferTimeOut() {
+//                        Log.v(T, "audio recorder buffer timeout")
+//                    }
+//                })
+//
+//                videoRecorder!!.drainOutputBuffer(10000, eos, object : CodecContext.DrainBufferListener {
+//                    override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
+//                        Log.i(T, "video encoder buffer available")
+//                        muxer!!.writeSampleData(videoRecorder!!, buffer, bufferInfo)
+//                    }
+//
+//                    override fun bufferChanged() {
+//                        Log.d(T, "video recorder buffer changed")
+//                    }
+//
+//                    override fun formatChanged(mediaFormat: MediaFormat) {
+//                        Log.w(T, "video encoder format change")
+//                        muxer!!.addTrack(mediaFormat, videoRecorder!!)
+//                        muxer!!.mayStart()
+//                    }
+//
+//                    override fun bufferTimeOut() {
+//                        Log.v(T, "video recorder buffer timeout")
+//                    }
+//                })
+//            }
 //        }
     }
 
-    fun invokeDecodeJob(eos: Boolean = false) {
-        recorderDrainWorker.execute {
-            if (!recording) {
-                stopWaiter.countDown()
-            }
-            if (recording) {
-                audioRecorder!!.drainOutputBuffer(10000, false, object : CodecContext.DrainBufferListener {
-                    override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-                        Log.i(T, "audio encoder buffer available")
-                        muxer!!.writeSampleData(audioRecorder!!, buffer, bufferInfo)
-                    }
-
-                    override fun bufferChanged() {
-                        Log.d(T, "audio recorder buffer changed")
-                    }
-
-                    override fun formatChanged(mediaFormat: MediaFormat) {
-                        Log.w(T, "audio encoder format change")
-                        muxer!!.addTrack(mediaFormat, audioRecorder!!)
-                        muxer!!.mayStart()
-                    }
-
-                    override fun bufferTimeOut() {
-                        Log.v(T, "audio recorder buffer timeout")
-                    }
-                })
-
-                videoRecorder!!.drainOutputBuffer(10000, eos, object : CodecContext.DrainBufferListener {
-                    override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-                        Log.i(T, "video encoder buffer available")
-                        muxer!!.writeSampleData(videoRecorder!!, buffer, bufferInfo)
-                    }
-
-                    override fun bufferChanged() {
-                        Log.d(T, "video recorder buffer changed")
-                    }
-
-                    override fun formatChanged(mediaFormat: MediaFormat) {
-                        Log.w(T, "video encoder format change")
-                        muxer!!.addTrack(mediaFormat, videoRecorder!!)
-                        muxer!!.mayStart()
-                    }
-
-                    override fun bufferTimeOut() {
-                        Log.v(T, "video recorder buffer timeout")
-                    }
-                })
-            }
-        }
-    }
-
     private fun stopRecord() {
-        recording = false
-        audioPlayer!!.removeListener(audioListener)
-        recorderFeedWorker.execute {
-            stopWaiter.countDown()
-        }
-        recorderDrainWorker.execute {
-            stopWaiter.countDown()
-        }
-        stopWaiter.await()
-        audioRecorder!!.finish()
-        render!!.mHandler!!.setRecordingEnabled(false, inputSurface!!)
-        muxer!!.mayFinish()
-        Log.d(T, "Stop is done.")
+//        recording = false
+//        audioPlayer!!.removeListener(audioListener)
+//        recorderFeedWorker.execute {
+//            stopWaiter.countDown()
+//        }
+//        recorderDrainWorker.execute {
+//            stopWaiter.countDown()
+//        }
+//        stopWaiter.await()
+//        audioRecorder!!.stop()
+//        render!!.mHandler!!.setRecordingEnabled(false, inputSurface!!)
+//        muxer!!.mayFinish()
+//        Log.d(T, "Stop is done.")
     }
 
     class MainH(private val controller: MainActivity) : Handler() {
         override fun handleMessage(msg: Message?) {
             when (msg!!.what) {
-                MSG_INVOKE_DRAIN -> {
-                    controller.invokeDecodeJob()
-                }
-                MSG_SIGNAL_EOS -> {
-                    controller.invokeDecodeJob(true)
-                }
+//                MSG_INVOKE_DRAIN -> {
+//                    controller.invokeDecodeJob()
+//                }
+//                MSG_SIGNAL_EOS -> {
+//                    controller.invokeDecodeJob(true)
+//                }
             }
         }
     }

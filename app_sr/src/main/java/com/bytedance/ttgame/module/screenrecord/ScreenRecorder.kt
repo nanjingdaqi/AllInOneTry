@@ -10,45 +10,27 @@ import android.os.HandlerThread
 import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
-import android.util.Log
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_AUDIO_ENCODE_FAIL
-import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_AUDIO_FINISH_FAIL
-import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_AUDIO_ENCODER
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_VIDEO_ENCODER
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_IN_USE
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_NO
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_VIDEO_ENCODE_FAIL
-import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_DRAIN
-import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_FEED
-import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_FINISH
+import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_START
+import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_STOP
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.T
 import java.nio.ByteBuffer
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.TimeUnit
 
-/**
- * 1. audio有两个线程，分别feed input buffer和drain out buffer, video拉出一个线程进行drain，减少影响
- *
- * 2. audio会从unity层不断接收pcm byte array，为了避免block，这里额外开辟了一块buffer queue
- */
+// 暂时先不支持audio
 class ScreenRecorder(val outMp4Path: String) {
 
     companion object {
         const val T = "daqi-ScreenRecorder"
         const val DEBUG = true
 
-        const val MSG_DRAIN = 1
-        const val MSG_FINISH = 2
-        const val MSG_FEED = 3
+        const val MSG_START = 1
+        const val MSG_STOP = 2
 
-        const val DRAIN_TIMEOUT = 0L
-
-        const val AUDIO_QUEUE_CAPACITY = 3
-
-        const val THREAD_AUDIO_FEED_NAME = "audio-encoder-feed"
-        const val THREAD_AUDIO_DRAIN_NAME = "audio-encoder-drain"
-        const val THREAD_VIDEO_NAME = "video-encoder-drain"
+        const val THREAD_VIDEO_NAME = "video-encoder"
     }
 
     enum class State {
@@ -58,24 +40,42 @@ class ScreenRecorder(val outMp4Path: String) {
     private var state = State.UNSTARTED
     private var pauseLock = Object()
 
-    private lateinit var audioCoder: CodecContext
-    private lateinit var videoCoder: CodecContext
+    lateinit var videoCoder: CodecContext
 
-    private lateinit var muxer: MuxerContext
+    lateinit var muxer: MuxerContext
     private lateinit var virtualDisplay: VirtualDisplay
-    private var audioQueue: LinkedBlockingQueue<ByteBuffer>? = null
-
-    private lateinit var audioFeedH: AudioFeedH
-    //    private lateinit var audioDrainH: AudioDrainH
-    var audioFinishCountDownLatch = CountDownLatch(2)
-    private lateinit var videoH: VideoH
-
-    var audioSource: AudioSource? = null
-    private var audioObserver: AudioObserver? = null
+    private lateinit var videoH: Handler
 
     private lateinit var mp: MediaProjection
-    // todo sync among threads
     private var firstTimeStampUs: Long = -1
+
+    private val videoCodecCallback = object : CodecContext.AbstraceCallback() {
+        override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, bufferInfo: MediaCodec.BufferInfo) {
+            if (state == State.RECORDING) {
+                Util.logd(T, "video avail buffer, index: $index, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
+                val buffer = codec.getOutputBuffer(index)
+                bufferInfo.presentationTimeUs = computeTimeStampUs()
+                muxer.writeSampleData(videoCoder, buffer, bufferInfo)
+                codec.releaseOutputBuffer(index, false)
+                if ((bufferInfo.flags.and(MediaCodec.BUFFER_FLAG_END_OF_STREAM)) != 0) {
+                    Util.logk(T, "video encoder eos")
+                    finishVideoCoder(false)
+                }
+            }
+        }
+
+        override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
+            Util.logk(T, "video format changed")
+            muxer.run {
+                addTrack(format, videoCoder)
+                mayStart()
+            }
+        }
+
+        override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
+            Util.logk(T, "video encoder on error", e)
+        }
+    }
 
     init {
         Util.logLevel = 1
@@ -89,7 +89,7 @@ class ScreenRecorder(val outMp4Path: String) {
             return ERROR_IN_USE
         }
         try {
-            videoCoder = CodecContext.createEncoderByName(codecName, videoFormat)
+            videoCoder = CodecContext.createEncoderByName(codecName, videoFormat, videoCodecCallback)
         } catch (e: Exception) {
             if (DEBUG) throw RuntimeException(e)
             e.printStackTrace()
@@ -101,39 +101,6 @@ class ScreenRecorder(val outMp4Path: String) {
             start()
             videoH = VideoH(looper, this@ScreenRecorder)
         }
-        return ERROR_NO
-    }
-
-    fun prepareAudio(audioSource: AudioSource, codecName: String, audioFormat: MediaFormat): Int {
-        if (state != State.UNSTARTED) {
-            return ERROR_IN_USE
-        }
-        this.audioSource = audioSource
-        try {
-            audioCoder = CodecContext.createEncoderByName(codecName, audioFormat)
-        } catch (e: Exception) {
-            if (DEBUG) throw RuntimeException(e)
-            e.printStackTrace()
-            return ERROR_CREATE_AUDIO_ENCODER
-        }
-        audioQueue = LinkedBlockingQueue(AUDIO_QUEUE_CAPACITY)
-        audioObserver = object : AudioObserver {
-            override fun onAudioAvail(audioData: ByteBuffer) {
-                handleIncomingAudio(audioData)
-            }
-        }.apply {
-            audioSource.subscribe(this)
-        }
-        HandlerThread(THREAD_AUDIO_FEED_NAME).run {
-            configThread(this, false)
-            start()
-            audioFeedH = AudioFeedH(looper, this@ScreenRecorder)
-        }
-//        HandlerThread(THREAD_AUDIO_DRAIN_NAME).run {
-//            configThread(this, false)
-//            start()
-//            audioDrainH = AudioDrainH(looper, this@ScreenRecorder)
-//        }
         return ERROR_NO
     }
 
@@ -151,13 +118,7 @@ class ScreenRecorder(val outMp4Path: String) {
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                 videoCoder.createInputSurface(),
                 null, null)
-        videoCoder.prepare()
-        audioSource?.run {
-            audioCoder.prepare()
-            audioFeedH.sendEmptyMessage(MSG_FEED)
-        }
-        muxer = MuxerContext.createMuxer(outMp4Path, if (audioSource == null) 1 else 2)
-        videoH.sendEmptyMessage(MSG_DRAIN)
+        videoH.sendEmptyMessage(MSG_START)
         return ERROR_NO
     }
 
@@ -177,112 +138,7 @@ class ScreenRecorder(val outMp4Path: String) {
         synchronized(pauseLock) {
             pauseLock.notifyAll()
         }
-        videoH.sendEmptyMessage(MSG_FINISH)
-        audioSource?.run {
-            audioFeedH.removeMessages(MSG_FEED)
-            audioFeedH.sendEmptyMessage(MSG_FINISH)
-//            audioDrainH.removeMessages(MSG_DRAIN)
-//            audioDrainH.sendEmptyMessage(MSG_FINISH)
-            audioFinishCountDownLatch.await()
-            try {
-                finishAudioCoder()
-            } catch (e: Throwable) {
-                e.printStackTrace()
-                VideoManager.listener?.onFail(ERROR_AUDIO_FINISH_FAIL, e)
-            }
-        }
-    }
-
-    fun handleIncomingAudio(audioData: ByteBuffer) {
-        audioQueue!!.offer(audioData)
-        if (state == State.RECORDING && !audioFeedH.hasMessages(MSG_FEED)) {
-            audioFeedH.sendEmptyMessage(MSG_FEED)
-        }
-    }
-
-    fun feedAudioCoderUntilStop() {
-        while (state == State.RECORDING && audioQueue!!.isNotEmpty()) {
-//            val curData = audioQueue!!.poll(10, TimeUnit.MILLISECONDS)
-            val curData = audioQueue!!.poll()
-            Util.logk(T, "audio poll one data: $curData")
-            if (curData != null) {
-                audioCoder.feedInputBuffer(1000L, object : CodecContext.FeedBufferListener {
-                    override fun availBuffer(inputBuffer: ByteBuffer): CodecContext.FeedInfo {
-                        inputBuffer.clear()
-                        Log.w("daqi", "audio input buffer: $inputBuffer")
-                        inputBuffer.put(curData)
-                        inputBuffer.flip()
-//                        if (!audioDrainH.hasMessages(MSG_DRAIN)) {
-//                            audioDrainH.sendEmptyMessage(MSG_DRAIN)
-//                        }
-                        if (!videoH.hasMessages(MSG_DRAIN)) {
-                            videoH.sendEmptyMessage(MSG_DRAIN)
-                        }
-                        // 这里的preTs置为零，关键是后面写入muxer的bufferInfo#presentationTimeUs
-                        return CodecContext.FeedInfo(false, inputBuffer.limit() - inputBuffer.position(), 0)
-                    }
-
-                    override fun bufferTimeout() {
-                        Util.logd(T, "audio feed buffer timeout")
-                    }
-                })
-            }
-        }
-        if (state == State.STOPPED) {
-            Util.logk(T, "audio feed eos")
-            audioCoder.feedInputBuffer(DRAIN_TIMEOUT, object : CodecContext.FeedBufferListener {
-                override fun availBuffer(buffer: ByteBuffer): CodecContext.FeedInfo {
-                    Util.logk(T, "audio last feed avail")
-                    return CodecContext.FeedInfo(true, 0, 0)
-                }
-
-                override fun bufferTimeout() {
-                    Util.logk(T, "audio last feed buffer timeout")
-                }
-
-            })
-        }
-    }
-
-    fun drainAudioCoderUntilStop() {
-        while (state != State.STOPPED) {
-            if (state == State.PAUSED) {
-                synchronized(pauseLock) {
-                    pauseLock.wait()
-                }
-            } else {
-                if (drainAudioCoderOnce()) break
-            }
-        }
-//        Util.logk(T, "audio drain over ")
-        Util.logd(T, "audio drain finish one loop")
-    }
-
-    private fun drainAudioCoderOnce(): Boolean {
-        var breakLoop = true
-        audioCoder.drainOutputBuffer(DRAIN_TIMEOUT, false, object : CodecContext.DrainBufferListener {
-            override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-                Util.logd(T, "audio avail buffer sz: ${bufferInfo.size}, pre tm: ${bufferInfo.presentationTimeUs}")
-                bufferInfo.presentationTimeUs = computeTimeStampUs()
-                muxer.writeSampleData(audioCoder, buffer, bufferInfo)
-                breakLoop = false
-            }
-
-            override fun bufferChanged() {
-                Util.logd(T, "audio buffer changed")
-            }
-
-            override fun formatChanged(mediaFormat: MediaFormat) {
-                Util.logk(T, "audio format changed")
-                muxer.addTrack(mediaFormat, audioCoder)
-                muxer.mayStart()
-            }
-
-            override fun bufferTimeOut() {
-                Util.logd(T, "audio buffer timeout")
-            }
-        })
-        return breakLoop
+        videoH.sendEmptyMessage(MSG_STOP)
     }
 
     private fun computeTimeStampUs(): Long {
@@ -294,119 +150,35 @@ class ScreenRecorder(val outMp4Path: String) {
         return ts
     }
 
-    fun drainVideoCoderUntilStop() {
-        while (state != State.STOPPED) {
-            if (state == State.PAUSED) {
-                synchronized(pauseLock) {
-                    pauseLock.wait()
-                }
-            } else {
-                drainVideoCoderOnce(false)
-            }
-        }
-        Util.logd(T, "video drain finish one loop")
-    }
-
-    public fun drainVideoCoderOnce(eos: Boolean): Boolean {
-        var breakLoop = true
-        videoCoder.drainOutputBuffer(DRAIN_TIMEOUT, eos, object : CodecContext.DrainBufferListener {
-            override fun availBuffer(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-                Util.logd(T, "video avail buffer, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
-                bufferInfo.presentationTimeUs = computeTimeStampUs()
-                muxer.writeSampleData(videoCoder, buffer, bufferInfo)
-                breakLoop = false
-            }
-
-            override fun bufferChanged() {
-                Util.logd(T, "video buffer changed")
-            }
-
-            override fun formatChanged(mediaFormat: MediaFormat) {
-                Util.logk(T, "video format changed")
-                muxer.run {
-                    addTrack(mediaFormat, videoCoder)
-                    mayStart()
-                }
-            }
-
-            override fun bufferTimeOut() {
-                Util.logd(T, "video buffer timeout")
-            }
-        })
-        return breakLoop
-    }
-
-    private fun finishAudioCoder() {
-        Util.logk(T, "finish audio coding")
-        audioSource!!.unsubscribe(audioObserver!!)
-        audioCoder.finish()
-        muxer.mayFinish()
-    }
-
-    fun finishVideoCoder() {
+    fun finishVideoCoder(eos: Boolean) {
         Util.logk(T, "finish video coding")
-        videoCoder.finish()
+        virtualDisplay.release()
+        mp.stop()
+        videoCoder.stop()
+        if (eos) {
+            MediaCodec.BufferInfo().apply {
+                set(0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                muxer.writeSampleData(videoCoder, ByteBuffer.allocate(0), this)
+            }
+        }
         muxer.mayFinish()
-    }
-}
-
-class AudioFeedH(looper: Looper, val recorder: ScreenRecorder) : Handler(looper) {
-    override fun handleMessage(msg: Message?) {
-        when (msg!!.what) {
-            MSG_FEED -> {
-                recorder.feedAudioCoderUntilStop()
-            }
-            MSG_FINISH -> {
-                recorder.feedAudioCoderUntilStop()
-                recorder.audioFinishCountDownLatch.countDown()
-                Looper.myLooper().quit()
-            }
-        }
-    }
-}
-
-class AudioDrainH(looper: Looper, val recorder: ScreenRecorder) : Handler(looper) {
-    override fun handleMessage(msg: Message?) {
-        when (msg!!.what) {
-            MSG_DRAIN -> {
-            }
-            MSG_FINISH -> {
-                recorder.audioFinishCountDownLatch.countDown()
-                Looper.myLooper().quit()
-            }
-        }
     }
 }
 
 class VideoH(looper: Looper, val recorder: ScreenRecorder) : Handler(looper) {
-    override fun handleMessage(msg: Message?) {
-        when (msg!!.what) {
-            MSG_DRAIN -> {
-                Util.logk(T, "Handling video msg_drain")
-                recorder.drainVideoCoderUntilStop()
-                if (recorder.audioSource != null) {
-                    recorder.drainAudioCoderUntilStop()
+    override fun handleMessage(msg: Message) {
+        when (msg.what) {
+            MSG_START -> {
+                recorder.run {
+                    videoCoder.start()
+                    muxer = MuxerContext.createMuxer(outMp4Path, 1)
                 }
             }
-            MSG_FINISH -> {
-                Util.logk(T, "Handling video msg_finish")
-                recorder.drainVideoCoderOnce(true)
-                Util.logk(T, "video last drain is over")
-                recorder.finishVideoCoder()
-                if (recorder.audioSource != null) {
-                    recorder.audioFinishCountDownLatch.countDown()
-                }
-                Looper.myLooper().quit()
+            MSG_STOP -> {
+                Util.logk(T, "Handling video msg_stop")
+                recorder.finishVideoCoder(true)
+                looper.quitSafely()
             }
         }
     }
-}
-
-interface AudioSource {
-    fun subscribe(observer: AudioObserver)
-    fun unsubscribe(observer: AudioObserver)
-}
-
-interface AudioObserver {
-    fun onAudioAvail(audioData: ByteBuffer)
 }
