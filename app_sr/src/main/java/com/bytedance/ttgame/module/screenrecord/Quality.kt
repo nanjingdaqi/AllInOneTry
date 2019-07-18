@@ -13,7 +13,7 @@ import java.util.*
 import kotlin.math.min
 
 // audio format目前由客户端决定
-class Quality {
+class Quality(val name: String) {
     companion object {
         var HIGH: Quality? = null
         var BASE: Quality? = null
@@ -87,26 +87,26 @@ class Quality {
                 height = Util.alignDown(height, videoCap!!.heightAlignment)
             }
             val fpsBest = min(30, videoCap!!.supportedFrameRates.upper)
-            val bitrateBest = videoCap!!.bitrateRange.upper
+            val bitrateBest = min((width * height).shl(2), videoCap!!.bitrateRange.upper)
             val iFrameInterval = fpsBest // 按照vesdk的建议，设置为fps大小，得到的视频的I帧就是1s的周期
             if (DEBUG) {
                 Log.w(TAG, "width: $width, height: $height, fps: $fpsBest, bit_rate: $bitrateBest, iFrameInterval: $iFrameInterval")
             }
-            HIGH = Quality().apply {
+            HIGH = Quality("High").apply {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest)
                     setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval)
                 }
             }
-            BASE = Quality().apply {
+            BASE = Quality("Base").apply {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest / 2)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest / 2)
                     setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval / 2)
                 }
             }
-            LOW = Quality().apply {
+            LOW = Quality("Low").apply {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest / 3)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest / 3)

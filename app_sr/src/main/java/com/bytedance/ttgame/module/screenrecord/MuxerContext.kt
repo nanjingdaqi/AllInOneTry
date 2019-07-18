@@ -37,13 +37,16 @@ class MuxerContext {
 
     fun writeSampleData(coder: CodecContext, buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
         if (started) {
-            muxer.writeSampleData(trackIdMap[coder]!!, buffer, bufferInfo)
+            synchronized(this) {
+                muxer.writeSampleData(trackIdMap[coder]!!, buffer, bufferInfo)
+            }
         }
     }
 
     fun mayFinish() {
         synchronized(this) {
             if (++finishedCount == trackCount) {
+                android.util.Log.w("daqi", "Muxer Do the real stop.")
                 finishedCount = 0
                 muxer.run {
                     stop()

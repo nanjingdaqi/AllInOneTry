@@ -2,10 +2,8 @@ package daqi.app_sr
 
 import android.Manifest
 import android.animation.ValueAnimator
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -14,17 +12,16 @@ import android.util.Log
 import android.widget.Toast
 import com.bytedance.ttgame.module.screenrecord.Listener
 import com.bytedance.ttgame.module.screenrecord.Quality
-import com.bytedance.ttgame.module.screenrecord.ScreenRecorder
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
 import com.bytedance.ttgame.module.screenrecord.VideoManager
 import kotlinx.android.synthetic.main.content_main2.cut
 import kotlinx.android.synthetic.main.content_main2.img
 import kotlinx.android.synthetic.main.content_main2.pause
+import kotlinx.android.synthetic.main.content_main2.prepare
 import kotlinx.android.synthetic.main.content_main2.resume
 import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
 import java.io.File
-import java.lang.Exception
 import java.lang.RuntimeException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -74,8 +71,14 @@ class MainActivity2 : AppCompatActivity() {
         val dir = File("/sdcard/a_g_game")
         dir.mkdirs()
         VideoEditor.init(application, dir.absolutePath)
+        prepare.setOnClickListener {
+            prepareRecord()
+        }
         start.setOnClickListener {
-            startRecord()
+            VideoManager.startScreenRecord(false, 0)
+            start.postDelayed({
+                VideoManager.stopScreenRecord()
+            }, 10 * 1000)
         }
         stop.setOnClickListener {
             VideoManager.stopScreenRecord()
@@ -99,26 +102,26 @@ class MainActivity2 : AppCompatActivity() {
                     add(VideoEditor.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
                 }.run {
                     var stMil = System.currentTimeMillis()
-                    crop("/sdcard/test_1562833951373.mp4", this, object : VideoEditor.CropListener {
-                        override fun onError(errors: List<VideoEditor.CropError>) {
-                            android.util.Log.w("daqi", "error")
-                        }
-
-                        override fun onFinish() {
-                            android.util.Log.w("daqi", "onFinish")
-                        }
-
-                        override fun onProgress(finishedCount: Int, totalCount: Int) {
-                            android.util.Log.w("daqi", "progress index: $finishedCount of total: $totalCount, time: ${System.currentTimeMillis() - stMil}")
-                            stMil = System.currentTimeMillis()
-                        }
-                    })
+//                    crop("/sdcard/test_1562833951373.mp4", this, object : VideoEditor.CropListener {
+//                        override fun onError(errors: List<VideoEditor.CropError>) {
+//                            android.util.Log.w("daqi", "error")
+//                        }
+//
+//                        override fun onFinish() {
+//                            android.util.Log.w("daqi", "onFinish")
+//                        }
+//
+//                        override fun onProgress(finishedCount: Int, totalCount: Int) {
+//                            android.util.Log.w("daqi", "progress index: $finishedCount of total: $totalCount, time: ${System.currentTimeMillis() - stMil}")
+//                            stMil = System.currentTimeMillis()
+//                        }
+//                    })
                 }
             }
         }
     }
 
-    fun startRecord() {
+    fun prepareRecord() {
         VideoManager.run {
             if (init(this@MainActivity2.application) != INIT_RESULT_OK) {
                 Toast.makeText(applicationContext, "该设备不支持录屏，请检查log.", Toast.LENGTH_LONG).show()
@@ -158,14 +161,14 @@ class MainActivity2 : AppCompatActivity() {
                                     for (i in 0 until size) {
                                         fa[i] = this[i] * 1.0f / 32767
                                     }
-                                    VideoManager.onAudioBuffer(fa, size, sampleRate)
+                                    VideoManager.onAudioBuffer(fa)
                                 }
                             }
                         } else {
                             asFloatBuffer().run {
                                 FloatArray(limit() - position()).run {
                                     get(this)
-                                    VideoManager.onAudioBuffer(this, size, sampleRate)
+                                    VideoManager.onAudioBuffer(this)
                                 }
                             }
                         }

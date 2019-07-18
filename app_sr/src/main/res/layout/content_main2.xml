@@ -4,6 +4,12 @@
               android:layout_width="match_parent"
               android:orientation="vertical">
 
+    <Button android:id="@+id/prepare"
+            android:text="准备录制"
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
     <Button android:id="@+id/start"
             android:text="开始录制"
             android:layout_marginTop="20dp"

@@ -14,7 +14,10 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
+import com.google.gson.Gson
+import com.google.gson.stream.JsonReader
 import java.io.File
+import java.io.FileReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.abs
@@ -33,6 +36,9 @@ object VideoManager {
     const val INIT_RESULT_OS_UNSURPPORT = 1
     const val INIT_RESULT_NO_VIDEO_ENCODER = 2
 
+    const val START_RESULT_OK = 0
+    const val START_RESULT_NO_MP = 1
+
     private var initResult = Int.MIN_VALUE
 
     lateinit var app: Application
@@ -41,8 +47,9 @@ object VideoManager {
     lateinit var orgMp4Path: String
     lateinit var audioAdapter: AudioAdapter
 
-    var recorderStarted = false
     var mp: MediaProjection? = null
+    var started: Boolean = false
+    var withAudio: Boolean = false
 
     var selectedQuality: Quality? = null
         set(value) {
@@ -57,6 +64,11 @@ object VideoManager {
 
     var dm: DisplayMetrics? = null
 
+    val CONFIG_FILE = "/sdcard/sr.config"
+    public var config: Config? = null
+
+    data class Config(val quality: Int, val duration: Int) {}
+
     fun init(app: Application): Int {
         if (initResult != Int.MIN_VALUE) {
             return initResult
@@ -64,6 +76,13 @@ object VideoManager {
         if (android.os.Build.VERSION.SDK_INT < 21) {
             initResult = INIT_RESULT_OS_UNSURPPORT
             return initResult
+        }
+        File(CONFIG_FILE).run {
+            if (!exists()) {
+                Toast.makeText(app, "没有发现配置文件 $CONFIG_FILE, 走默认配置", Toast.LENGTH_LONG).show()
+            } else {
+                config = Gson().fromJson(JsonReader(FileReader(CONFIG_FILE)), Config::class.java)
+            }
         }
         Quality.apply {
             this.init(app)
@@ -75,6 +94,16 @@ object VideoManager {
         this.app = app
         initResult = INIT_RESULT_OK
         selectedQuality = Quality.HIGH
+        config?.run {
+            if (quality == 1) {
+                selectedQuality = Quality.HIGH
+            } else if (quality == 2) {
+                selectedQuality = Quality.BASE
+            } else {
+                selectedQuality = Quality.LOW
+            }
+        }
+        Log.w(TAG, "Selected quality is: ${selectedQuality!!.name}")
         dm = DisplayMetrics().apply {
             (app.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(this)
         }
@@ -115,82 +144,87 @@ object VideoManager {
         mp = projectionManager.getMediaProjection(resultCode, data)
     }
 
-    // 面向Unity环境，使用这个接口
-    fun onAudioBuffer(buffer: FloatArray, length: Int, sampleRate: Int) {
+    fun startScreenRecord(withAudio: Boolean = false, audioSampleRate: Int = 0): Int {
+        checkState()
         if (mp == null) {
-            return
+            return START_RESULT_NO_MP
         }
-        if (!recorderStarted) {
-            recorderStarted = true
-            startRecorder(sampleRate)
-        } else {
-            for (observer in audioAdapter.observers) {
-                try {
-                    if (Quality.ONLY_PCM_16) {
-                        // 转为pcm_16
-                        val sa = ShortArray(buffer.size).apply {
-                            for (i in 0 until buffer.size) {
-                                if (abs(x = buffer[i]) > 1.0) {
-                                    Log.e("daqi", "one float is too big: ${buffer[i]}")
-                                }
-                                set(i, (buffer[i] * 32767).toShort())
-                            }
-                        }
-                        ByteBuffer.allocate(sa.size * 2).run {
-                            order(ByteOrder.nativeOrder())
-                            val sb = asShortBuffer().apply {
-                                put(sa)
-                                flip()
-                            }
-                            flip()
-                            limit((sb.limit() - sb.position()) * 2)
-                            observer.onAudioAvail(this)
-                        }
-                    } else {
-                        ByteBuffer.allocate(length * 4).run {
-                            order(ByteOrder.nativeOrder())
-                            val fb = asFloatBuffer().apply {
-                                put(buffer)
-                                flip()
-                            }
-                            flip()
-                            limit((fb.limit() - fb.position()) * 4)
-                            observer.onAudioAvail(this)
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG, "exception: ", e)
+        if (!started) {
+            if (DEBUG) {
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(app, "输出视频地址：$orgMp4Path", Toast.LENGTH_LONG).show()
                 }
             }
+            this.withAudio = withAudio
+            recorder = ScreenRecorder(orgMp4Path).apply {
+                selectedQuality!!.videoFormat.run {
+                    setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+                    prepareVideo(Quality.videoCodec!!, this, mp!!).apply {
+                        if (this != Listener.ERROR_NO) {
+                            listener?.onFail(this)
+                        }
+                    }
+                }
+                if (withAudio) {
+                    // audio codec可能为空，此时降级为只录取视频
+                    selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
+                        audioAdapter = AudioAdapter()
+                        prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
+                            if (this != Listener.ERROR_NO) {
+                                listener?.onFail(this)
+                            }
+                        }
+                    }
+                }
+                start(dm!!.widthPixels, dm!!.heightPixels)
+            }
+            started = true
         }
+        return START_RESULT_OK
     }
 
-    fun startRecorder(audioSampleRate: Int) {
-        checkState()
-        if (DEBUG) {
-            Handler(Looper.getMainLooper()).post {
-                Toast.makeText(app, "输出视频地址：$orgMp4Path", Toast.LENGTH_LONG).show()
-            }
+    // 面向Unity环境，使用这个接口
+    fun onAudioBuffer(buffer: FloatArray) {
+        if (!started || !withAudio) {
+            return
         }
-        recorder = ScreenRecorder(orgMp4Path).apply {
-            selectedQuality!!.videoFormat.run {
-                setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-                prepareVideo(Quality.videoCodec!!, this, mp!!).apply {
-                    if (this != Listener.ERROR_NO) {
-                        listener?.onFail(this)
+        for (observer in audioAdapter.observers) {
+            try {
+                if (Quality.ONLY_PCM_16) {
+                    // 转为pcm_16
+                    val sa = ShortArray(buffer.size).apply {
+                        for (i in 0 until buffer.size) {
+                            if (abs(x = buffer[i]) > 1.0) {
+                                Log.e("daqi", "one float is too big: ${buffer[i]}")
+                            }
+                            set(i, (buffer[i] * 32767).toShort())
+                        }
+                    }
+                    ByteBuffer.allocate(sa.size * 2).run {
+                        order(ByteOrder.nativeOrder())
+                        val sb = asShortBuffer().apply {
+                            put(sa)
+                            flip()
+                        }
+                        flip()
+                        limit((sb.limit() - sb.position()) * 2)
+                        observer.onAudioAvail(this)
+                    }
+                } else {
+                    ByteBuffer.allocate(buffer.size * 4).run {
+                        order(ByteOrder.nativeOrder())
+                        val fb = asFloatBuffer().apply {
+                            put(buffer)
+                            flip()
+                        }
+                        flip()
+                        limit((fb.limit() - fb.position()) * 4)
+                        observer.onAudioAvail(this)
                     }
                 }
+            } catch (e: Exception) {
+                Log.w(TAG, "exception: ", e)
             }
-            // audio codec可能为空，此时降级为只录取视频
-            selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
-                audioAdapter = AudioAdapter()
-                prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
-                    if (this != Listener.ERROR_NO) {
-                        listener?.onFail(this)
-                    }
-                }
-            }
-            start(dm!!.widthPixels, dm!!.heightPixels)
         }
     }
 
@@ -200,7 +234,7 @@ object VideoManager {
             Toast.makeText(app, "录屏结束, 文件地址：$orgMp4Path", Toast.LENGTH_LONG).show()
         }
         recorder.stop()
-        recorderStarted = false
+        started = false
         mp = null
     }
 
