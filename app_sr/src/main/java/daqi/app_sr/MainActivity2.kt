@@ -14,6 +14,7 @@ import com.bytedance.ttgame.module.screenrecord.Listener
 import com.bytedance.ttgame.module.screenrecord.Quality
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
 import com.bytedance.ttgame.module.screenrecord.VideoManager
+import com.bytedance.ttgame.module.screenrecord.VideoManager.Companion.INIT_RESULT_OK
 import kotlinx.android.synthetic.main.content_main2.cut
 import kotlinx.android.synthetic.main.content_main2.img
 import kotlinx.android.synthetic.main.content_main2.pause
@@ -29,10 +30,13 @@ import java.nio.ByteOrder
 class MainActivity2 : AppCompatActivity() {
 
     private var audioPlayer: AudioPlayer? = null
+    private lateinit var videoManager: VideoManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.content_main2)
+        videoManager = VideoManager()
+
         startAnim()
         playAudio()
 
@@ -51,7 +55,7 @@ class MainActivity2 : AppCompatActivity() {
         if (requestCode == 0) {
             init()
         } else if (requestCode == 1) {
-            VideoManager.onActivityResult(resultCode, data!!)
+            videoManager.onActivityResult(resultCode, data!!)
         }
     }
 
@@ -75,10 +79,10 @@ class MainActivity2 : AppCompatActivity() {
             prepareRecord()
         }
         start.setOnClickListener {
-            VideoManager.startScreenRecord(true, audioPlayer!!.sampleRate)
+            videoManager.startScreenRecord(true, audioPlayer!!.sampleRate)
         }
         stop.setOnClickListener {
-            VideoManager.stopScreenRecord()
+            videoManager.stopScreenRecord()
         }
         pause.setOnClickListener {
             //            recorder.pause()
@@ -119,7 +123,7 @@ class MainActivity2 : AppCompatActivity() {
     }
 
     fun prepareRecord() {
-        VideoManager.run {
+        videoManager.run {
             if (init(this@MainActivity2.application) != INIT_RESULT_OK) {
                 Toast.makeText(applicationContext, "该设备不支持录屏，请检查log.", Toast.LENGTH_LONG).show()
                 return
@@ -127,11 +131,11 @@ class MainActivity2 : AppCompatActivity() {
             selectedQuality = Quality.HIGH!!
             listener = object : Listener {
                 override fun onSucc(videoFiles: List<File>) {
-                    Log.w(TAG, "recording onSucc: $videoFiles")
+                    Log.w("daqi", "recording onSucc: $videoFiles")
                 }
 
                 override fun onFail(error: Int, exception: Throwable?) {
-                    Log.w(TAG, "recording onFail, error: $error", exception)
+                    Log.w("daqi", "recording onFail, error: $error", exception)
                     throw RuntimeException(exception)
                 }
             }
@@ -158,14 +162,14 @@ class MainActivity2 : AppCompatActivity() {
                                     for (i in 0 until size) {
                                         fa[i] = this[i] * 1.0f / 32767
                                     }
-                                    VideoManager.onAudioBuffer(fa)
+                                    videoManager.onAudioBuffer(fa)
                                 }
                             }
                         } else {
                             asFloatBuffer().run {
                                 FloatArray(limit() - position()).run {
                                     get(this)
-                                    VideoManager.onAudioBuffer(this)
+                                    videoManager.onAudioBuffer(this)
                                 }
                             }
                         }

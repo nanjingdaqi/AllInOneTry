@@ -22,22 +22,24 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.abs
 
-object VideoManager {
+class VideoManager {
 
-    public const val DEBUG = true
+    companion object {
+        public const val DEBUG = true
 
-    const val TAG = "VideoManager"
+        const val TAG = "VideoManager"
 
-    const val DIR = "g_screen_records"
-    const val ORG_MP4_PREFIX = "org_screen_record_"
-    const val CROP_MP4_PREFIX = "cropped_scree_record_"
+        const val DIR = "g_screen_records"
+        const val ORG_MP4_PREFIX = "org_screen_record_"
+        const val CROP_MP4_PREFIX = "cropped_scree_record_"
 
-    const val INIT_RESULT_OK = 0
-    const val INIT_RESULT_OS_UNSURPPORT = 1
-    const val INIT_RESULT_NO_VIDEO_ENCODER = 2
+        const val INIT_RESULT_OK = 0
+        const val INIT_RESULT_OS_UNSURPPORT = 1
+        const val INIT_RESULT_NO_VIDEO_ENCODER = 2
 
-    const val START_RESULT_OK = 0
-    const val START_RESULT_NO_MP = 1
+        const val START_RESULT_OK = 0
+        const val START_RESULT_NO_MP = 1
+    }
 
     private var initResult = Int.MIN_VALUE
 
@@ -50,6 +52,7 @@ object VideoManager {
     var mp: MediaProjection? = null
     var started: Boolean = false
     var withAudio: Boolean = false
+    var failed: Boolean = false
 
     var selectedQuality: Quality? = null
         set(value) {
@@ -64,7 +67,7 @@ object VideoManager {
 
     var dm: DisplayMetrics? = null
 
-    val CONFIG_FILE = "/sdcard/sr.config"
+    val DEBUG_CONFIG_FILE = "/sdcard/sr.config"
     public var config: Config? = null
 
     data class Config(val quality: Int, val duration: Int) {}
@@ -77,11 +80,11 @@ object VideoManager {
             initResult = INIT_RESULT_OS_UNSURPPORT
             return initResult
         }
-        File(CONFIG_FILE).run {
+        File(DEBUG_CONFIG_FILE).run {
             if (!exists()) {
-                Toast.makeText(app, "没有发现配置文件 $CONFIG_FILE, 走默认配置", Toast.LENGTH_LONG).show()
+                Toast.makeText(app, "没有发现配置文件 $DEBUG_CONFIG_FILE, 走默认配置", Toast.LENGTH_LONG).show()
             } else {
-                config = Gson().fromJson(JsonReader(FileReader(CONFIG_FILE)), Config::class.java)
+                config = Gson().fromJson(JsonReader(FileReader(DEBUG_CONFIG_FILE)), Config::class.java)
             }
         }
         Quality.apply {
@@ -95,12 +98,10 @@ object VideoManager {
         initResult = INIT_RESULT_OK
         selectedQuality = Quality.HIGH
         config?.run {
-            if (quality == 1) {
-                selectedQuality = Quality.HIGH
-            } else if (quality == 2) {
-                selectedQuality = Quality.BASE
-            } else {
-                selectedQuality = Quality.LOW
+            when (quality) {
+                1 -> selectedQuality = Quality.HIGH
+                2 -> selectedQuality = Quality.BASE
+                else -> selectedQuality = Quality.LOW
             }
         }
         Log.w(TAG, "Selected quality is: ${selectedQuality!!.name}")
@@ -123,6 +124,9 @@ object VideoManager {
         if (initResult == Int.MIN_VALUE) {
             throw IllegalStateException("Please invoke init method at first.")
         }
+        if (failed) {
+            throw IllegalStateException("当前VideoManager对象已经录制失败，无法再次使用，请重新创建.")
+        }
     }
 
     fun prepareVideo(activity: Activity, requestCode: Int) {
@@ -133,6 +137,7 @@ object VideoManager {
 
     fun onActivityResult(resultCode: Int, data: Intent) {
         if (resultCode == Activity.RESULT_OK) {
+            Log.w(TAG, "User confirmed screen recording.")
             createMediaProjection(resultCode, data)
         } else {
             Log.v(TAG, "User did not choose OK for screen recording.")
@@ -140,7 +145,6 @@ object VideoManager {
     }
 
     fun createMediaProjection(resultCode: Int, data: Intent) {
-        Log.w("daqi", "start screen record")
         mp = projectionManager.getMediaProjection(resultCode, data)
     }
 
@@ -156,12 +160,12 @@ object VideoManager {
                 }
             }
             this.withAudio = withAudio
-            recorder = ScreenRecorder(orgMp4Path).apply {
+            recorder = ScreenRecorder(orgMp4Path, this).apply {
                 selectedQuality!!.videoFormat.run {
                     setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
                     prepareVideo(Quality.videoCodec!!, this, mp!!).apply {
                         if (this != Listener.ERROR_NO) {
-                            listener?.onFail(this)
+                            onFail(this)
                         }
                     }
                 }
@@ -171,7 +175,7 @@ object VideoManager {
                         audioAdapter = AudioAdapter()
                         prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
                             if (this != Listener.ERROR_NO) {
-                                listener?.onFail(this)
+                                onFail(this)
                             }
                         }
                     }
@@ -229,13 +233,24 @@ object VideoManager {
     }
 
     fun stopScreenRecord() {
-        Log.w(TAG, "stop screen record.")
-        if (DEBUG) {
-            Toast.makeText(app, "录屏结束, 文件地址：$orgMp4Path", Toast.LENGTH_LONG).show()
+        if (started) {
+            Log.w(TAG, "stop screen record.")
+            if (DEBUG) {
+                Toast.makeText(app, "录屏结束, 文件地址：$orgMp4Path", Toast.LENGTH_LONG).show()
+            }
+            recorder.stop()
+            started = false
+            mp = null
         }
-        recorder.stop()
-        started = false
-        mp = null
+    }
+
+    fun onFail(error: Int, exception: Throwable? = null) {
+        if (!failed) {
+            // 保证只会向外通知一次
+            failed = true
+            stopScreenRecord()
+            listener?.onFail(error, exception)
+        }
     }
 
     class AudioAdapter : AudioSource {

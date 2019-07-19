@@ -13,17 +13,19 @@ import android.os.SystemClock
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_AUDIO_ENCODE_FAIL
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_AUDIO_ENCODER
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_CREATE_VIDEO_ENCODER
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_FINISH_FAIL
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_IN_USE
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_NO
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_VIDEO_ENCODE_FAIL
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_START
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_STOP
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.T
+import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
-class ScreenRecorder(val outMp4Path: String) {
+class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
 
     companion object {
         const val T = "daqi-ScreenRecorder"
@@ -39,7 +41,7 @@ class ScreenRecorder(val outMp4Path: String) {
     }
 
     enum class State {
-        UNSTARTED, RECORDING, PAUSED, STOPPED
+        UNSTARTED, RECORDING, PAUSED, STOPPED, FAILED
     }
 
     private var state = State.UNSTARTED
@@ -79,10 +81,12 @@ class ScreenRecorder(val outMp4Path: String) {
 
         override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
             recorderH.post {
-                Util.logk(T, "video format changed")
-                muxer.run {
-                    addTrack(format, videoCoder)
-                    mayStart()
+                if (state == State.RECORDING) {
+                    Util.logk(T, "video format changed")
+                    muxer.run {
+                        addTrack(format, videoCoder)
+                        mayStart()
+                    }
                 }
             }
         }
@@ -98,11 +102,17 @@ class ScreenRecorder(val outMp4Path: String) {
                 while (state == State.RECORDING) {
                     audioQueue?.poll(1, TimeUnit.SECONDS)?.run {
                         val data = this
-                        codec.getInputBuffer(index)?.run {
-                            Util.logd(T, "audio feed one buffer: $this")
-                            put(data)
-                            flip()
-                            codec.queueInputBuffer(index, 0, limit(), 0, 0)
+                        try {
+                            codec.getInputBuffer(index)?.run {
+                                Util.logd(T, "audio feed one buffer: $this")
+                                put(data)
+                                flip()
+                                codec.queueInputBuffer(index, 0, limit(), 0, 0)
+                            }
+                        } catch (e: IllegalStateException) {
+                            // 这里的线程没有与encode线程同步，会存在这种潜在风险
+                            Util.logd(T, "audio feed fail because encoder has been closed.")
+                            e.printStackTrace()
                         }
                         return@post
                     }
@@ -128,10 +138,12 @@ class ScreenRecorder(val outMp4Path: String) {
 
         override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
             recorderH.post {
-                Util.logk(T, "audio format changed")
-                muxer.run {
-                    addTrack(format, audioCoder!!)
-                    mayStart()
+                if (state == State.RECORDING) {
+                    Util.logk(T, "audio format changed")
+                    muxer.run {
+                        addTrack(format, audioCoder!!)
+                        mayStart()
+                    }
                 }
             }
         }
@@ -199,8 +211,10 @@ class ScreenRecorder(val outMp4Path: String) {
 
     private fun configThread(td: Thread, videoT: Boolean) {
         td.setUncaughtExceptionHandler { t, e ->
+            state = State.FAILED
             Util.logk(T, "Thread ${t.name} exception", e)
-            VideoManager.listener?.onFail(if (videoT) ERROR_VIDEO_ENCODE_FAIL else ERROR_AUDIO_ENCODE_FAIL, e)
+            videoManager.onFail(if (videoT) ERROR_VIDEO_ENCODE_FAIL else ERROR_AUDIO_ENCODE_FAIL, e)
+            stop()
         }
     }
 
@@ -227,11 +241,13 @@ class ScreenRecorder(val outMp4Path: String) {
     }
 
     fun stop() {
-        state = State.STOPPED
-        synchronized(pauseLock) {
-            pauseLock.notifyAll()
+        if (state != State.STOPPED) {
+            state = State.STOPPED
+            synchronized(pauseLock) {
+                pauseLock.notifyAll()
+            }
+            recorderH.sendEmptyMessage(MSG_STOP)
         }
-        recorderH.sendEmptyMessage(MSG_STOP)
     }
 
     private fun computeTimeStampUs(): Long {
@@ -239,8 +255,7 @@ class ScreenRecorder(val outMp4Path: String) {
             firstTimeStampUs = SystemClock.elapsedRealtime() * 1000
             return 0
         }
-        val ts = SystemClock.elapsedRealtime() * 1000 - firstTimeStampUs
-        return ts
+        return SystemClock.elapsedRealtime() * 1000 - firstTimeStampUs
     }
 
     fun writeEos(coder: CodecContext) {
@@ -251,14 +266,19 @@ class ScreenRecorder(val outMp4Path: String) {
     }
 
     fun finishAll() {
-        Util.logk(T, "finish all resource")
-        virtualDisplay.release()
-        mp.stop()
-        videoCoder.stop()
-        muxer.mayFinish()
-        audioCoder?.run {
-            stop()
+        try {
+            Util.logk(T, "finish all resource")
+            virtualDisplay.release()
+            mp.stop()
+            videoCoder.stop()
             muxer.mayFinish()
+            audioCoder?.run {
+                stop()
+                muxer.mayFinish()
+            }
+        } catch (e: Exception) {
+            Util.logk(T, "finish resource failed")
+            videoManager.onFail(ERROR_FINISH_FAIL, e)
         }
     }
 }
