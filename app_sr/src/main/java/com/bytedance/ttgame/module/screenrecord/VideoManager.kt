@@ -2,22 +2,27 @@ package com.bytedance.ttgame.module.screenrecord
 
 import android.app.Activity
 import android.app.Application
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_ACTIVITY_PAUSED
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
 import java.io.File
 import java.io.FileReader
+import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.abs
@@ -43,6 +48,7 @@ class VideoManager {
 
     private var initResult = Int.MIN_VALUE
 
+    lateinit var mainActivityComponentName: ComponentName
     lateinit var app: Application
     lateinit var projectionManager: MediaProjectionManager
     lateinit var recorder: ScreenRecorder
@@ -70,9 +76,9 @@ class VideoManager {
     val DEBUG_CONFIG_FILE = "/sdcard/sr.config"
     public var config: Config? = null
 
-    data class Config(val quality: Int, val duration: Int) {}
+    data class Config(val quality: Int, val duration: Int)
 
-    fun init(app: Application): Int {
+    fun init(activity: Activity): Int {
         if (initResult != Int.MIN_VALUE) {
             return initResult
         }
@@ -80,6 +86,8 @@ class VideoManager {
             initResult = INIT_RESULT_OS_UNSURPPORT
             return initResult
         }
+        app = activity.application
+        mainActivityComponentName = activity.componentName
         File(DEBUG_CONFIG_FILE).run {
             if (!exists()) {
                 Toast.makeText(app, "没有发现配置文件 $DEBUG_CONFIG_FILE, 走默认配置", Toast.LENGTH_LONG).show()
@@ -94,14 +102,13 @@ class VideoManager {
                 return initResult
             }
         }
-        this.app = app
         initResult = INIT_RESULT_OK
         selectedQuality = Quality.HIGH
         config?.run {
-            when (quality) {
-                1 -> selectedQuality = Quality.HIGH
-                2 -> selectedQuality = Quality.BASE
-                else -> selectedQuality = Quality.LOW
+            selectedQuality = when (quality) {
+                1 -> Quality.HIGH
+                2 -> Quality.BASE
+                else -> Quality.LOW
             }
         }
         Log.w(TAG, "Selected quality is: ${selectedQuality!!.name}")
@@ -109,6 +116,7 @@ class VideoManager {
             (app.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(this)
         }
         initOutFile()
+        observeActivityInvisible(app)
         return initResult
     }
 
@@ -118,6 +126,32 @@ class VideoManager {
             mkdirs()
             orgMp4Path = File(this, "${ORG_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
         }
+    }
+
+    private fun observeActivityInvisible(app: Application) {
+        app.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityStarted(activity: Activity?) {}
+
+            override fun onActivityDestroyed(activity: Activity?) {}
+
+            override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {}
+
+            override fun onActivityStopped(activity: Activity?) {}
+
+            override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {}
+
+            override fun onActivityPaused(activity: Activity?) {
+                if (mainActivityComponentName == activity?.componentName) {
+                    Util.logk(TAG, "Check current activity paused")
+                    // 延迟处理，处理转屏情况
+                    if (started) {
+                        onFail(ERROR_ACTIVITY_PAUSED)
+                    }
+                }
+            }
+
+            override fun onActivityResumed(activity: Activity?) {}
+        })
     }
 
     private fun checkState() {

@@ -60,7 +60,7 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
     private var audioQueue: LinkedBlockingQueue<ByteBuffer>? = null
 
     private lateinit var mp: MediaProjection
-    private var firstTimeStampUs: Long = -1
+    var firstTimeStampUs: Long = -1
 
     private val videoCodecCallback = object : CodecContext.AbstraceCallback() {
         override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, bufferInfo: MediaCodec.BufferInfo) {

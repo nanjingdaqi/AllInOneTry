@@ -13,9 +13,10 @@ interface Listener {
         const val ERROR_AUDIO_ENCODE_FAIL = 4
         const val ERROR_VIDEO_ENCODE_FAIL = 5
         const val ERROR_FINISH_FAIL = 6
-        const val ERROR_UPLOAD_FAIL = 7
-        const val ERROR_DOWNLOAD_FAIL = 8
-        const val ERROR_CROP_FAIL = 9
+        const val ERROR_ACTIVITY_PAUSED = 7
+        const val ERROR_UPLOAD_FAIL = 8
+        const val ERROR_DOWNLOAD_FAIL = 9
+        const val ERROR_CROP_FAIL = 10
     }
 
 

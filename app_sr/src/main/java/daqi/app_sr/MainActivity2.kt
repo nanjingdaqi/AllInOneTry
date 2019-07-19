@@ -120,7 +120,7 @@ class MainActivity2 : AppCompatActivity() {
 
     fun prepareRecord() {
         videoManager.run {
-            if (init(this@MainActivity2.application) != INIT_RESULT_OK) {
+            if (init(this@MainActivity2) != INIT_RESULT_OK) {
                 Toast.makeText(applicationContext, "该设备不支持录屏，请检查log.", Toast.LENGTH_LONG).show()
                 return
             }
