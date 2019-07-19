@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.os.SystemClock
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
@@ -20,6 +21,7 @@ import android.widget.Toast
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_ACTIVITY_PAUSED
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
+import io.reactivex.Observable
 import java.io.File
 import java.io.FileReader
 import java.lang.ref.WeakReference
@@ -54,6 +56,7 @@ class VideoManager {
     lateinit var recorder: ScreenRecorder
     lateinit var orgMp4Path: String
     lateinit var audioAdapter: AudioAdapter
+    var keyFrames = mutableListOf<Long>() // 与ScreenRecorder的timeStampUs计算方式一致
 
     var mp: MediaProjection? = null
     var started: Boolean = false
@@ -266,6 +269,10 @@ class VideoManager {
         }
     }
 
+    fun markKeyMoment() {
+        keyFrames.add(SystemClock.elapsedRealtime() * 1000)
+    }
+
     fun stopScreenRecord() {
         if (started) {
             Log.w(TAG, "stop screen record.")
@@ -276,6 +283,19 @@ class VideoManager {
             started = false
             mp = null
         }
+    }
+
+    /**
+     * 1. mux, 2. build crop info, 3. crop
+     * 4. upload to 视频云, 5. 上传信息到中台
+     * 6. 下载中台处理后的视频
+     */
+    private fun handlePostRecordingJob() {
+
+    }
+
+    private fun shareVideo() {
+
     }
 
     fun onFail(error: Int, exception: Throwable? = null) {

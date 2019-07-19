@@ -15,6 +15,11 @@ import com.bytedance.ttgame.module.screenrecord.Quality
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
 import com.bytedance.ttgame.module.screenrecord.VideoManager
 import com.bytedance.ttgame.module.screenrecord.VideoManager.Companion.INIT_RESULT_OK
+import io.reactivex.Observer
+import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.content_main2.cut
 import kotlinx.android.synthetic.main.content_main2.img
 import kotlinx.android.synthetic.main.content_main2.pause
@@ -79,7 +84,7 @@ class MainActivity2 : AppCompatActivity() {
             prepareRecord()
         }
         start.setOnClickListener {
-            videoManager.startScreenRecord(true, audioPlayer!!.sampleRate)
+            videoManager.startScreenRecord(false, audioPlayer!!.sampleRate)
         }
         stop.setOnClickListener {
             videoManager.stopScreenRecord()
@@ -97,22 +102,50 @@ class MainActivity2 : AppCompatActivity() {
                 var index = 0
                 mutableListOf<VideoEditor.CropInfo>().apply {
                     add(VideoEditor.CropInfo(0, 5000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-                    add(VideoEditor.CropInfo(5000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-                    add(VideoEditor.CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-                    add(VideoEditor.CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-                    add(VideoEditor.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+//                    add(VideoEditor.CropInfo(2000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+//                    add(VideoEditor.CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+//                    add(VideoEditor.CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+//                    add(VideoEditor.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
                 }.run {
-                    var stMil = System.currentTimeMillis()
-                    crop("/sdcard/test_1562833951373.mp4", this, object : VideoEditor.CropListener {
-                        override fun onFinish() {
-                            Log.w("daqi", "finish time consumption: ${System.currentTimeMillis() - stMil}")
-                        }
+//                    val stMil = System.currentTimeMillis()
+//                    crop("/sdcard/test_1562833951373.mp4", this)
+//                    mux("/sdcard/a.mp4", "/sdcard/test.mp3", "/a_g_game/muxed.mp4")
+//                            .subscribeOn(Schedulers.from(worker))
+//                            .flatMap {
+//                                crop(it.absolutePath, this)
+//                            }
+//                            .observeOn(AndroidSchedulers.mainThread())
+//                            .subscribe(object : Observer<List<File>> {
+//                                override fun onComplete() {
+//                                    Log.w("daqi", "finish time consumption: ${System.currentTimeMillis() - stMil}")
+//                                }
+//
+//                                override fun onSubscribe(d: Disposable) {}
+//
+//                                override fun onNext(t: List<File>) {}
+//
+//                                override fun onError(e: Throwable) {
+//                                    throw RuntimeException(e)
+//                                }
+//                            })
+                    mux("/sdcard/a.mp4", "/sdcard/test.mp3", "/a_g_game/muxed.mp4")
+                            .subscribeOn(Schedulers.from(worker))
+                            .subscribe(object : Observer<File> {
+                                override fun onComplete() {
+                                    Log.w("daqi", "onComplete")
+                                }
 
-                        override fun onError(error: Int) {
-                            throw RuntimeException("fail $error")
-                        }
+                                override fun onSubscribe(d: Disposable) {
+                                }
 
-                    })
+                                override fun onNext(t: File) {
+
+                                }
+
+                                override fun onError(e: Throwable) {
+                                    throw RuntimeException(e)
+                                }
+                            })
                 }
             }
         }

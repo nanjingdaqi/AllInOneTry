@@ -252,6 +252,7 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
 
     private fun computeTimeStampUs(): Long {
         if (firstTimeStampUs == -1L) {
+            // 这里的计算方式要与VideoManager#makeKeyMoment保持一致
             firstTimeStampUs = SystemClock.elapsedRealtime() * 1000
             return 0
         }
