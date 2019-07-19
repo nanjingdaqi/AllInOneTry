@@ -103,20 +103,16 @@ class MainActivity2 : AppCompatActivity() {
                     add(VideoEditor.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
                 }.run {
                     var stMil = System.currentTimeMillis()
-//                    crop("/sdcard/test_1562833951373.mp4", this, object : VideoEditor.CropListener {
-//                        override fun onError(errors: List<VideoEditor.CropError>) {
-//                            android.util.Log.w("daqi", "error")
-//                        }
-//
-//                        override fun onFinish() {
-//                            android.util.Log.w("daqi", "onFinish")
-//                        }
-//
-//                        override fun onProgress(finishedCount: Int, totalCount: Int) {
-//                            android.util.Log.w("daqi", "progress index: $finishedCount of total: $totalCount, time: ${System.currentTimeMillis() - stMil}")
-//                            stMil = System.currentTimeMillis()
-//                        }
-//                    })
+                    crop("/sdcard/test_1562833951373.mp4", this, object : VideoEditor.CropListener {
+                        override fun onFinish() {
+                            Log.w("daqi", "finish time consumption: ${System.currentTimeMillis() - stMil}")
+                        }
+
+                        override fun onError(error: Int) {
+                            throw RuntimeException("fail $error")
+                        }
+
+                    })
                 }
             }
         }
