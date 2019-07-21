@@ -1,28 +1,13 @@
 package com.bytedance.ttgame.module.screenrecord
 
-import android.app.Application
 import android.util.Log
-import com.ss.android.vesdk.VESDK
 import com.ss.android.vesdk.VEUtils
 import io.reactivex.Observable
 import java.io.File
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 object VideoEditor {
 
     const val TAG = "daqi-VideoEditor"
-
-    lateinit var workspaceDir: String
-    lateinit var worker: Executor
-
-    public fun init(app: Application, workspaceDir: String) {
-        this.workspaceDir = workspaceDir
-        VESDK.init(app, workspaceDir)
-        worker = Executors.newSingleThreadExecutor {
-            Thread(null, it, "VideoEditor")
-        }
-    }
 
     public fun mux(inVideoPath: String, inAudioPath: String, outPath: String): Observable<File> {
         return Observable.create { emitter ->
@@ -38,7 +23,7 @@ object VideoEditor {
         }
     }
 
-    public fun crop(inVideoPath: String, cropInfos: List<CropInfo>): Observable<List<File>> {
+    public fun crop(inVideoPath: String, cropInfos: List<CropInfo>): Observable<List<CropInfo>> {
         return Observable.create { emitter ->
             cropInfos.run {
                 val outPaths = ArrayList<String>(size)
@@ -56,12 +41,8 @@ object VideoEditor {
                 Log.d(TAG, "crop video: st: $stTimes, ed: $edTimes")
                 VEUtils.curVideo(inVideoPath, outPaths, stTimes, edTimes).run {
                     if (this == 0) {
-                        outPaths.map {
-                            File(it)
-                        }.run {
-                            emitter.onNext(this)
-                            emitter.onComplete()
-                        }
+                        emitter.onNext(cropInfos)
+                        emitter.onComplete()
                     } else {
                         emitter.onError(CropException(this))
                     }
@@ -69,9 +50,4 @@ object VideoEditor {
             }
         }
     }
-
-    data class CropInfo(val stMilli: Int, val edMilli: Int, val outPath: String)
-
-    class MuxException(val error: Int) : Exception()
-    class CropException(val error: Int) : Exception()
 }

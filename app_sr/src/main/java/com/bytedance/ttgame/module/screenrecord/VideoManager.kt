@@ -9,24 +9,29 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.os.SystemClock
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_ACTIVITY_PAUSED
+import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_NO_AUDIO_FILE
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
+import com.ss.android.vesdk.VESDK
 import io.reactivex.Observable
+import io.reactivex.SingleObserver
+import io.reactivex.disposables.Disposable
+import io.reactivex.functions.BiFunction
+import io.reactivex.schedulers.Schedulers
 import java.io.File
 import java.io.FileReader
-import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import kotlin.math.abs
 
 class VideoManager {
@@ -36,16 +41,64 @@ class VideoManager {
 
         const val TAG = "VideoManager"
 
-        const val DIR = "g_screen_records"
+        const val ROOT_DIR = "g_screen_records"
+        const val VESDK_DIR = "vesdk"
+        const val CROP_DIR = "crop"
+        const val DOWNLOAD_DIR = "download"
         const val ORG_MP4_PREFIX = "org_screen_record_"
-        const val CROP_MP4_PREFIX = "cropped_scree_record_"
+        const val MUXED_MP4_PREFIX = "muxed_screen_record_"
+        const val CROP_MP4_PREFIX = "cropped_screen_record_"
+        const val DOWNLOADED_MP4_PREFIX = "downloaded_screen_record_"
 
         const val INIT_RESULT_OK = 0
-        const val INIT_RESULT_OS_UNSURPPORT = 1
+        const val INIT_RESULT_OS_UNSUPPORT = 1
         const val INIT_RESULT_NO_VIDEO_ENCODER = 2
 
         const val START_RESULT_OK = 0
         const val START_RESULT_NO_MP = 1
+
+        val worker = Executors.newSingleThreadExecutor {
+            Thread(null, it, "video-worker")
+        }
+        val downloadWorker = Executors.newCachedThreadPool {
+            Thread(null, it, "video-downloader")
+        }
+
+        var rootDir: File? = null
+        var cropDir: File? = null
+        var downloadDir: File? = null
+        var vesdkDir: File? = null
+
+        private fun initOnce(app: Application) {
+            if (rootDir == null) {
+                rootDir = File(if (!DEBUG) app.filesDir else File("/sdcard"), ROOT_DIR).apply {
+                    Util.removeDir(absolutePath)
+                    mkdirs()
+                    cropDir = File(this, CROP_DIR).apply {
+                        mkdirs()
+                    }
+                    downloadDir = File(this, DOWNLOAD_DIR).apply {
+                        mkdirs()
+                    }
+                    vesdkDir = File(this, VESDK_DIR).apply {
+                        mkdirs()
+                        VESDK.init(app, absolutePath)
+                    }
+                }
+            }
+        }
+
+        private fun clearDir() {
+            listOf(cropDir, vesdkDir).forEach { dir ->
+                dir?.listFiles()?.forEach {
+                    if (it.isFile) {
+                        it.delete()
+                    } else {
+                        Util.removeDir(it.absolutePath)
+                    }
+                }
+            }
+        }
     }
 
     private var initResult = Int.MIN_VALUE
@@ -55,12 +108,14 @@ class VideoManager {
     lateinit var projectionManager: MediaProjectionManager
     lateinit var recorder: ScreenRecorder
     lateinit var orgMp4Path: String
+    lateinit var muxedMp4Path: String
     lateinit var audioAdapter: AudioAdapter
-    var keyFrames = mutableListOf<Long>() // 与ScreenRecorder的timeStampUs计算方式一致
+    var keyMoments = mutableListOf<KeyMoment>() // 与ScreenRecorder的timeStampUs计算方式一致
+    var audioFile: File? = null
 
     var mp: MediaProjection? = null
     var started: Boolean = false
-    var withAudio: Boolean = false
+    lateinit var userConfig: RecordUserConfig
     var failed: Boolean = false
 
     var selectedQuality: Quality? = null
@@ -86,11 +141,19 @@ class VideoManager {
             return initResult
         }
         if (android.os.Build.VERSION.SDK_INT < 21) {
-            initResult = INIT_RESULT_OS_UNSURPPORT
+            initResult = INIT_RESULT_OS_UNSUPPORT
             return initResult
         }
         app = activity.application
         mainActivityComponentName = activity.componentName
+
+        initOnce(app)
+        // 每次开始录屏时，都清除之前的数据
+        clearDir()
+
+        orgMp4Path = File(rootDir, "${ORG_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
+        muxedMp4Path = File(rootDir, "${MUXED_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
+
         File(DEBUG_CONFIG_FILE).run {
             if (!exists()) {
                 Toast.makeText(app, "没有发现配置文件 $DEBUG_CONFIG_FILE, 走默认配置", Toast.LENGTH_LONG).show()
@@ -118,31 +181,12 @@ class VideoManager {
         dm = DisplayMetrics().apply {
             (app.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(this)
         }
-        initOutFile()
         observeActivityInvisible(app)
         return initResult
     }
 
-    private fun initOutFile() {
-        File(if (!DEBUG) app.filesDir else File("/sdcard"), DIR).apply {
-            Util.removeDir(absolutePath)
-            mkdirs()
-            orgMp4Path = File(this, "${ORG_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
-        }
-    }
-
     private fun observeActivityInvisible(app: Application) {
-        app.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
-            override fun onActivityStarted(activity: Activity?) {}
-
-            override fun onActivityDestroyed(activity: Activity?) {}
-
-            override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {}
-
-            override fun onActivityStopped(activity: Activity?) {}
-
-            override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {}
-
+        app.registerActivityLifecycleCallbacks(object : EmptyActivityLifecycleCallbacks() {
             override fun onActivityPaused(activity: Activity?) {
                 if (mainActivityComponentName == activity?.componentName) {
                     Util.logk(TAG, "Check current activity paused")
@@ -152,8 +196,6 @@ class VideoManager {
                     }
                 }
             }
-
-            override fun onActivityResumed(activity: Activity?) {}
         })
     }
 
@@ -181,11 +223,11 @@ class VideoManager {
         }
     }
 
-    fun createMediaProjection(resultCode: Int, data: Intent) {
+    private fun createMediaProjection(resultCode: Int, data: Intent) {
         mp = projectionManager.getMediaProjection(resultCode, data)
     }
 
-    fun startScreenRecord(withAudio: Boolean = false, audioSampleRate: Int = 0): Int {
+    fun startScreenRecord(userConfig: RecordUserConfig): Int {
         checkState()
         if (mp == null) {
             return START_RESULT_NO_MP
@@ -196,7 +238,7 @@ class VideoManager {
                     Toast.makeText(app, "输出视频地址：$orgMp4Path", Toast.LENGTH_LONG).show()
                 }
             }
-            this.withAudio = withAudio
+            this.userConfig = userConfig
             recorder = ScreenRecorder(orgMp4Path, this).apply {
                 selectedQuality!!.videoFormat.run {
                     setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
@@ -206,9 +248,9 @@ class VideoManager {
                         }
                     }
                 }
-                if (withAudio) {
+                if (userConfig.withAudio) {
                     // audio codec可能为空，此时降级为只录取视频
-                    selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
+                    selectedQuality!!.getAudioFormat(userConfig.audioSampleRate)?.run {
                         audioAdapter = AudioAdapter()
                         prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
                             if (this != Listener.ERROR_NO) {
@@ -226,7 +268,7 @@ class VideoManager {
 
     // 面向Unity环境，使用这个接口
     fun onAudioBuffer(buffer: FloatArray) {
-        if (!started || !withAudio) {
+        if (!started || !userConfig.withAudio) {
             return
         }
         for (observer in audioAdapter.observers) {
@@ -269,8 +311,8 @@ class VideoManager {
         }
     }
 
-    fun markKeyMoment() {
-        keyFrames.add(SystemClock.elapsedRealtime() * 1000)
+    fun markKeyMoment(priority: Int, addToConcatenatedVideo: Boolean) {
+        keyMoments.add(KeyMoment(SystemClock.elapsedRealtime() * 1000, priority, addToConcatenatedVideo))
     }
 
     fun stopScreenRecord() {
@@ -286,15 +328,87 @@ class VideoManager {
     }
 
     /**
-     * 1. mux, 2. build crop info, 3. crop
-     * 4. upload to 视频云, 5. 上传信息到中台
-     * 6. 下载中台处理后的视频
+     * CP 注入音频文件，开始后续的处理
      */
-    private fun handlePostRecordingJob() {
-
+    fun injectAudioFile(filePath: String) {
+        audioFile = File(filePath)
+        if (!audioFile!!.exists()) {
+            Log.e(TAG, "Injected audio file not exist. $filePath")
+            onFail(ERROR_NO_AUDIO_FILE)
+        } else {
+            performPostRecordingJob()
+        }
     }
 
-    private fun shareVideo() {
+    /**
+     * 1. mux
+     * 2. build crop info
+     * 3. crop
+     * 4. upload to 视频云
+     * 5. 上传信息到中台
+     * 6. 下载中台处理后的视频
+     * 7. 返回给CP
+     */
+    private fun performPostRecordingJob() {
+        val muxedMp4FileObservable = audioFile?.run {
+            VideoEditor.mux(orgMp4Path, audioFile!!.absolutePath, muxedMp4Path)
+        } ?: Observable.fromArray(File(orgMp4Path))
+        var cropInfos: List<CropInfo>? = null
+        val cropInfoObservable = muxedMp4FileObservable
+                .subscribeOn(Schedulers.from(worker))
+                .observeOn(Schedulers.from(worker))
+                .map {
+                    Pair(it, Util.resolveMuxedVideoInfo(recorder.firstTimeStampUs, it.absolutePath))
+                }
+                .map {
+                    cropInfos = Util.buildCropInfos(recorder.firstTimeStampUs, userConfig.keyMomentDurationMill, cropDir!!, keyMoments, it.second)
+                    Pair(it.first, cropInfos)
+                }
+                .flatMap {
+                    VideoEditor.crop(it.first.absolutePath, it.second!!)
+                }
+        VideoNet.fetchAuth()
+                .subscribeOn(Schedulers.from(worker))
+                .observeOn(Schedulers.from(worker))
+                .zipWith(cropInfoObservable, BiFunction<String, List<CropInfo>, Pair<String, List<CropInfo>>> { t, u -> Pair(t, u) })
+                .flatMap {
+                    VideoNet.uploadVideos(it.first, it.second.map { path -> File(path.outPath) })
+                }
+                .flatMap {
+                    VideoNet.uploadVids(it, cropInfos!!.map { info -> info.priority })
+                }
+                .flatMap {
+                    VideoNet.queryProcessedVideos(it)
+                }
+                .flatMapIterable {
+                    mutableListOf<DownloadedVideo>().apply {
+                        val sz = it.vids.size
+                        for (i in 0 until sz) {
+                            add(DownloadedVideo(it.vids[i], it.urls[i], File(downloadDir, "${it.vids[i]}.mp4").absolutePath))
+                        }
+                        add(DownloadedVideo(it.finalVid, it.finalUrl, File(downloadDir, "final_${it.finalVid}.mp4").absolutePath))
+                    }
+                }
+                .observeOn(Schedulers.from(downloadWorker))
+                .flatMap {
+                    VideoNet.download(it)
+                }
+                .toList()
+                .observeOn(Schedulers.from(worker))
+                .subscribe(object : SingleObserver<List<DownloadedVideo>> {
+                    override fun onSubscribe(d: Disposable) {}
+
+                    override fun onSuccess(t: List<DownloadedVideo>) {
+
+                    }
+
+                    override fun onError(e: Throwable) {
+
+                    }
+                })
+    }
+
+    public fun shareVideo(localPath: String) {
 
     }
 
@@ -304,18 +418,6 @@ class VideoManager {
             failed = true
             stopScreenRecord()
             listener?.onFail(error, exception)
-        }
-    }
-
-    class AudioAdapter : AudioSource {
-        var observers = mutableListOf<AudioObserver>()
-
-        override fun subscribe(observer: AudioObserver) {
-            observers.add(observer)
-        }
-
-        override fun unsubscribe(observer: AudioObserver) {
-            observers.remove(observer)
         }
     }
 }

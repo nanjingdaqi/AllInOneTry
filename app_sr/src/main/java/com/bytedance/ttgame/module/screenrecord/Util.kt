@@ -1,7 +1,10 @@
 package com.bytedance.ttgame.module.screenrecord
 
 import android.util.Log
+import com.ss.android.vesdk.VEUtils
 import java.io.File
+import kotlin.math.max
+import kotlin.math.min
 
 object Util {
 
@@ -38,6 +41,59 @@ object Util {
                 }
             }
             file.delete()
+        }
+    }
+
+    fun buildCropInfos(firstTimeStampUs: Long, keyMomentDurMill: Int, cropDir: File, moments: List<KeyMoment>, muxedVideoInfo: MuxedVideoInfo): List<VideoEditor.CropInfo> {
+        return mutableListOf<VideoEditor.CropInfo>().apply {
+            val org = moments.map {
+                val pos = it.timeStampUs - firstTimeStampUs
+                val keyMomentDur = keyMomentDurMill * 1000
+                val videoDur = muxedVideoInfo.durationTimeMill
+                VideoEditor.CropInfo(stMilli = max(pos - keyMomentDur / 2, 0) / 1000,
+                        edMilli = min(pos + keyMomentDur / 2, videoDur * 1000) / 1000,
+                        outPath = File(cropDir, "${it.timeStampUs}.mp4").absolutePath,
+                        priority = it.priority,
+                        toBeConcatenated = it.addToConcatenatedVideo
+                )
+            }
+            var i = 0
+            var cur: VideoEditor.CropInfo? = null
+            while (i < org.size) {
+                if (cur == null) {
+                    cur = org[i]
+                }
+                if (i + 1 >= org.size) {
+                    add(cur)
+                } else {
+                    val next = org[i + 1]
+                    if (cur.edMilli >= next.stMilli) {
+                        cur = mergeTwoCropInfo(cur, next)
+                    } else {
+                        add(cur)
+                        cur = null
+                    }
+                }
+                i++
+            }
+        }
+    }
+
+    private fun mergeTwoCropInfo(left: VideoEditor.CropInfo, right: VideoEditor.CropInfo): VideoEditor.CropInfo {
+        return VideoEditor.CropInfo(stMilli = left.stMilli,
+                edMilli = right.edMilli,
+                outPath = if (left.priority < right.priority) right.outPath else left.outPath,
+                priority = max(left.priority, right.priority),
+                toBeConcatenated = left.toBeConcatenated || right.toBeConcatenated
+        )
+    }
+
+    fun resolveMuxedVideoInfo(firstTimeStampUs: Long, filePath: String): MuxedVideoInfo {
+        IntArray(11).apply {
+            VEUtils.getVideoFileInfo(filePath, this)
+        }.run {
+            // todo: check duration time unit
+            return MuxedVideoInfo(firstTimeStampUs, this[3].toLong())
         }
     }
 }

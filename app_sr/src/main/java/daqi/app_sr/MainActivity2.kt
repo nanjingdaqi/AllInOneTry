@@ -79,12 +79,13 @@ class MainActivity2 : AppCompatActivity() {
     fun init() {
         val dir = File("/sdcard/a_g_game")
         dir.mkdirs()
-        VideoEditor.init(application, dir.absolutePath)
         prepare.setOnClickListener {
             prepareRecord()
         }
         start.setOnClickListener {
-            videoManager.startScreenRecord(false, audioPlayer!!.sampleRate)
+            VideoManager.RecordUserConfig(false, 0, 5 * 1000).run {
+                videoManager.startScreenRecord(this)
+            }
         }
         stop.setOnClickListener {
             videoManager.stopScreenRecord()
@@ -98,49 +99,30 @@ class MainActivity2 : AppCompatActivity() {
         cut.setOnClickListener {
             VideoEditor.run {
                 val dir = File("/sdcard/a_g_game")
-                init(application, dir.absolutePath)
                 var index = 0
                 mutableListOf<VideoEditor.CropInfo>().apply {
-                    add(VideoEditor.CropInfo(0, 5000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-//                    add(VideoEditor.CropInfo(2000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-//                    add(VideoEditor.CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-//                    add(VideoEditor.CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
-//                    add(VideoEditor.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath))
+                    add(VideoEditor.CropInfo(0, 5000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
+                    add(VideoEditor.CropInfo(2000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
+                    add(VideoEditor.CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
+                    add(VideoEditor.CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
+                    add(VideoEditor.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
                 }.run {
-//                    val stMil = System.currentTimeMillis()
-//                    crop("/sdcard/test_1562833951373.mp4", this)
-//                    mux("/sdcard/a.mp4", "/sdcard/test.mp3", "/a_g_game/muxed.mp4")
-//                            .subscribeOn(Schedulers.from(worker))
-//                            .flatMap {
-//                                crop(it.absolutePath, this)
-//                            }
-//                            .observeOn(AndroidSchedulers.mainThread())
-//                            .subscribe(object : Observer<List<File>> {
-//                                override fun onComplete() {
-//                                    Log.w("daqi", "finish time consumption: ${System.currentTimeMillis() - stMil}")
-//                                }
-//
-//                                override fun onSubscribe(d: Disposable) {}
-//
-//                                override fun onNext(t: List<File>) {}
-//
-//                                override fun onError(e: Throwable) {
-//                                    throw RuntimeException(e)
-//                                }
-//                            })
-                    mux("/sdcard/a.mp4", "/sdcard/test.mp3", "/a_g_game/muxed.mp4")
-                            .subscribeOn(Schedulers.from(worker))
-                            .subscribe(object : Observer<File> {
+                    val stMil = System.currentTimeMillis()
+//                        crop("/sdcard/test_1562833951373.mp4", this)
+                    mux("/sdcard/a.mp4", "/sdcard/test.mp3", "/sdcard/a_g_game/muxed.mp4")
+                            .subscribeOn(Schedulers.from(VideoManager.worker))
+                            .flatMap {
+                                crop(it.absolutePath, this)
+                            }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(object : Observer<List<File>> {
                                 override fun onComplete() {
-                                    Log.w("daqi", "onComplete")
+                                    Log.w("daqi", "finish time consumption: ${System.currentTimeMillis() - stMil}")
                                 }
 
-                                override fun onSubscribe(d: Disposable) {
-                                }
+                                override fun onSubscribe(d: Disposable) {}
 
-                                override fun onNext(t: File) {
-
-                                }
+                                override fun onNext(t: List<File>) {}
 
                                 override fun onError(e: Throwable) {
                                     throw RuntimeException(e)

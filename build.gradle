@@ -20,7 +20,26 @@ allprojects {
         maven {
             url "https://jitpack.io"
         }
+        maven {url "http://maven.byted.org/nexus/content/repositories/ugc_android_snapshot/"}
         maven {url "http://maven.byted.org/nexus/content/repositories/ugc_android/"}
         maven {url "https://maven.byted.org/nexus/content/repositories/ss_app_android/"}
+        maven {
+            url "http://maven.byted.org/nexus/content/repositories/ttplayer/"
+        }
+        maven {
+            url "https://dl.bintray.com/thelasterstar/maven/"
+        }
+        maven {
+            url 'http://ttandroid.byted.org/repository/ttandroid/'
+        }
+        maven {
+           url "http://maven.byted.org/repository/videoarch/"
+        }
+        maven {
+           url "https://maven.byted.org/repository/caijing_android/"
+        }
+        maven {
+            url "https://dl.bintray.com/aweme-open-sdk-team/public"
+        }
     }
 }

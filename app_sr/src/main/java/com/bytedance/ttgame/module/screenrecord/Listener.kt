@@ -2,7 +2,7 @@ package com.bytedance.ttgame.module.screenrecord
 
 import java.io.File
 
-// 面向服务使用方的回调
+// 面向服务使用方的大回调
 interface Listener {
 
     companion object {
@@ -14,9 +14,10 @@ interface Listener {
         const val ERROR_VIDEO_ENCODE_FAIL = 5
         const val ERROR_FINISH_FAIL = 6
         const val ERROR_ACTIVITY_PAUSED = 7
-        const val ERROR_UPLOAD_FAIL = 8
-        const val ERROR_DOWNLOAD_FAIL = 9
-        const val ERROR_CROP_FAIL = 10
+        const val ERROR_NO_AUDIO_FILE = 8
+        const val ERROR_UPLOAD_FAIL = 9
+        const val ERROR_DOWNLOAD_FAIL = 10
+        const val ERROR_CROP_FAIL = 11
     }
 
 
