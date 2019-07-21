@@ -10,25 +10,27 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
+import com.bytedance.ttgame.module.screenrecord.CropInfo
 import com.bytedance.ttgame.module.screenrecord.Listener
 import com.bytedance.ttgame.module.screenrecord.Quality
+import com.bytedance.ttgame.module.screenrecord.RecordUserConfig
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
 import com.bytedance.ttgame.module.screenrecord.VideoManager
 import com.bytedance.ttgame.module.screenrecord.VideoManager.Companion.INIT_RESULT_OK
 import io.reactivex.Observer
-import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.content_main2.cut
 import kotlinx.android.synthetic.main.content_main2.img
+import kotlinx.android.synthetic.main.content_main2.inject_audio
+import kotlinx.android.synthetic.main.content_main2.inject_key_moment
 import kotlinx.android.synthetic.main.content_main2.pause
 import kotlinx.android.synthetic.main.content_main2.prepare
 import kotlinx.android.synthetic.main.content_main2.resume
 import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
 import java.io.File
-import java.lang.RuntimeException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -43,7 +45,7 @@ class MainActivity2 : AppCompatActivity() {
         videoManager = VideoManager()
 
         startAnim()
-        playAudio()
+//        playAudio()
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)) {
@@ -83,7 +85,7 @@ class MainActivity2 : AppCompatActivity() {
             prepareRecord()
         }
         start.setOnClickListener {
-            VideoManager.RecordUserConfig(false, 0, 5 * 1000).run {
+            RecordUserConfig(false, 0, 5 * 1000).run {
                 videoManager.startScreenRecord(this)
             }
         }
@@ -100,29 +102,30 @@ class MainActivity2 : AppCompatActivity() {
             VideoEditor.run {
                 val dir = File("/sdcard/a_g_game")
                 var index = 0
-                mutableListOf<VideoEditor.CropInfo>().apply {
-                    add(VideoEditor.CropInfo(0, 5000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
-                    add(VideoEditor.CropInfo(2000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
-                    add(VideoEditor.CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
-                    add(VideoEditor.CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
-                    add(VideoEditor.CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
+                mutableListOf<CropInfo>().apply {
+                    add(CropInfo(0, 5000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
+                    add(CropInfo(2000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
+                    add(CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
+                    add(CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
+                    add(CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
                 }.run {
                     val stMil = System.currentTimeMillis()
 //                        crop("/sdcard/test_1562833951373.mp4", this)
-                    mux("/sdcard/a.mp4", "/sdcard/test.mp3", "/sdcard/a_g_game/muxed.mp4")
+                    crop("/sdcard/muxed_screen_record__1563706334399.mp4", this)
+//                    mux("/sdcard/a.mp4", "/sdcard/test.mp3", "/sdcard/a_g_game/muxed.mp4")
                             .subscribeOn(Schedulers.from(VideoManager.worker))
-                            .flatMap {
-                                crop(it.absolutePath, this)
-                            }
+//                            .flatMap {
+//                                crop(it.absolutePath, this)
+//                            }
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(object : Observer<List<File>> {
+                            .subscribe(object : Observer<List<CropInfo>> {
                                 override fun onComplete() {
                                     Log.w("daqi", "finish time consumption: ${System.currentTimeMillis() - stMil}")
                                 }
 
                                 override fun onSubscribe(d: Disposable) {}
 
-                                override fun onNext(t: List<File>) {}
+                                override fun onNext(t: List<CropInfo>) {}
 
                                 override fun onError(e: Throwable) {
                                     throw RuntimeException(e)
@@ -130,6 +133,12 @@ class MainActivity2 : AppCompatActivity() {
                             })
                 }
             }
+        }
+        inject_key_moment.setOnClickListener {
+            videoManager.markKeyMoment(0, true)
+        }
+        inject_audio.setOnClickListener {
+            videoManager.injectAudio("/sdcard/test.mp3")
         }
     }
 

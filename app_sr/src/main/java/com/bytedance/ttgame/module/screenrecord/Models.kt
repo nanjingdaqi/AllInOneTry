@@ -5,6 +5,8 @@ import android.app.Application
 import android.os.Bundle
 
 
+data class DebugConfig(val quality: Int, val duration: Int)
+
 data class KeyMoment(val timeStampUs: Long, val priority: Int, val addToConcatenatedVideo: Boolean)
 
 data class RecordUserConfig(val withAudio: Boolean, val audioSampleRate: Int, val keyMomentDurationMill: Int)
@@ -30,17 +32,17 @@ class AudioAdapter : AudioSource {
 }
 
 open class EmptyActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
-    override fun onActivityPaused(activity: Activity?) { }
+    override fun onActivityPaused(activity: Activity?) {}
 
-    override fun onActivityResumed(activity: Activity?) { }
+    override fun onActivityResumed(activity: Activity?) {}
 
-    override fun onActivityStarted(activity: Activity?) { }
+    override fun onActivityStarted(activity: Activity?) {}
 
-    override fun onActivityDestroyed(activity: Activity?) { }
+    override fun onActivityDestroyed(activity: Activity?) {}
 
-    override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) { }
+    override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {}
 
-    override fun onActivityStopped(activity: Activity?) { }
+    override fun onActivityStopped(activity: Activity?) {}
 
-    override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) { }
+    override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {}
 }

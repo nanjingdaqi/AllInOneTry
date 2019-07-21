@@ -44,21 +44,22 @@ object Util {
         }
     }
 
-    fun buildCropInfos(firstTimeStampUs: Long, keyMomentDurMill: Int, cropDir: File, moments: List<KeyMoment>, muxedVideoInfo: MuxedVideoInfo): List<VideoEditor.CropInfo> {
-        return mutableListOf<VideoEditor.CropInfo>().apply {
+    fun buildCropInfos(firstTimeStampUs: Long, keyMomentDurMill: Int, cropDir: File, moments: List<KeyMoment>, muxedVideoInfo: MuxedVideoInfo): List<CropInfo> {
+        return mutableListOf<CropInfo>().apply {
             val org = moments.map {
                 val pos = it.timeStampUs - firstTimeStampUs
                 val keyMomentDur = keyMomentDurMill * 1000
                 val videoDur = muxedVideoInfo.durationTimeMill
-                VideoEditor.CropInfo(stMilli = max(pos - keyMomentDur / 2, 0) / 1000,
+                CropInfo(stMilli = max(pos - keyMomentDur / 2, 0) / 1000,
                         edMilli = min(pos + keyMomentDur / 2, videoDur * 1000) / 1000,
                         outPath = File(cropDir, "${it.timeStampUs}.mp4").absolutePath,
                         priority = it.priority,
                         toBeConcatenated = it.addToConcatenatedVideo
                 )
             }
+            Log.w("daqi", "Init crop info: $org")
             var i = 0
-            var cur: VideoEditor.CropInfo? = null
+            var cur: CropInfo? = null
             while (i < org.size) {
                 if (cur == null) {
                     cur = org[i]
@@ -79,8 +80,8 @@ object Util {
         }
     }
 
-    private fun mergeTwoCropInfo(left: VideoEditor.CropInfo, right: VideoEditor.CropInfo): VideoEditor.CropInfo {
-        return VideoEditor.CropInfo(stMilli = left.stMilli,
+    private fun mergeTwoCropInfo(left: CropInfo, right: CropInfo): CropInfo {
+        return CropInfo(stMilli = left.stMilli,
                 edMilli = right.edMilli,
                 outPath = if (left.priority < right.priority) right.outPath else left.outPath,
                 priority = max(left.priority, right.priority),
@@ -93,7 +94,10 @@ object Util {
             VEUtils.getVideoFileInfo(filePath, this)
         }.run {
             // todo: check duration time unit
-            return MuxedVideoInfo(firstTimeStampUs, this[3].toLong())
+            if (VideoManager.DEBUG) {
+                Log.w(VideoManager.TAG, "video info: ${map { it.toString() }}")
+            }
+            return MuxedVideoInfo(firstTimeStampUs, this[10].toLong())
         }
     }
 }

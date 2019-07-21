@@ -22,15 +22,17 @@ import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
 import com.ss.android.vesdk.VESDK
 import io.reactivex.Observable
+import io.reactivex.Observer
 import io.reactivex.SingleObserver
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
+import org.reactivestreams.Subscriber
+import org.reactivestreams.Subscription
 import java.io.File
 import java.io.FileReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlin.math.abs
 
@@ -41,21 +43,25 @@ class VideoManager {
 
         const val TAG = "VideoManager"
 
+        const val DEBUG_CONFIG_FILE = "/sdcard/sr.config"
+
         const val ROOT_DIR = "g_screen_records"
         const val VESDK_DIR = "vesdk"
         const val CROP_DIR = "crop"
         const val DOWNLOAD_DIR = "download"
         const val ORG_MP4_PREFIX = "org_screen_record_"
         const val MUXED_MP4_PREFIX = "muxed_screen_record_"
-        const val CROP_MP4_PREFIX = "cropped_screen_record_"
-        const val DOWNLOADED_MP4_PREFIX = "downloaded_screen_record_"
 
         const val INIT_RESULT_OK = 0
         const val INIT_RESULT_OS_UNSUPPORT = 1
         const val INIT_RESULT_NO_VIDEO_ENCODER = 2
 
         const val START_RESULT_OK = 0
-        const val START_RESULT_NO_MP = 1
+        const val START_RESULT_WRONG_STATE = 1
+
+        enum class State {
+            UNINITED, INITED, PREPARED, USER_CONFIRMED, RECORDING, WAITING_AUDIO, PROCESSING, FINISHED, FAILED
+        }
 
         val worker = Executors.newSingleThreadExecutor {
             Thread(null, it, "video-worker")
@@ -89,7 +95,7 @@ class VideoManager {
         }
 
         private fun clearDir() {
-            listOf(cropDir, vesdkDir).forEach { dir ->
+            listOf(cropDir, downloadDir, vesdkDir).forEach { dir ->
                 dir?.listFiles()?.forEach {
                     if (it.isFile) {
                         it.delete()
@@ -101,6 +107,7 @@ class VideoManager {
         }
     }
 
+    private var state = State.UNINITED
     private var initResult = Int.MIN_VALUE
 
     lateinit var mainActivityComponentName: ComponentName
@@ -111,12 +118,11 @@ class VideoManager {
     lateinit var muxedMp4Path: String
     lateinit var audioAdapter: AudioAdapter
     var keyMoments = mutableListOf<KeyMoment>() // 与ScreenRecorder的timeStampUs计算方式一致
-    var audioFile: File? = null
+    var injectedAudio: File? = null
 
     var mp: MediaProjection? = null
-    var started: Boolean = false
     lateinit var userConfig: RecordUserConfig
-    var failed: Boolean = false
+    public var debugConfig: DebugConfig? = null
 
     var selectedQuality: Quality? = null
         set(value) {
@@ -130,11 +136,6 @@ class VideoManager {
         }
 
     var dm: DisplayMetrics? = null
-
-    val DEBUG_CONFIG_FILE = "/sdcard/sr.config"
-    public var config: Config? = null
-
-    data class Config(val quality: Int, val duration: Int)
 
     fun init(activity: Activity): Int {
         if (initResult != Int.MIN_VALUE) {
@@ -154,13 +155,6 @@ class VideoManager {
         orgMp4Path = File(rootDir, "${ORG_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
         muxedMp4Path = File(rootDir, "${MUXED_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
 
-        File(DEBUG_CONFIG_FILE).run {
-            if (!exists()) {
-                Toast.makeText(app, "没有发现配置文件 $DEBUG_CONFIG_FILE, 走默认配置", Toast.LENGTH_LONG).show()
-            } else {
-                config = Gson().fromJson(JsonReader(FileReader(DEBUG_CONFIG_FILE)), Config::class.java)
-            }
-        }
         Quality.apply {
             this.init(app)
             if (HIGH == null) {
@@ -168,20 +162,31 @@ class VideoManager {
                 return initResult
             }
         }
+
         initResult = INIT_RESULT_OK
+        state = State.INITED
         selectedQuality = Quality.HIGH
-        config?.run {
-            selectedQuality = when (quality) {
-                1 -> Quality.HIGH
-                2 -> Quality.BASE
-                else -> Quality.LOW
-            }
-        }
-        Log.w(TAG, "Selected quality is: ${selectedQuality!!.name}")
         dm = DisplayMetrics().apply {
             (app.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(this)
         }
         observeActivityInvisible(app)
+        if (DEBUG) {
+            File(DEBUG_CONFIG_FILE).run {
+                if (!exists()) {
+                    Toast.makeText(app, "没有发现配置文件 $DEBUG_CONFIG_FILE, 走默认配置", Toast.LENGTH_LONG).show()
+                } else {
+                    debugConfig = Gson().fromJson(JsonReader(FileReader(DEBUG_CONFIG_FILE)), DebugConfig::class.java)
+                }
+            }
+            debugConfig?.run {
+                selectedQuality = when (quality) {
+                    1 -> Quality.HIGH
+                    2 -> Quality.BASE
+                    else -> Quality.LOW
+                }
+            }
+        }
+        Log.w(TAG, "Selected quality is: ${selectedQuality!!.name}")
         return initResult
     }
 
@@ -191,7 +196,7 @@ class VideoManager {
                 if (mainActivityComponentName == activity?.componentName) {
                     Util.logk(TAG, "Check current activity paused")
                     // 延迟处理，处理转屏情况
-                    if (started) {
+                    if (state == State.RECORDING) {
                         onFail(ERROR_ACTIVITY_PAUSED)
                     }
                 }
@@ -203,72 +208,63 @@ class VideoManager {
         if (initResult == Int.MIN_VALUE) {
             throw IllegalStateException("Please invoke init method at first.")
         }
-        if (failed) {
-            throw IllegalStateException("当前VideoManager对象已经录制失败，无法再次使用，请重新创建.")
-        }
     }
 
     fun prepareVideo(activity: Activity, requestCode: Int) {
-        checkState()
+        if (!ensureState(State.INITED, action = "prepareVideo")) return
+        state = State.PREPARED
         projectionManager = app.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         activity.startActivityForResult(projectionManager.createScreenCaptureIntent(), requestCode)
     }
 
     fun onActivityResult(resultCode: Int, data: Intent) {
+        if (!ensureState(State.PREPARED, action = "onActivityResult")) return
         if (resultCode == Activity.RESULT_OK) {
-            Log.w(TAG, "User confirmed screen recording.")
-            createMediaProjection(resultCode, data)
+            Log.d(TAG, "User confirmed screen recording.")
+            mp = projectionManager.getMediaProjection(resultCode, data)
+            state = State.USER_CONFIRMED
         } else {
-            Log.v(TAG, "User did not choose OK for screen recording.")
+            Log.w(TAG, "User did not choose OK for screen recording.")
         }
-    }
-
-    private fun createMediaProjection(resultCode: Int, data: Intent) {
-        mp = projectionManager.getMediaProjection(resultCode, data)
     }
 
     fun startScreenRecord(userConfig: RecordUserConfig): Int {
-        checkState()
-        if (mp == null) {
-            return START_RESULT_NO_MP
+        if (!ensureState(State.USER_CONFIRMED, action = "startScreenRecord")) return START_RESULT_WRONG_STATE
+        if (DEBUG) {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(app, "输出视频地址：$orgMp4Path", Toast.LENGTH_LONG).show()
+            }
         }
-        if (!started) {
-            if (DEBUG) {
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(app, "输出视频地址：$orgMp4Path", Toast.LENGTH_LONG).show()
+        this.userConfig = userConfig
+        recorder = ScreenRecorder(orgMp4Path, this).apply {
+            selectedQuality!!.videoFormat.run {
+                setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+                prepareVideo(Quality.videoCodec!!, this, mp!!).apply {
+                    if (this != Listener.ERROR_NO) {
+                        onFail(this)
+                    }
                 }
             }
-            this.userConfig = userConfig
-            recorder = ScreenRecorder(orgMp4Path, this).apply {
-                selectedQuality!!.videoFormat.run {
-                    setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-                    prepareVideo(Quality.videoCodec!!, this, mp!!).apply {
+            if (userConfig.withAudio) {
+                // audio codec可能为空，此时降级为只录取视频
+                selectedQuality!!.getAudioFormat(userConfig.audioSampleRate)?.run {
+                    audioAdapter = AudioAdapter()
+                    prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
                         if (this != Listener.ERROR_NO) {
                             onFail(this)
                         }
                     }
                 }
-                if (userConfig.withAudio) {
-                    // audio codec可能为空，此时降级为只录取视频
-                    selectedQuality!!.getAudioFormat(userConfig.audioSampleRate)?.run {
-                        audioAdapter = AudioAdapter()
-                        prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
-                            if (this != Listener.ERROR_NO) {
-                                onFail(this)
-                            }
-                        }
-                    }
-                }
-                start(dm!!.widthPixels, dm!!.heightPixels)
             }
-            started = true
+            start(selectedQuality!!.width, selectedQuality!!.height)
+            state = State.RECORDING
         }
         return START_RESULT_OK
     }
 
     // 面向Unity环境，使用这个接口
     fun onAudioBuffer(buffer: FloatArray) {
-        if (!started || !userConfig.withAudio) {
+        if (!ensureState(State.RECORDING, action = "onAudioBuffer", log = false) || !userConfig.withAudio) {
             return
         }
         for (observer in audioAdapter.observers) {
@@ -278,7 +274,7 @@ class VideoManager {
                     val sa = ShortArray(buffer.size).apply {
                         for (i in 0 until buffer.size) {
                             if (abs(x = buffer[i]) > 1.0) {
-                                Log.e("daqi", "one float is too big: ${buffer[i]}")
+                                Log.e(TAG, "one float is too big: ${buffer[i]}")
                             }
                             set(i, (buffer[i] * 32767).toShort())
                         }
@@ -312,31 +308,41 @@ class VideoManager {
     }
 
     fun markKeyMoment(priority: Int, addToConcatenatedVideo: Boolean) {
+        if (!ensureState(State.RECORDING, action = "markKeyMoment")) return
+        Log.w(TAG, "Mark key moment, at moment: ${(SystemClock.elapsedRealtime() * 1000 - recorder.firstTimeStampUs) / 1000 / 1000}s")
         keyMoments.add(KeyMoment(SystemClock.elapsedRealtime() * 1000, priority, addToConcatenatedVideo))
     }
 
     fun stopScreenRecord() {
-        if (started) {
+        if (ensureState(State.RECORDING, action = "stopScreenRecord")) {
             Log.w(TAG, "stop screen record.")
             if (DEBUG) {
                 Toast.makeText(app, "录屏结束, 文件地址：$orgMp4Path", Toast.LENGTH_LONG).show()
             }
             recorder.stop()
-            started = false
             mp = null
+            if (!userConfig.withAudio) {
+                state = State.WAITING_AUDIO
+            } else {
+                performProcessingJob()
+            }
         }
     }
 
     /**
      * CP 注入音频文件，开始后续的处理
      */
-    fun injectAudioFile(filePath: String) {
-        audioFile = File(filePath)
-        if (!audioFile!!.exists()) {
+    fun injectAudio(filePath: String) {
+        injectedAudio = File(filePath)
+        if (!injectedAudio!!.exists()) {
             Log.e(TAG, "Injected audio file not exist. $filePath")
             onFail(ERROR_NO_AUDIO_FILE)
         } else {
-            performPostRecordingJob()
+            if (state == State.WAITING_AUDIO) {
+                performProcessingJob()
+            } else {
+                Log.w(TAG, "inject audio, but not start process asap current state: $state")
+            }
         }
     }
 
@@ -349,10 +355,12 @@ class VideoManager {
      * 6. 下载中台处理后的视频
      * 7. 返回给CP
      */
-    private fun performPostRecordingJob() {
-        val muxedMp4FileObservable = audioFile?.run {
-            VideoEditor.mux(orgMp4Path, audioFile!!.absolutePath, muxedMp4Path)
+    private fun performProcessingJob() {
+        state = State.PROCESSING
+        val muxedMp4FileObservable = injectedAudio?.run {
+            VideoEditor.mux(orgMp4Path, injectedAudio!!.absolutePath, muxedMp4Path)
         } ?: Observable.fromArray(File(orgMp4Path))
+
         var cropInfos: List<CropInfo>? = null
         val cropInfoObservable = muxedMp4FileObservable
                 .subscribeOn(Schedulers.from(worker))
@@ -409,15 +417,26 @@ class VideoManager {
     }
 
     public fun shareVideo(localPath: String) {
+        if (!ensureState(State.FINISHED, action = "shareVideo")) return
 
     }
 
     fun onFail(error: Int, exception: Throwable? = null) {
-        if (!failed) {
+        if (state != State.FAILED) {
             // 保证只会向外通知一次
-            failed = true
+            state = State.FAILED
             stopScreenRecord()
+            Log.e(TAG, "Fail!!!", exception)
             listener?.onFail(error, exception)
         }
+    }
+
+    private fun ensureState(vararg expected: State, action: String = "", log: Boolean = true): Boolean {
+        expected.forEach {
+            if (state == it) return true
+        }
+        val msg = "Action($action) failed!. Wrong current state $state"
+        Log.w(TAG, msg)
+        if (DEBUG) throw IllegalStateException(msg) else return false
     }
 }

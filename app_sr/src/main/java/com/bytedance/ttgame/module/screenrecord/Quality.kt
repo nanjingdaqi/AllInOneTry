@@ -13,7 +13,8 @@ import java.util.*
 import kotlin.math.min
 
 // audio format目前由客户端决定
-class Quality(val name: String) {
+// 最高720p, 60fps
+class Quality(val name: String, val width: Int, val height: Int) {
     companion object {
         var HIGH: Quality? = null
         var BASE: Quality? = null
@@ -79,34 +80,45 @@ class Quality(val name: String) {
             val dm = DisplayMetrics()
             (app.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(dm)
             var width = min(dm.widthPixels, videoCap!!.supportedWidths.upper)
+            var height = min(dm.heightPixels, videoCap!!.supportedHeights.upper)
+            if (width > height) {
+                val tw = min(width, 1280)
+                val th = tw * height / width
+                width = tw
+                height = th
+            } else {
+                val th = min(height, 1280)
+                val tw = th * width / height
+                width = tw
+                height = th
+            }
             if (videoCap!!.widthAlignment > 0) {
                 width = Util.alignDown(width, videoCap!!.widthAlignment)
             }
-            var height = min(dm.heightPixels, videoCap!!.supportedHeights.upper)
             if (videoCap!!.heightAlignment > 0) {
                 height = Util.alignDown(height, videoCap!!.heightAlignment)
             }
-            val fpsBest = min(30, videoCap!!.supportedFrameRates.upper)
+            val fpsBest = min(60, videoCap!!.supportedFrameRates.upper)
             val bitrateBest = min((width * height).shl(2), videoCap!!.bitrateRange.upper)
             val iFrameInterval = fpsBest // 按照vesdk的建议，设置为fps大小，得到的视频的I帧就是1s的周期
             if (DEBUG) {
                 Log.w(TAG, "width: $width, height: $height, fps: $fpsBest, bit_rate: $bitrateBest, iFrameInterval: $iFrameInterval")
             }
-            HIGH = Quality("High").apply {
+            HIGH = Quality("High", width, height).apply {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest)
                     setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval)
                 }
             }
-            BASE = Quality("Base").apply {
+            BASE = Quality("Base", width, height).apply {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest / 2)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest / 2)
                     setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval / 2)
                 }
             }
-            LOW = Quality("Low").apply {
+            LOW = Quality("Low", width, height).apply {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest / 3)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest / 3)

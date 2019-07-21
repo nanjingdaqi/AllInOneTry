@@ -38,7 +38,7 @@ object VideoEditor {
                         String.format("%d:%02d:%02d", this / 3600, (this % 3600) / 60, this % 60)
                     })
                 }
-                Log.d(TAG, "crop video: st: $stTimes, ed: $edTimes")
+                Log.w(TAG, "crop video: st: $stTimes, ed: $edTimes")
                 VEUtils.curVideo(inVideoPath, outPaths, stTimes, edTimes).run {
                     if (this == 0) {
                         emitter.onNext(cropInfos)
