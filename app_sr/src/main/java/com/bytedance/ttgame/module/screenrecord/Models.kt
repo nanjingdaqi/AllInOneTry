@@ -9,8 +9,6 @@ data class DebugConfig(val quality: Int, val duration: Int)
 
 data class KeyMoment(val timeStampUs: Long, val priority: Int, val addToConcatenatedVideo: Boolean)
 
-data class RecordUserConfig(val withAudio: Boolean, val audioSampleRate: Int, val keyMomentDurationMill: Int)
-
 data class MuxedVideoInfo(val firstTimeStampUs: Long, val durationTimeMill: Long)
 
 data class CropInfo(val stMilli: Long, val edMilli: Long, val outPath: String, val priority: Int, val toBeConcatenated: Boolean)

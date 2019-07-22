@@ -1,6 +1,8 @@
 package com.bytedance.ttgame.module.screenrecord
 
 import android.util.Log
+import com.bytedance.ttgame.module.screenrecord.api.CropException
+import com.bytedance.ttgame.module.screenrecord.api.MuxException
 import com.ss.android.vesdk.VEUtils
 import io.reactivex.Observable
 import java.io.File

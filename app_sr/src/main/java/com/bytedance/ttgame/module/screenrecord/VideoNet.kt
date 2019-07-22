@@ -6,6 +6,8 @@ import com.bytedance.retrofit2.http.GET
 import com.bytedance.retrofit2.http.POST
 import com.bytedance.retrofit2.http.Streaming
 import com.bytedance.retrofit2.rxjava2.adapter.RxJava2CallAdapterFactory
+import com.bytedance.ttgame.module.screenrecord.api.ServerException
+import com.bytedance.ttgame.module.screenrecord.api.UploadException
 import com.ss.ttuploader.TTVideoInfo
 import com.ss.ttuploader.TTVideoUploader
 import com.ss.ttuploader.TTVideoUploaderListener
@@ -19,6 +21,7 @@ object VideoNet {
 
     val retrofit: Retrofit
     val request: Request
+    var auth: String? = null
 
     init {
         // todo 参考notice模块创建retrofit
@@ -26,11 +29,6 @@ object VideoNet {
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
         request = retrofit.create(Request::class.java)
-    }
-
-    // 获取视频云需要使用的auth
-    fun fetchAuth(): Observable<String> {
-        return request.fetchAuth()
     }
 
     // 上传视频云的vid给中台服务器, 返回query_id
@@ -58,7 +56,7 @@ object VideoNet {
     }
 
     // 上传视频到视频云
-    fun uploadVideos(auth: String, files: List<File>): Observable<List<String>> {
+    fun uploadVideos(files: List<File>): Observable<List<String>> {
         return Observable.create { ob ->
             Looper.myLooper() ?: Looper.prepare()
             mutableListOf<String>().run {

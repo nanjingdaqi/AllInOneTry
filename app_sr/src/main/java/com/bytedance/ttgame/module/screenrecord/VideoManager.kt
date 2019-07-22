@@ -1,5 +1,6 @@
 package com.bytedance.ttgame.module.screenrecord
 
+import android.annotation.TargetApi
 import android.app.Activity
 import android.app.Application
 import android.content.ComponentName
@@ -9,6 +10,7 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -16,19 +18,18 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
-import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_ACTIVITY_PAUSED
-import com.bytedance.ttgame.module.screenrecord.Listener.Companion.ERROR_NO_AUDIO_FILE
+import com.bytedance.ttgame.module.screenrecord.api.IScreenRecordService
+import com.bytedance.ttgame.module.screenrecord.api.Listener
+import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_ACTIVITY_PAUSED
+import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_NO_AUDIO_FILE
+import com.bytedance.ttgame.module.screenrecord.api.UserConfig
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
 import com.ss.android.vesdk.VESDK
 import io.reactivex.Observable
-import io.reactivex.Observer
 import io.reactivex.SingleObserver
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
-import org.reactivestreams.Subscriber
-import org.reactivestreams.Subscription
 import java.io.File
 import java.io.FileReader
 import java.nio.ByteBuffer
@@ -36,7 +37,7 @@ import java.nio.ByteOrder
 import java.util.concurrent.Executors
 import kotlin.math.abs
 
-class VideoManager {
+class VideoManager : IScreenRecordService {
 
     companion object {
         public const val DEBUG = true
@@ -116,12 +117,13 @@ class VideoManager {
     lateinit var recorder: ScreenRecorder
     lateinit var orgMp4Path: String
     lateinit var muxedMp4Path: String
+    var audioSampleRate: Int = Int.MIN_VALUE
     lateinit var audioAdapter: AudioAdapter
     var keyMoments = mutableListOf<KeyMoment>() // 与ScreenRecorder的timeStampUs计算方式一致
     var injectedAudio: File? = null
 
     var mp: MediaProjection? = null
-    lateinit var userConfig: RecordUserConfig
+    lateinit var userConfig: UserConfig
     public var debugConfig: DebugConfig? = null
 
     var selectedQuality: Quality? = null
@@ -137,7 +139,7 @@ class VideoManager {
 
     var dm: DisplayMetrics? = null
 
-    fun init(activity: Activity): Int {
+    override fun init(activity: Activity): Int {
         if (initResult != Int.MIN_VALUE) {
             return initResult
         }
@@ -210,14 +212,17 @@ class VideoManager {
         }
     }
 
-    fun prepareVideo(activity: Activity, requestCode: Int) {
-        if (!ensureState(State.INITED, action = "prepareVideo")) return
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun prepare(activity: Activity, requestCode: Int, audioSampleRate: Int) {
+        if (!ensureState(State.INITED, action = "prepare")) return
         state = State.PREPARED
+        this.audioSampleRate = audioSampleRate
         projectionManager = app.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         activity.startActivityForResult(projectionManager.createScreenCaptureIntent(), requestCode)
     }
 
-    fun onActivityResult(resultCode: Int, data: Intent) {
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun onActivityResult(resultCode: Int, data: Intent) {
         if (!ensureState(State.PREPARED, action = "onActivityResult")) return
         if (resultCode == Activity.RESULT_OK) {
             Log.d(TAG, "User confirmed screen recording.")
@@ -228,7 +233,7 @@ class VideoManager {
         }
     }
 
-    fun startScreenRecord(userConfig: RecordUserConfig): Int {
+    override fun startScreenRecord(userConfig: UserConfig): Int {
         if (!ensureState(State.USER_CONFIRMED, action = "startScreenRecord")) return START_RESULT_WRONG_STATE
         if (DEBUG) {
             Handler(Looper.getMainLooper()).post {
@@ -245,9 +250,9 @@ class VideoManager {
                     }
                 }
             }
-            if (userConfig.withAudio) {
+            if (audioSampleRate > 0) {
                 // audio codec可能为空，此时降级为只录取视频
-                selectedQuality!!.getAudioFormat(userConfig.audioSampleRate)?.run {
+                selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
                     audioAdapter = AudioAdapter()
                     prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
                         if (this != Listener.ERROR_NO) {
@@ -263,8 +268,8 @@ class VideoManager {
     }
 
     // 面向Unity环境，使用这个接口
-    fun onAudioBuffer(buffer: FloatArray) {
-        if (!ensureState(State.RECORDING, action = "onAudioBuffer", log = false) || !userConfig.withAudio) {
+    override fun onAudioBuffer(buffer: FloatArray) {
+        if (!ensureState(State.RECORDING, action = "onAudioBuffer", log = false) || audioSampleRate <= 0) {
             return
         }
         for (observer in audioAdapter.observers) {
@@ -307,13 +312,13 @@ class VideoManager {
         }
     }
 
-    fun markKeyMoment(priority: Int, addToConcatenatedVideo: Boolean) {
+    override fun markKeyMoment(priority: Int, addToConcatenatedVideo: Boolean) {
         if (!ensureState(State.RECORDING, action = "markKeyMoment")) return
         Log.w(TAG, "Mark key moment, at moment: ${(SystemClock.elapsedRealtime() * 1000 - recorder.firstTimeStampUs) / 1000 / 1000}s")
         keyMoments.add(KeyMoment(SystemClock.elapsedRealtime() * 1000, priority, addToConcatenatedVideo))
     }
 
-    fun stopScreenRecord() {
+    override fun stopScreenRecord() {
         if (ensureState(State.RECORDING, action = "stopScreenRecord")) {
             Log.w(TAG, "stop screen record.")
             if (DEBUG) {
@@ -321,7 +326,7 @@ class VideoManager {
             }
             recorder.stop()
             mp = null
-            if (!userConfig.withAudio) {
+            if (audioSampleRate <= 0) {
                 state = State.WAITING_AUDIO
             } else {
                 performProcessingJob()
@@ -332,7 +337,7 @@ class VideoManager {
     /**
      * CP 注入音频文件，开始后续的处理
      */
-    fun injectAudio(filePath: String) {
+    override fun injectAudio(filePath: String) {
         injectedAudio = File(filePath)
         if (!injectedAudio!!.exists()) {
             Log.e(TAG, "Injected audio file not exist. $filePath")
@@ -375,12 +380,8 @@ class VideoManager {
                 .flatMap {
                     VideoEditor.crop(it.first.absolutePath, it.second!!)
                 }
-        VideoNet.fetchAuth()
-                .subscribeOn(Schedulers.from(worker))
-                .observeOn(Schedulers.from(worker))
-                .zipWith(cropInfoObservable, BiFunction<String, List<CropInfo>, Pair<String, List<CropInfo>>> { t, u -> Pair(t, u) })
                 .flatMap {
-                    VideoNet.uploadVideos(it.first, it.second.map { path -> File(path.outPath) })
+                    VideoNet.uploadVideos(it.map { path -> File(path.outPath) })
                 }
                 .flatMap {
                     VideoNet.uploadVids(it, cropInfos!!.map { info -> info.priority })
@@ -416,8 +417,12 @@ class VideoManager {
                 })
     }
 
-    public fun shareVideo(localPath: String) {
+    override fun shareVideo(localPath: String) {
         if (!ensureState(State.FINISHED, action = "shareVideo")) return
+
+    }
+
+    override fun setAuth(auth: String) {
 
     }
 

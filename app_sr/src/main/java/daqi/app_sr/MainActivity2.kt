@@ -11,13 +11,13 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
 import com.bytedance.ttgame.module.screenrecord.CropInfo
-import com.bytedance.ttgame.module.screenrecord.Listener
 import com.bytedance.ttgame.module.screenrecord.Quality
-import com.bytedance.ttgame.module.screenrecord.RecordUserConfig
 import com.bytedance.ttgame.module.screenrecord.Util
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
 import com.bytedance.ttgame.module.screenrecord.VideoManager
 import com.bytedance.ttgame.module.screenrecord.VideoManager.Companion.INIT_RESULT_OK
+import com.bytedance.ttgame.module.screenrecord.api.Listener
+import com.bytedance.ttgame.module.screenrecord.api.UserConfig
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -88,7 +88,7 @@ class MainActivity2 : AppCompatActivity() {
             prepareRecord()
         }
         start.setOnClickListener {
-            RecordUserConfig(false, 0, 5 * 1000).run {
+            UserConfig(5 * 1000).run {
                 videoManager.startScreenRecord(this)
             }
         }
@@ -180,7 +180,7 @@ class MainActivity2 : AppCompatActivity() {
                     throw RuntimeException(exception)
                 }
             }
-            prepareVideo(this@MainActivity2, 1)
+            prepare(this@MainActivity2, 1, 0)
         }
     }
 

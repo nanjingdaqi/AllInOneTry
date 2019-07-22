@@ -1,4 +1,4 @@
-package com.bytedance.ttgame.module.screenrecord
+package com.bytedance.ttgame.module.screenrecord.api
 
 import java.io.File
 
