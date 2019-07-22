@@ -108,21 +108,21 @@ class Quality(val name: String, val width: Int, val height: Int) {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest)
-                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval)
+                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
                 }
             }
             BASE = Quality("Base", width, height).apply {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest / 2)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest / 2)
-                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval / 2)
+                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
                 }
             }
             LOW = Quality("Low", width, height).apply {
                 videoFormat = MediaFormat.createVideoFormat(VIDEO_TYPE, width, height).apply {
                     setInteger(MediaFormat.KEY_FRAME_RATE, fpsBest / 3)
                     setInteger(MediaFormat.KEY_BIT_RATE, bitrateBest / 3)
-                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval / 3)
+                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
                 }
             }
         }

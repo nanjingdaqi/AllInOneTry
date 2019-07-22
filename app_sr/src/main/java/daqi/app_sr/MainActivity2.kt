@@ -113,14 +113,23 @@ class MainActivity2 : AppCompatActivity() {
                     add(CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
                 }.run {
                     val stMil = System.currentTimeMillis()
-//                        crop("/sdcard/test_1562833951373.mp4", this)
-                    copyMp4(File("/sdcard/sr.mp4"))
-                    crop("/sdcard/sr.mp4", this)
-//                    mux("/sdcard/a.mp4", "/sdcard/test.mp3", "/sdcard/a_g_game/muxed.mp4")
+                    crop("/sdcard/test_1562833951373.mp4", this)
+                            .subscribe {
+                               Log.w("daqi", "crop finish")
+                            }
+                    Util.removeDir(dir.absolutePath)
+                    dir.mkdirs()
+
+                    Thread.sleep(1000)
+
+                    copy("sr.mp4", File("/sdcard/sr.mp4"))
+                    copy("test.mp3", File("/sdcard/test.mp3"))
+//                    crop("/sdcard/sr.mp4", this)
+                    mux("/sdcard/sr.mp4", "/sdcard/test.mp3", "/sdcard/a_g_game/muxed.mp4")
                             .subscribeOn(Schedulers.from(VideoManager.worker))
-//                            .flatMap {
-//                                crop(it.absolutePath, this)
-//                            }
+                            .flatMap {
+                                crop(it.absolutePath, this)
+                            }
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(object : Observer<List<CropInfo>> {
                                 override fun onComplete() {
@@ -146,10 +155,10 @@ class MainActivity2 : AppCompatActivity() {
         }
     }
 
-    fun copyMp4(dstMp4: File) {
-        dstMp4.run {
+    fun copy(asset: String, dst: File) {
+        dst.run {
             val os = FileOutputStream(this)
-            resources.assets.open("sr.mp4").run {
+            resources.assets.open(asset).run {
                 val buffer = ByteArray(4096)
                 while (true) {
                     val sz = read(buffer)
