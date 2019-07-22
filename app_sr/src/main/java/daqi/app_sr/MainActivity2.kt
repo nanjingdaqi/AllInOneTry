@@ -14,6 +14,7 @@ import com.bytedance.ttgame.module.screenrecord.CropInfo
 import com.bytedance.ttgame.module.screenrecord.Listener
 import com.bytedance.ttgame.module.screenrecord.Quality
 import com.bytedance.ttgame.module.screenrecord.RecordUserConfig
+import com.bytedance.ttgame.module.screenrecord.Util
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
 import com.bytedance.ttgame.module.screenrecord.VideoManager
 import com.bytedance.ttgame.module.screenrecord.VideoManager.Companion.INIT_RESULT_OK
@@ -31,6 +32,7 @@ import kotlinx.android.synthetic.main.content_main2.resume
 import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
 import java.io.File
+import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -80,6 +82,7 @@ class MainActivity2 : AppCompatActivity() {
 
     fun init() {
         val dir = File("/sdcard/a_g_game")
+        Util.removeDir(dir.absolutePath)
         dir.mkdirs()
         prepare.setOnClickListener {
             prepareRecord()
@@ -111,7 +114,8 @@ class MainActivity2 : AppCompatActivity() {
                 }.run {
                     val stMil = System.currentTimeMillis()
 //                        crop("/sdcard/test_1562833951373.mp4", this)
-                    crop("/sdcard/muxed_screen_record__1563706334399.mp4", this)
+                    copyMp4(File("/sdcard/sr.mp4"))
+                    crop("/sdcard/sr.mp4", this)
 //                    mux("/sdcard/a.mp4", "/sdcard/test.mp3", "/sdcard/a_g_game/muxed.mp4")
                             .subscribeOn(Schedulers.from(VideoManager.worker))
 //                            .flatMap {
@@ -139,6 +143,23 @@ class MainActivity2 : AppCompatActivity() {
         }
         inject_audio.setOnClickListener {
             videoManager.injectAudio("/sdcard/test.mp3")
+        }
+    }
+
+    fun copyMp4(dstMp4: File) {
+        dstMp4.run {
+            val os = FileOutputStream(this)
+            resources.assets.open("sr.mp4").run {
+                val buffer = ByteArray(4096)
+                while (true) {
+                    val sz = read(buffer)
+                    if (sz <= 0)
+                        break
+                    os.write(buffer, 0, sz)
+                }
+                os.flush()
+                os.close()
+            }
         }
     }
 
