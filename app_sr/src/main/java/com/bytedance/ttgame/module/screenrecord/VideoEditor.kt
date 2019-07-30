@@ -33,10 +33,10 @@ object VideoEditor {
                 val edTimes = ArrayList<String>(size)
                 forEach {
                     outPaths.add(it.outPath)
-                    stTimes.add((it.stMilli / 1000).run {
+                    stTimes.add((it.stMilli).run {
                         String.format("%d:%02d:%02d", this / 3600, (this % 3600) / 60, this % 60)
                     })
-                    edTimes.add((it.edMilli / 1000).run {
+                    edTimes.add((it.edMilli - it.stMilli).run {
                         String.format("%d:%02d:%02d", this / 3600, (this % 3600) / 60, this % 60)
                     })
                 }
@@ -46,6 +46,7 @@ object VideoEditor {
                         emitter.onNext(cropInfos)
                         emitter.onComplete()
                     } else {
+                        Log.e(TAG, "crop video fail, code: $this")
                         emitter.onError(CropException(this))
                     }
                 }

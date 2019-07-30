@@ -18,6 +18,7 @@ import com.bytedance.ttgame.module.screenrecord.VideoManager
 import com.bytedance.ttgame.module.screenrecord.VideoManager.Companion.INIT_RESULT_OK
 import com.bytedance.ttgame.module.screenrecord.api.Listener
 import com.bytedance.ttgame.module.screenrecord.api.UserConfig
+import com.ss.android.vesdk.VEUtils
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -26,6 +27,7 @@ import kotlinx.android.synthetic.main.content_main2.cut
 import kotlinx.android.synthetic.main.content_main2.img
 import kotlinx.android.synthetic.main.content_main2.inject_audio
 import kotlinx.android.synthetic.main.content_main2.inject_key_moment
+import kotlinx.android.synthetic.main.content_main2.mux
 import kotlinx.android.synthetic.main.content_main2.pause
 import kotlinx.android.synthetic.main.content_main2.prepare
 import kotlinx.android.synthetic.main.content_main2.resume
@@ -103,48 +105,24 @@ class MainActivity2 : AppCompatActivity() {
         }
         cut.setOnClickListener {
             VideoEditor.run {
-                val dir = File("/sdcard/a_g_game")
-                var index = 0
-                mutableListOf<CropInfo>().apply {
-                    add(CropInfo(0, 5000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
-                    add(CropInfo(2000, 10000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
-                    add(CropInfo(0, 20000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
-                    add(CropInfo(40000, 50000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
-                    add(CropInfo(70000, 80000, File(dir, "crop_${System.currentTimeMillis()}_${index++}.mp4").absolutePath, 0, false))
-                }.run {
-                    val stMil = System.currentTimeMillis()
-                    crop("/sdcard/test_1562833951373.mp4", this)
-                            .subscribe {
-                               Log.w("daqi", "crop finish")
+                crop("/sdcard/mux-org.mp4", listOf(CropInfo(5, 20, "/sdcard/crop_mux1.mp4", 1, false)))
+                        .subscribe(object : Observer<List<CropInfo>> {
+                            override fun onComplete() {
+                                Log.w("daqi", "onComplete")
                             }
-                    Util.removeDir(dir.absolutePath)
-                    dir.mkdirs()
 
-                    Thread.sleep(1000)
-
-                    copy("sr.mp4", File("/sdcard/sr.mp4"))
-                    copy("test.mp3", File("/sdcard/test.mp3"))
-//                    crop("/sdcard/sr.mp4", this)
-                    mux("/sdcard/sr.mp4", "/sdcard/test.mp3", "/sdcard/a_g_game/muxed.mp4")
-                            .subscribeOn(Schedulers.from(VideoManager.worker))
-                            .flatMap {
-                                crop(it.absolutePath, this)
+                            override fun onNext(t: List<CropInfo>) {
+                                Log.w("daqi", "onNext")
                             }
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(object : Observer<List<CropInfo>> {
-                                override fun onComplete() {
-                                    Log.w("daqi", "finish time consumption: ${System.currentTimeMillis() - stMil}")
-                                }
 
-                                override fun onSubscribe(d: Disposable) {}
+                            override fun onSubscribe(d: Disposable) {
 
-                                override fun onNext(t: List<CropInfo>) {}
+                            }
 
-                                override fun onError(e: Throwable) {
-                                    throw RuntimeException(e)
-                                }
-                            })
-                }
+                            override fun onError(e: Throwable) {
+                                Log.w("daqi", "onError")
+                            }
+                        })
             }
         }
         inject_key_moment.setOnClickListener {
@@ -152,6 +130,31 @@ class MainActivity2 : AppCompatActivity() {
         }
         inject_audio.setOnClickListener {
             videoManager.injectAudio("/sdcard/test.mp3")
+        }
+
+        mux.setOnClickListener {
+//            VEUtils.isCanImport("/sdcard/outputVoice.wav").run {
+//                Log.e("daqi", "isCanImport: $this")
+//            }
+            VideoEditor.mux("/sdcard/org.mp4", "/sdcard/outputVoice.wav", "/sdcard/mux2.mp4")
+                    .subscribeOn(Schedulers.from(VideoManager.worker))
+                    .subscribe(object: Observer<File> {
+                        override fun onComplete() {
+                            Log.w("daqi", "onComplete")
+                        }
+
+                        override fun onSubscribe(d: Disposable) {
+                        }
+
+                        override fun onNext(t: File) {
+                            Log.w("daqi", "onNext")
+                        }
+
+                        override fun onError(e: Throwable) {
+                            Log.w("daqi", "onError")
+                        }
+
+                    })
         }
     }
 
