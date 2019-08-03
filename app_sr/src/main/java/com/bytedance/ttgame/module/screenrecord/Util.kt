@@ -20,6 +20,10 @@ object Util {
         if (logLevel <= 3) if (e == null) Log.w(tag, msg) else Log.w(tag, msg, e)
     }
 
+    fun loge(tag: String, msg: String, e: Throwable? = null) {
+        if (e == null) Log.e(tag, msg) else Log.e(tag, msg, e)
+    }
+
     // 向下对齐
     fun alignDown(i: Int, factor: Int): Int {
         return (i / factor) * factor
@@ -44,18 +48,15 @@ object Util {
         }
     }
 
-    fun buildCropInfos(firstTimeStampUs: Long, keyMomentDurMill: Int, cropDir: File, moments: List<KeyMoment>, muxedVideoInfo: MuxedVideoInfo): List<CropInfo> {
+    fun buildCropInfos(firstTimeStampUs: Long, durationBefore: Int, durationAfter: Int, cropDir: File, moments: List<KeyMoment>, muxedVideoInfo: MuxedVideoInfo): List<CropInfo> {
         return mutableListOf<CropInfo>().apply {
             val org = moments.map {
                 val pos = it.timeStampUs - firstTimeStampUs
-                val keyMomentDur = keyMomentDurMill * 1000
                 val videoDur = muxedVideoInfo.durationTimeMill
-                CropInfo(stMilli = max(pos - keyMomentDur / 2, 0) / 1000,
-                        edMilli = min(pos + keyMomentDur / 2, videoDur * 1000) / 1000,
+                CropInfo(st = max(pos - durationBefore * 1000000, 0) / 1000000,
+                        ed= min(pos + durationAfter * 1000000, videoDur * 1000) / 1000000,
                         outPath = File(cropDir, "${it.timeStampUs}.mp4").absolutePath,
-                        priority = it.priority,
-                        toBeConcatenated = it.addToConcatenatedVideo
-                )
+                        priority = it.priority)
             }
             Log.w("daqi", "Init crop info: $org")
             var i = 0
@@ -68,7 +69,7 @@ object Util {
                     add(cur)
                 } else {
                     val next = org[i + 1]
-                    if (cur.edMilli >= next.stMilli) {
+                    if (cur.ed >= next.st) {
                         cur = mergeTwoCropInfo(cur, next)
                     } else {
                         add(cur)
@@ -81,12 +82,10 @@ object Util {
     }
 
     private fun mergeTwoCropInfo(left: CropInfo, right: CropInfo): CropInfo {
-        return CropInfo(stMilli = left.stMilli,
-                edMilli = right.edMilli,
+        return CropInfo(st = left.st,
+                ed = right.ed,
                 outPath = if (left.priority < right.priority) right.outPath else left.outPath,
-                priority = max(left.priority, right.priority),
-                toBeConcatenated = left.toBeConcatenated || right.toBeConcatenated
-        )
+                priority = max(left.priority, right.priority))
     }
 
     fun resolveMuxedVideoInfo(firstTimeStampUs: Long, filePath: String): MuxedVideoInfo {
@@ -97,7 +96,7 @@ object Util {
             if (VideoManager.DEBUG) {
                 Log.w(VideoManager.TAG, "video info: ${map { it.toString() }}")
             }
-            return MuxedVideoInfo(firstTimeStampUs, this[10].toLong())
+            return MuxedVideoInfo(firstTimeStampUs, this[3].toLong())
         }
     }
 }

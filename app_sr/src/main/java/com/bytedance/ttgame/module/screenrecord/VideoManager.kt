@@ -14,22 +14,26 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.util.DisplayMetrics
 import android.util.Log
-import android.view.WindowManager
 import android.widget.Toast
+import com.bytedance.ttgame.module.screenrecord.api.AudioEngineType
+import com.bytedance.ttgame.module.screenrecord.api.Config
+import com.bytedance.ttgame.module.screenrecord.api.ConvertResult
+import com.bytedance.ttgame.module.screenrecord.api.Error
 import com.bytedance.ttgame.module.screenrecord.api.IScreenRecordService
-import com.bytedance.ttgame.module.screenrecord.api.Listener
-import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_ACTIVITY_PAUSED
-import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_NO_AUDIO_FILE
-import com.bytedance.ttgame.module.screenrecord.api.UserConfig
+import com.bytedance.ttgame.module.screenrecord.api.ScreenRecordCallback
+import com.bytedance.ttgame.module.screenrecord.api.Result
+import com.bytedance.ttgame.module.screenrecord.api.VideoType
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
 import com.ss.android.vesdk.VESDK
 import io.reactivex.Observable
 import io.reactivex.SingleObserver
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 import java.io.File
 import java.io.FileReader
 import java.nio.ByteBuffer
@@ -53,21 +57,17 @@ class VideoManager : IScreenRecordService {
         const val ORG_MP4_PREFIX = "org_screen_record_"
         const val MUXED_MP4_PREFIX = "muxed_screen_record_"
 
-        const val INIT_RESULT_OK = 0
-        const val INIT_RESULT_OS_UNSUPPORT = 1
-        const val INIT_RESULT_NO_VIDEO_ENCODER = 2
-
-        const val START_RESULT_OK = 0
-        const val START_RESULT_WRONG_STATE = 1
+        const val PREPARE_RESULT_OK = 0
+        const val PREPARE_RESULT_NO_VIDEO_ENCODER = 1
 
         enum class State {
-            UNINITED, INITED, PREPARED, USER_CONFIRMED, RECORDING, WAITING_AUDIO, PROCESSING, FINISHED, FAILED
+            UNPREPARED, PREPARED, USER_CONFIRMED, RECORDING, PROCESSING, FINISHED, FAILED
         }
 
         val worker = Executors.newSingleThreadExecutor {
             Thread(null, it, "video-worker")
         }
-        val downloadWorker = Executors.newCachedThreadPool {
+        val downloadWorker = Executors.newSingleThreadExecutor {
             Thread(null, it, "video-downloader")
         }
 
@@ -108,44 +108,48 @@ class VideoManager : IScreenRecordService {
         }
     }
 
-    private var state = State.UNINITED
-    private var initResult = Int.MIN_VALUE
+    private var state = State.UNPREPARED
+    private var prepareResult = Int.MIN_VALUE
 
     lateinit var mainActivityComponentName: ComponentName
     lateinit var app: Application
-    lateinit var projectionManager: MediaProjectionManager
     lateinit var recorder: ScreenRecorder
     lateinit var orgMp4Path: String
     lateinit var muxedMp4Path: String
     var audioSampleRate: Int = Int.MIN_VALUE
     lateinit var audioAdapter: AudioAdapter
     var keyMoments = mutableListOf<KeyMoment>() // 与ScreenRecorder的timeStampUs计算方式一致
-    var injectedAudio: File? = null
 
     var mp: MediaProjection? = null
-    lateinit var userConfig: UserConfig
+    lateinit var userConfig: Config
     public var debugConfig: DebugConfig? = null
-
+    val videoNet: VideoNet = VideoNet(this)
     var selectedQuality: Quality? = null
-        set(value) {
-            checkState()
-            field = value
-        }
-    var listener: Listener? = null
-        set(value) {
-            checkState()
-            field = value
-        }
+    var userCallback: ScreenRecordCallback? = null
 
-    var dm: DisplayMetrics? = null
-
-    override fun init(activity: Activity): Int {
-        if (initResult != Int.MIN_VALUE) {
-            return initResult
+    var lifecycleCallback = object : EmptyActivityLifecycleCallbacks() {
+        override fun onActivityPaused(activity: Activity?) {
+            if (mainActivityComponentName == activity?.componentName) {
+                Util.logk(TAG, "Check current activity paused")
+                if (state == State.RECORDING) {
+                    onFail(Error.EXIT_OR_OUT_OF_MEMORY)
+                }
+            }
         }
-        if (android.os.Build.VERSION.SDK_INT < 21) {
-            initResult = INIT_RESULT_OS_UNSUPPORT
-            return initResult
+    }
+
+
+    override fun isSupported(activity: Activity): Boolean {
+        if (Build.VERSION.SDK_INT < 21) {
+            return false
+        }
+        return true
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun prepare(activity: Activity, audioSampleRate: Int): Boolean {
+        if (prepareResult != Int.MIN_VALUE) {
+            return prepareResult == PREPARE_RESULT_OK
         }
         app = activity.application
         mainActivityComponentName = activity.componentName
@@ -160,18 +164,61 @@ class VideoManager : IScreenRecordService {
         Quality.apply {
             this.init(app)
             if (HIGH == null) {
-                initResult = INIT_RESULT_NO_VIDEO_ENCODER
-                return initResult
+                prepareResult = PREPARE_RESULT_NO_VIDEO_ENCODER
+                return false
             }
         }
+        prepareResult = PREPARE_RESULT_OK
+        this.audioSampleRate = audioSampleRate
+        activity.startActivity(Intent(app, ScreenRecordHandlerActivity::class.java))
+        EventBus.getDefault().register(this)
+        state = State.PREPARED
+        return prepareResult == PREPARE_RESULT_OK
+    }
 
-        initResult = INIT_RESULT_OK
-        state = State.INITED
-        selectedQuality = Quality.HIGH
-        dm = DisplayMetrics().apply {
-            (app.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getRealMetrics(this)
+    @Subscribe
+    fun onEvent(event: ScreenRecordHandlerActivity.ActivityResultEvent) {
+        onActivityResult(event.resultCode, event.data)
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    fun onActivityResult(resultCode: Int, data: Intent?) {
+        EventBus.getDefault().unregister(this)
+        if (!ensureState(State.PREPARED, action = "onActivityResult")) return
+        if (resultCode == Activity.RESULT_OK) {
+            Log.d(TAG, "User confirmed screen recording.")
+            val pm = app.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+            mp = pm.getMediaProjection(resultCode, data)
+            state = State.USER_CONFIRMED
+        } else {
+            Log.w(TAG, "User did not choose OK for screen recording.")
         }
-        observeActivityInvisible(app)
+    }
+
+    override fun setCallback(listener: ScreenRecordCallback) {
+        userCallback = listener
+    }
+
+    private fun checkUserConfig(userConfig: Config): Boolean {
+        userConfig.run {
+            if (auth == null || auth!!.isEmpty()) {
+                Log.e(TAG, "Auth is empty.")
+                return false
+            }
+        }
+        return true
+    }
+
+    override fun startScreenRecord(userConfig: Config): Boolean {
+        if (!ensureState(State.USER_CONFIRMED, action = "startScreenRecord")) return false
+        if (!checkUserConfig(userConfig)) return false
+        this.userConfig = userConfig
+        selectedQuality = when (userConfig.quality) {
+            com.bytedance.ttgame.module.screenrecord.api.Quality.LOW -> Quality.LOW
+            com.bytedance.ttgame.module.screenrecord.api.Quality.MEDIUM -> Quality.BASE
+            com.bytedance.ttgame.module.screenrecord.api.Quality.HIGH -> Quality.HIGH
+            else -> Quality.BASE
+        }
         if (DEBUG) {
             File(DEBUG_CONFIG_FILE).run {
                 if (!exists()) {
@@ -189,82 +236,40 @@ class VideoManager : IScreenRecordService {
             }
         }
         Log.w(TAG, "Selected quality is: ${selectedQuality!!.name}")
-        return initResult
-    }
-
-    private fun observeActivityInvisible(app: Application) {
-        app.registerActivityLifecycleCallbacks(object : EmptyActivityLifecycleCallbacks() {
-            override fun onActivityPaused(activity: Activity?) {
-                if (mainActivityComponentName == activity?.componentName) {
-                    Util.logk(TAG, "Check current activity paused")
-                    // 延迟处理，处理转屏情况
-                    if (state == State.RECORDING) {
-                        onFail(ERROR_ACTIVITY_PAUSED)
-                    }
-                }
-            }
-        })
-    }
-
-    private fun checkState() {
-        if (initResult == Int.MIN_VALUE) {
-            throw IllegalStateException("Please invoke init method at first.")
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun prepare(activity: Activity, requestCode: Int, audioSampleRate: Int) {
-        if (!ensureState(State.INITED, action = "prepare")) return
-        state = State.PREPARED
-        this.audioSampleRate = audioSampleRate
-        projectionManager = app.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        activity.startActivityForResult(projectionManager.createScreenCaptureIntent(), requestCode)
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun onActivityResult(resultCode: Int, data: Intent) {
-        if (!ensureState(State.PREPARED, action = "onActivityResult")) return
-        if (resultCode == Activity.RESULT_OK) {
-            Log.d(TAG, "User confirmed screen recording.")
-            mp = projectionManager.getMediaProjection(resultCode, data)
-            state = State.USER_CONFIRMED
-        } else {
-            Log.w(TAG, "User did not choose OK for screen recording.")
-        }
-    }
-
-    override fun startScreenRecord(userConfig: UserConfig): Int {
-        if (!ensureState(State.USER_CONFIRMED, action = "startScreenRecord")) return START_RESULT_WRONG_STATE
         if (DEBUG) {
             Handler(Looper.getMainLooper()).post {
                 Toast.makeText(app, "输出视频地址：$orgMp4Path", Toast.LENGTH_LONG).show()
             }
         }
-        this.userConfig = userConfig
         recorder = ScreenRecorder(orgMp4Path, this).apply {
             selectedQuality!!.videoFormat.run {
                 setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
                 prepareVideo(Quality.videoCodec!!, this, mp!!).apply {
-                    if (this != Listener.ERROR_NO) {
-                        onFail(this)
+                    if (this != ScreenRecorder.ERROR_NO) {
+                        return false
                     }
                 }
             }
-            if (audioSampleRate > 0) {
-                // audio codec可能为空，此时降级为只录取视频
-                selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
-                    audioAdapter = AudioAdapter()
-                    prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
-                        if (this != Listener.ERROR_NO) {
-                            onFail(this)
+            if (userConfig.audioEngineType == AudioEngineType.UNITY) {
+                if (audioSampleRate <= 0) {
+                    Log.w(TAG, "Input audio sample rate is illegal: $audioSampleRate. Won't record audio.")
+                } else {
+                    // audio codec可能为空，此时降级为只录取视频
+                    selectedQuality!!.getAudioFormat(audioSampleRate)?.run {
+                        audioAdapter = AudioAdapter()
+                        prepareAudio(audioAdapter, Quality.audioCodec!!, this).apply {
+                            if (this != ScreenRecorder.ERROR_NO) {
+                                return false
+                            }
                         }
                     }
                 }
             }
-            start(selectedQuality!!.width, selectedQuality!!.height)
-            state = State.RECORDING
         }
-        return START_RESULT_OK
+        recorder.start(selectedQuality!!.width, selectedQuality!!.height)
+        state = State.RECORDING
+        app.registerActivityLifecycleCallbacks(lifecycleCallback)
+        return true
     }
 
     // 面向Unity环境，使用这个接口
@@ -312,42 +317,30 @@ class VideoManager : IScreenRecordService {
         }
     }
 
-    override fun markKeyMoment(priority: Int, addToConcatenatedVideo: Boolean) {
+    override fun markKeyMoment(priority: Int) {
         if (!ensureState(State.RECORDING, action = "markKeyMoment")) return
         Log.w(TAG, "Mark key moment, at moment: ${(SystemClock.elapsedRealtime() * 1000 - recorder.firstTimeStampUs) / 1000 / 1000}s")
-        keyMoments.add(KeyMoment(SystemClock.elapsedRealtime() * 1000, priority, addToConcatenatedVideo))
+        keyMoments.add(KeyMoment(SystemClock.elapsedRealtime() * 1000, priority))
     }
 
-    override fun stopScreenRecord() {
+    override fun stopScreenRecord(fragModifyCount: Int, albumFragCount: Int) {
         if (ensureState(State.RECORDING, action = "stopScreenRecord")) {
             Log.w(TAG, "stop screen record.")
             if (DEBUG) {
                 Toast.makeText(app, "录屏结束, 文件地址：$orgMp4Path", Toast.LENGTH_LONG).show()
             }
-            recorder.stop()
-            mp = null
-            if (audioSampleRate <= 0) {
-                state = State.WAITING_AUDIO
-            } else {
-                performProcessingJob()
-            }
+            release()
+            videoNet.fragModifyCount = fragModifyCount
+            videoNet.albumFragCount = albumFragCount
+            performProcessingJob()
         }
+        app.unregisterActivityLifecycleCallbacks(lifecycleCallback)
     }
 
-    /**
-     * CP 注入音频文件，开始后续的处理
-     */
-    override fun injectAudio(filePath: String) {
-        injectedAudio = File(filePath)
-        if (!injectedAudio!!.exists()) {
-            Log.e(TAG, "Injected audio file not exist. $filePath")
-            onFail(ERROR_NO_AUDIO_FILE)
-        } else {
-            if (state == State.WAITING_AUDIO) {
-                performProcessingJob()
-            } else {
-                Log.w(TAG, "inject audio, but not start process asap current state: $state")
-            }
+    private fun release() {
+        if (mp != null) {
+            recorder.stop()
+            mp = null
         }
     }
 
@@ -360,79 +353,107 @@ class VideoManager : IScreenRecordService {
      * 6. 下载中台处理后的视频
      * 7. 返回给CP
      */
-    private fun performProcessingJob() {
+    public fun performProcessingJob() {
         state = State.PROCESSING
+        var injectedAudio = userConfig.audioPath
+        Log.w(TAG, "User inject audio path: $injectedAudio")
+        if (injectedAudio != null && !File(injectedAudio).exists()) {
+            injectedAudio = null
+            Log.w(TAG, "Audio file doew not exist")
+        }
         val muxedMp4FileObservable = injectedAudio?.run {
-            VideoEditor.mux(orgMp4Path, injectedAudio!!.absolutePath, muxedMp4Path)
+            VideoEditor.mux(orgMp4Path, injectedAudio, muxedMp4Path)
         } ?: Observable.fromArray(File(orgMp4Path))
 
         var cropInfos: List<CropInfo>? = null
-        val cropInfoObservable = muxedMp4FileObservable
+        muxedMp4FileObservable
                 .subscribeOn(Schedulers.from(worker))
                 .observeOn(Schedulers.from(worker))
                 .map {
                     Pair(it, Util.resolveMuxedVideoInfo(recorder.firstTimeStampUs, it.absolutePath))
                 }
                 .map {
-                    cropInfos = Util.buildCropInfos(recorder.firstTimeStampUs, userConfig.keyMomentDurationMill, cropDir!!, keyMoments, it.second)
+                    cropInfos = Util.buildCropInfos(recorder.firstTimeStampUs, userConfig.durationBefore, userConfig.durationAfter, cropDir!!, keyMoments, it.second)
+//                    cropInfos = listOf(CropInfo(10, 30, File(rootDir, "crop1.mp4").absolutePath, 1))
                     Pair(it.first, cropInfos)
                 }
                 .flatMap {
                     VideoEditor.crop(it.first.absolutePath, it.second!!)
                 }
+                // uploadVideo要切到主线程执行
+                .observeOn(AndroidSchedulers.mainThread())
                 .flatMap {
-                    VideoNet.uploadVideos(it.map { path -> File(path.outPath) })
+                    if (DEBUG) {
+                        Log.w(TAG, "uploadVideos")
+                    }
+                    videoNet.uploadVideos(it.map { path -> File(path.outPath) })
+                }
+                .observeOn(Schedulers.from(worker))
+                .flatMap {
+                    if (DEBUG) {
+                        Log.w(TAG, "uploadVids")
+                    }
+                    videoNet.uploadVids(it, cropInfos!!.map { info -> info.priority })
                 }
                 .flatMap {
-                    VideoNet.uploadVids(it, cropInfos!!.map { info -> info.priority })
-                }
-                .flatMap {
-                    VideoNet.queryProcessedVideos(it)
+                    if (DEBUG) {
+                        Log.w(TAG, "queryProcessedVideos")
+                    }
+                    videoNet.queryProcessedVideos(it)
                 }
                 .flatMapIterable {
-                    mutableListOf<DownloadedVideo>().apply {
-                        val sz = it.vids.size
-                        for (i in 0 until sz) {
-                            add(DownloadedVideo(it.vids[i], it.urls[i], File(downloadDir, "${it.vids[i]}.mp4").absolutePath))
+                    it.map {
+                        val url = String(android.util.Base64.decode(it.url, android.util.Base64.DEFAULT))
+                        if (DEBUG) {
+                            Log.w(TAG, "download url: $url")
                         }
-                        add(DownloadedVideo(it.finalVid, it.finalUrl, File(downloadDir, "final_${it.finalVid}.mp4").absolutePath))
+                        DownloadedVideo(it.vid, it.aid, url, it.type, File(downloadDir, "${it.vid}.mp4").absolutePath)
                     }
                 }
                 .observeOn(Schedulers.from(downloadWorker))
                 .flatMap {
-                    VideoNet.download(it)
+                    videoNet.download(it)
                 }
                 .toList()
                 .observeOn(Schedulers.from(worker))
                 .subscribe(object : SingleObserver<List<DownloadedVideo>> {
-                    override fun onSubscribe(d: Disposable) {}
+                    override fun onSubscribe(d: Disposable) {
+                        if (DEBUG) {
+                            Log.d(TAG, "ProcessingJob start")
+                        }
+                    }
 
                     override fun onSuccess(t: List<DownloadedVideo>) {
-
+                        if (DEBUG) {
+                            Log.w(TAG, "Downloaded videos: $t")
+                        }
+                        userCallback?.onSuccess(Result(0, Error.NO_ERROR, "", t.map {
+                            ConvertResult(it.aid, it.vid, it.url, it.localPath, VideoType.values()[it.type])
+                        }.toTypedArray()))
                     }
 
                     override fun onError(e: Throwable) {
-
+                        Log.w(TAG, "视频后续处理失败", e)
+                        if (DEBUG) {
+                            Toast.makeText(app, "视屏后续处理失败，查看log.", Toast.LENGTH_LONG).show()
+                        }
                     }
                 })
     }
 
-    override fun shareVideo(localPath: String) {
+    override fun shareVideo(localPath: String, aid: String) {
         if (!ensureState(State.FINISHED, action = "shareVideo")) return
 
     }
 
-    override fun setAuth(auth: String) {
-
-    }
-
-    fun onFail(error: Int, exception: Throwable? = null) {
+    // todo: 改为只在stop调用后，才开始发出onFail的callback
+    fun onFail(error: Error, exception: Throwable? = null) {
         if (state != State.FAILED) {
+            Log.e(TAG, "Fail!!!", exception)
             // 保证只会向外通知一次
             state = State.FAILED
-            stopScreenRecord()
-            Log.e(TAG, "Fail!!!", exception)
-            listener?.onFail(error, exception)
+            release()
+            userCallback?.onFail(Result(-1, error, "", null))
         }
     }
 

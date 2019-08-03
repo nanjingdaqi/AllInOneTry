@@ -1,6 +1,7 @@
 package com.bytedance.ttgame.module.screenrecord
 
 import android.hardware.display.DisplayManager
+import com.bytedance.ttgame.module.screenrecord.api.Error
 import android.hardware.display.VirtualDisplay
 import android.media.MediaCodec
 import android.media.MediaFormat
@@ -10,13 +11,6 @@ import android.os.HandlerThread
 import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
-import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_AUDIO_ENCODE_FAIL
-import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_CREATE_AUDIO_ENCODER
-import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_CREATE_VIDEO_ENCODER
-import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_FINISH_FAIL
-import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_IN_USE
-import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_NO
-import com.bytedance.ttgame.module.screenrecord.api.Listener.Companion.ERROR_VIDEO_ENCODE_FAIL
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_START
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.MSG_STOP
 import com.bytedance.ttgame.module.screenrecord.ScreenRecorder.Companion.T
@@ -29,7 +23,8 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
 
     companion object {
         const val T = "daqi-ScreenRecorder"
-        const val DEBUG = true
+        const val DEBUG = VideoManager.DEBUG
+        const val DEBUG_BUFFER = DEBUG && true
 
         const val MSG_START = 1
         const val MSG_STOP = 2
@@ -38,6 +33,10 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
 
         const val THREAD_ENCODE_NAME = "screen-encoder"
         const val THREAD_AUDIO_FEED_NAME = "audio-feed"
+
+        const val ERROR_NO = 0
+        const val ERROR_CREATE_VIDEO_ENCODER = 1
+        const val ERROR_CREATE_AUDIO_ENCODER = 2
     }
 
     enum class State {
@@ -66,7 +65,8 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
         override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, bufferInfo: MediaCodec.BufferInfo) {
             recorderH.post {
                 if (state == State.RECORDING) {
-                    Util.logd(T, "video avail buffer, index: $index, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
+                    if (DEBUG_BUFFER)
+                        Util.logd(T, "video avail buffer, index: $index, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
                     codec.getOutputBuffer(index)?.run {
                         bufferInfo.presentationTimeUs = computeTimeStampUs()
                         muxer.writeSampleData(videoCoder, this, bufferInfo)
@@ -92,7 +92,7 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
         }
 
         override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
-            Util.logk(T, "video encoder on error", e)
+            Util.loge(T, "video encoder on error", e)
         }
     }
 
@@ -104,7 +104,8 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
                         val data = this
                         try {
                             codec.getInputBuffer(index)?.run {
-                                Util.logd(T, "audio feed one buffer: $this")
+                                if (DEBUG_BUFFER)
+                                    Util.logd(T, "audio feed one buffer: $this")
                                 put(data)
                                 flip()
                                 codec.queueInputBuffer(index, 0, limit(), 0, 0)
@@ -123,7 +124,8 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
         override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, bufferInfo: MediaCodec.BufferInfo) {
             recorderH.post {
                 if (state == State.RECORDING) {
-                    Util.logd(T, "audio avail buffer, index: $index, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
+                    if (DEBUG_BUFFER)
+                        Util.logd(T, "audio avail buffer, index: $index, sz: ${bufferInfo.size}, pren time: ${bufferInfo.presentationTimeUs}")
                     codec.getOutputBuffer(index)?.run {
                         bufferInfo.presentationTimeUs = computeTimeStampUs()
                         muxer.writeSampleData(audioCoder!!, this, bufferInfo)
@@ -161,14 +163,11 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
      * 完成初始化，如果有问题，返回错误码。
      */
     fun prepareVideo(codecName: String, videoFormat: MediaFormat, mp: MediaProjection): Int {
-        if (state != State.UNSTARTED) {
-            return ERROR_IN_USE
-        }
         try {
             videoCoder = CodecContext.createEncoderByName(codecName, videoFormat, videoCodecCallback)
         } catch (e: Exception) {
             if (DEBUG) throw RuntimeException(e)
-            e.printStackTrace()
+            Util.loge(T, "Fail to create video encoder", e)
             return ERROR_CREATE_VIDEO_ENCODER
         }
         this.mp = mp
@@ -181,15 +180,12 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
     }
 
     fun prepareAudio(audioSource: AudioSource, codecName: String, audioFormat: MediaFormat): Int {
-        if (state != State.UNSTARTED) {
-            return ERROR_IN_USE
-        }
         this.audioSource = audioSource
         try {
             audioCoder = CodecContext.createEncoderByName(codecName, audioFormat, audioCodecCallback)
         } catch (e: Exception) {
             if (DEBUG) throw RuntimeException(e)
-            e.printStackTrace()
+            Util.loge(T, "Fail to create audio encoder.", e)
             return ERROR_CREATE_AUDIO_ENCODER
         }
         audioQueue = LinkedBlockingQueue(AUDIO_QUEUE_CAPACITY)
@@ -205,15 +201,14 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
             configThread(this, false)
             Handler(looper)
         }
-
         return ERROR_NO
     }
 
     private fun configThread(td: Thread, videoT: Boolean) {
         td.setUncaughtExceptionHandler { t, e ->
             state = State.FAILED
-            Util.logk(T, "Thread ${t.name} exception", e)
-            videoManager.onFail(if (videoT) ERROR_VIDEO_ENCODE_FAIL else ERROR_AUDIO_ENCODE_FAIL, e)
+            Util.logk(T, "Thread ${t.name} exception is video $videoT", e)
+            videoManager.onFail(Error.RECORD_ERROR)
             stop()
         }
     }
@@ -278,8 +273,8 @@ class ScreenRecorder(val outMp4Path: String, val videoManager: VideoManager) {
                 muxer.mayFinish()
             }
         } catch (e: Exception) {
-            Util.logk(T, "finish resource failed")
-            videoManager.onFail(ERROR_FINISH_FAIL, e)
+            Util.loge(T, "finish resource failed")
+            videoManager.onFail(Error.RECORD_ERROR)
         }
     }
 }

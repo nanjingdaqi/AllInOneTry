@@ -9,23 +9,17 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.Toast
 import com.bytedance.ttgame.module.screenrecord.CropInfo
-import com.bytedance.ttgame.module.screenrecord.Quality
 import com.bytedance.ttgame.module.screenrecord.Util
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
 import com.bytedance.ttgame.module.screenrecord.VideoManager
-import com.bytedance.ttgame.module.screenrecord.VideoManager.Companion.INIT_RESULT_OK
-import com.bytedance.ttgame.module.screenrecord.api.Listener
-import com.bytedance.ttgame.module.screenrecord.api.UserConfig
-import com.ss.android.vesdk.VEUtils
+import com.bytedance.ttgame.module.screenrecord.api.AudioEngineType
+import com.bytedance.ttgame.module.screenrecord.api.Config
 import io.reactivex.Observer
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.content_main2.cut
 import kotlinx.android.synthetic.main.content_main2.img
-import kotlinx.android.synthetic.main.content_main2.inject_audio
 import kotlinx.android.synthetic.main.content_main2.inject_key_moment
 import kotlinx.android.synthetic.main.content_main2.mux
 import kotlinx.android.synthetic.main.content_main2.pause
@@ -35,8 +29,6 @@ import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 class MainActivity2 : AppCompatActivity() {
 
@@ -49,7 +41,6 @@ class MainActivity2 : AppCompatActivity() {
         videoManager = VideoManager()
 
         startAnim()
-//        playAudio()
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)) {
@@ -87,15 +78,15 @@ class MainActivity2 : AppCompatActivity() {
         Util.removeDir(dir.absolutePath)
         dir.mkdirs()
         prepare.setOnClickListener {
-            prepareRecord()
+            videoManager.prepare(this, 0)
         }
         start.setOnClickListener {
-            UserConfig(5 * 1000).run {
+            Config(com.bytedance.ttgame.module.screenrecord.api.Quality.HIGH, 5, 5, 0, "", AudioEngineType.DEFAULT, "", "").run {
                 videoManager.startScreenRecord(this)
             }
         }
         stop.setOnClickListener {
-            videoManager.stopScreenRecord()
+            videoManager.stopScreenRecord(3, 3)
         }
         pause.setOnClickListener {
             //            recorder.pause()
@@ -105,7 +96,7 @@ class MainActivity2 : AppCompatActivity() {
         }
         cut.setOnClickListener {
             VideoEditor.run {
-                crop("/sdcard/mux-org.mp4", listOf(CropInfo(5, 20, "/sdcard/crop_mux1.mp4", 1, false)))
+                crop("/sdcard/mux-org.mp4", listOf(CropInfo(5, 20, "/sdcard/crop_mux1.mp4", 1)))
                         .subscribe(object : Observer<List<CropInfo>> {
                             override fun onComplete() {
                                 Log.w("daqi", "onComplete")
@@ -126,19 +117,13 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
         inject_key_moment.setOnClickListener {
-            videoManager.markKeyMoment(0, true)
-        }
-        inject_audio.setOnClickListener {
-            videoManager.injectAudio("/sdcard/test.mp3")
+            videoManager.markKeyMoment(0)
         }
 
         mux.setOnClickListener {
-//            VEUtils.isCanImport("/sdcard/outputVoice.wav").run {
-//                Log.e("daqi", "isCanImport: $this")
-//            }
             VideoEditor.mux("/sdcard/org.mp4", "/sdcard/outputVoice.wav", "/sdcard/mux2.mp4")
                     .subscribeOn(Schedulers.from(VideoManager.worker))
-                    .subscribe(object: Observer<File> {
+                    .subscribe(object : Observer<File> {
                         override fun onComplete() {
                             Log.w("daqi", "onComplete")
                         }
@@ -172,64 +157,6 @@ class MainActivity2 : AppCompatActivity() {
                 os.flush()
                 os.close()
             }
-        }
-    }
-
-    fun prepareRecord() {
-        videoManager.run {
-            if (init(this@MainActivity2) != INIT_RESULT_OK) {
-                Toast.makeText(applicationContext, "该设备不支持录屏，请检查log.", Toast.LENGTH_LONG).show()
-                return
-            }
-            selectedQuality = Quality.HIGH!!
-            listener = object : Listener {
-                override fun onSucc(videoFiles: List<File>) {
-                    Log.w("daqi", "recording onSucc: $videoFiles")
-                }
-
-                override fun onFail(error: Int, exception: Throwable?) {
-                    Log.w("daqi", "recording onFail, error: $error", exception)
-                    throw RuntimeException(exception)
-                }
-            }
-            prepare(this@MainActivity2, 1, 0)
-        }
-    }
-
-    private fun playAudio() {
-        if (audioPlayer == null) {
-            audioPlayer = AudioPlayer()
-        }
-        audioPlayer!!.run {
-            play(resources.assets.openFd("test.mp3"))
-            addListener(object : AudioPlayer.Listener {
-                override fun onNewBuffer(buffer: ByteBuffer, sampleTime: Long) {
-                    buffer.run {
-                        mark()
-                        order(ByteOrder.nativeOrder())
-                        if (Quality.ONLY_PCM_16) {
-                            asShortBuffer().run {
-                                ShortArray(limit() - position()).apply {
-                                    get(this)
-                                    val fa = FloatArray(size)
-                                    for (i in 0 until size) {
-                                        fa[i] = this[i] * 1.0f / 32767
-                                    }
-                                    videoManager.onAudioBuffer(fa)
-                                }
-                            }
-                        } else {
-                            asFloatBuffer().run {
-                                FloatArray(limit() - position()).run {
-                                    get(this)
-                                    videoManager.onAudioBuffer(this)
-                                }
-                            }
-                        }
-                        reset()
-                    }
-                }
-            })
         }
     }
 }

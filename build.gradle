@@ -20,6 +20,9 @@ allprojects {
         maven {
             url "https://jitpack.io"
         }
+        maven {
+            url "https://dl.bintray.com/ttgamesdk/public"
+        }
         maven {url "http://maven.byted.org/nexus/content/repositories/ugc_android_snapshot/"}
         maven {url "http://maven.byted.org/nexus/content/repositories/ugc_android/"}
         maven {url "https://maven.byted.org/nexus/content/repositories/ss_app_android/"}

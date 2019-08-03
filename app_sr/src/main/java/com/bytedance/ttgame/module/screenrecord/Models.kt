@@ -7,15 +7,14 @@ import android.os.Bundle
 
 data class DebugConfig(val quality: Int, val duration: Int)
 
-data class KeyMoment(val timeStampUs: Long, val priority: Int, val addToConcatenatedVideo: Boolean)
+data class KeyMoment(val timeStampUs: Long, val priority: Int)
 
 data class MuxedVideoInfo(val firstTimeStampUs: Long, val durationTimeMill: Long)
 
-data class CropInfo(val stMilli: Long, val edMilli: Long, val outPath: String, val priority: Int, val toBeConcatenated: Boolean)
+// unit: s
+data class CropInfo(val st: Long, val ed: Long, var outPath: String, val priority: Int)
 
-data class ProcessedVideos(val result: Int, val vids: List<String>, val urls: List<String>, val finalVid: String, val finalUrl: String)
-
-data class DownloadedVideo(val vid: String, val url: String, val localPath: String)
+data class DownloadedVideo(val vid: String, val aid: String, val url: String, val type: Int, val localPath: String)
 
 class AudioAdapter : AudioSource {
     var observers = mutableListOf<AudioObserver>()

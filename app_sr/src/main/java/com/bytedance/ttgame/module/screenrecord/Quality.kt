@@ -98,7 +98,7 @@ class Quality(val name: String, val width: Int, val height: Int) {
             if (videoCap!!.heightAlignment > 0) {
                 height = Util.alignDown(height, videoCap!!.heightAlignment)
             }
-            val fpsBest = min(60, videoCap!!.supportedFrameRates.upper)
+            val fpsBest = min(30, videoCap!!.supportedFrameRates.upper)
             val bitrateBest = min((width * height).shl(2), videoCap!!.bitrateRange.upper)
             val iFrameInterval = fpsBest // 按照vesdk的建议，设置为fps大小，得到的视频的I帧就是1s的周期
             if (DEBUG) {

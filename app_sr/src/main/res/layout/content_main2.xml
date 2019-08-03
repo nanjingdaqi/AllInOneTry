@@ -28,12 +28,6 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"/>
 
-    <Button android:id="@+id/inject_audio"
-            android:text="插入音频文件"
-            android:layout_marginTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"/>
-
     <Button android:id="@+id/pause"
             android:visibility="gone"
             android:text="暂停录制"
