@@ -10,6 +10,20 @@ object VideoEditor {
 
     const val TAG = "daqi-VideoEditor"
 
+    fun transAudio(inAudioPath: String, outAudioPath: String): Observable<File> {
+        return Observable.create { emmitter ->
+            VEUtils.transCodeAudio(inAudioPath, outAudioPath, 2, 128 * 1000).run {
+                if (this == 0) {
+                    emmitter.onNext(File(outAudioPath))
+                    emmitter.onComplete()
+                } else {
+                    Log.e(TAG, "trans audio fail: $this")
+                    emmitter.onError(ScreenRecordException(Error.MUX_ERROR))
+                }
+            }
+        }
+    }
+
     // todo 做个优化，以视频为主，音频适配视频
     public fun mux(inVideoPath: String, inAudioPath: String, outPath: String): Observable<File> {
         return Observable.create { emitter ->

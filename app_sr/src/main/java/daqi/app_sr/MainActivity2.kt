@@ -121,7 +121,14 @@ class MainActivity2 : AppCompatActivity() {
         }
 
         mux.setOnClickListener {
-            VideoEditor.mux("/sdcard/org.mp4", "/sdcard/outputVoice.wav", "/sdcard/mux2.mp4")
+            val inMp4 = "/sdcard/org.mp4"
+            val inWav = "/sdcard/outputVoice.wav"
+            val outAac = "/sdcard/out.aac"
+            val outMp4 = "/sdcard/mux2.mp4"
+            VideoEditor.transAudio(inWav, outAac)
+                    .flatMap {
+                        VideoEditor.mux(inMp4, it.absolutePath, outMp4)
+                    }
                     .subscribeOn(Schedulers.from(VideoManager.worker))
                     .subscribe(object : Observer<File> {
                         override fun onComplete() {
@@ -138,7 +145,6 @@ class MainActivity2 : AppCompatActivity() {
                         override fun onError(e: Throwable) {
                             Log.w("daqi", "onError")
                         }
-
                     })
         }
     }
