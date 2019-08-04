@@ -34,10 +34,6 @@ class WorkerService : IntentService("screenrecord") {
             Log.e("daqi", "Haha")
             clientProxy = IClient.Stub.asInterface(getBundleExtra(KEY_CLIENT_BUNDLE).getBinder(KEY_CLIENT))
             val cmd = getIntExtra(KEY_CMD, -1)
-            if (System.currentTimeMillis() > 0) {
-                sendResult(cmd, 100)
-                return
-            }
             when (cmd) {
                 CMD_TRANS_AUDIO -> {
                     VideoEditorWorker.transAudio(inAudioPath = getStringExtra(KEY_IN_AUDIO_PATH),
@@ -55,7 +51,7 @@ class WorkerService : IntentService("screenrecord") {
                 CMD_CROP -> {
                     VideoEditorWorker.crop(inVideoPath = getStringExtra(KEY_IN_MP4_PATH),
                             cropInfos = getSerializableExtra(KEY_CROP_INFO) as List<CropInfo>).run {
-                        sendResult(CMD_TRANS_AUDIO, this)
+                        sendResult(CMD_CROP, this)
                     }
                 }
             }

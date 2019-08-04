@@ -1,5 +1,6 @@
 package com.bytedance.ttgame.module.screenrecord
 
+import android.util.Log
 import com.ss.android.vesdk.VEUtils
 
 object VideoEditorWorker {
@@ -29,8 +30,15 @@ object VideoEditorWorker {
                     String.format("%d:%02d:%02d", this / 3600, (this % 3600) / 60, this % 60)
                 })
             }
+            if (VideoManager.DEBUG) {
+                Log.w(TAG, "crop infos: $cropInfos")
+                Log.w(TAG, "st $stTimes")
+                Log.w(TAG, "durations: $durations")
+            }
             // 代码注释写的有误，是时长
-            return VEUtils.curVideo(inVideoPath, outPaths, stTimes, durations)
+            val ret = VEUtils.curVideo(inVideoPath, outPaths, stTimes, durations)
+            Log.e("daqi", "result: $ret")
+            return ret
         }
     }
 }

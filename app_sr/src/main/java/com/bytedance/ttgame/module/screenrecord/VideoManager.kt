@@ -361,11 +361,12 @@ class VideoManager : IScreenRecordService {
             injectedAudio = null
             Log.w(TAG, "Audio file doew not exist")
         }
+        val editor = VideoEditorProxy(app)
         val muxedMp4FileObservable = injectedAudio?.run {
-            VideoEditorProxy.mux(orgMp4Path, injectedAudio, muxedMp4Path)
+            editor.mux(orgMp4Path, injectedAudio, muxedMp4Path)
         } ?: Observable.fromArray(File(orgMp4Path))
 
-        var cropInfos: List<CropInfo>? = null
+        var cropInfos: ArrayList<CropInfo>? = null
         muxedMp4FileObservable
                 .subscribeOn(Schedulers.from(worker))
                 .observeOn(Schedulers.from(worker))
@@ -374,11 +375,10 @@ class VideoManager : IScreenRecordService {
                 }
                 .map {
                     cropInfos = Util.buildCropInfos(recorder.firstTimeStampUs, userConfig.durationBefore, userConfig.durationAfter, cropDir!!, keyMoments, it.second)
-//                    cropInfos = listOf(CropInfo(10, 30, File(rootDir, "crop1.mp4").absolutePath, 1))
                     Pair(it.first, cropInfos)
                 }
                 .flatMap {
-                    VideoEditorProxy.crop(it.first.absolutePath, it.second!!)
+                    editor.crop(it.first.absolutePath, it.second!!)
                 }
                 // uploadVideo要切到主线程执行
                 .observeOn(AndroidSchedulers.mainThread())

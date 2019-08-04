@@ -5,6 +5,7 @@ import com.ss.android.vesdk.VEUtils
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
+import java.util.ArrayList
 
 object Util {
 
@@ -48,8 +49,10 @@ object Util {
         }
     }
 
-    fun buildCropInfos(firstTimeStampUs: Long, durationBefore: Int, durationAfter: Int, cropDir: File, moments: List<KeyMoment>, muxedVideoInfo: MuxedVideoInfo): List<CropInfo> {
-        return mutableListOf<CropInfo>().apply {
+    fun buildCropInfos(firstTimeStampUs: Long, durationBefore: Int,
+                       durationAfter: Int, cropDir: File,
+                       moments: List<KeyMoment>, muxedVideoInfo: MuxedVideoInfo): ArrayList<CropInfo> {
+        return ArrayList<CropInfo>().apply {
             val org = moments.map {
                 val pos = it.timeStampUs - firstTimeStampUs
                 val videoDur = muxedVideoInfo.durationTimeMill
@@ -58,7 +61,6 @@ object Util {
                         outPath = File(cropDir, "${it.timeStampUs}.mp4").absolutePath,
                         priority = it.priority)
             }
-            Log.w("daqi", "Init crop info: $org")
             var i = 0
             var cur: CropInfo? = null
             while (i < org.size) {

@@ -1,19 +1,25 @@
 package com.bytedance.ttgame.module.screenrecord
 
+import android.app.Application
+import android.content.Intent
+import android.os.Bundle
 import android.util.Log
-import com.ss.android.vesdk.VEUtils
 import io.reactivex.Observable
 import java.io.File
 import com.bytedance.ttgame.module.screenrecord.api.Error
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
-object VideoEditorProxy : IClient.Stub() {
+class VideoEditorProxy(val app: Application) : IClient.Stub() {
 
-    const val TAG = "daqi-VideoEditor"
-    const val TIMEOUT = 60 // s
+    companion object {
+        const val TAG = "daqi-VideoEditor"
+        const val TIMEOUT = 60L // s
+    }
+
     var waitLatch = CountDownLatch(1)
-    var resultCmd: Int = 0
-    var resultError: Int = 0
+    var resultCmd: Int = -1
+    var resultError: Int = -1
 
     override fun onResult(cmd: Int, error: Int) {
         resultCmd = cmd
@@ -22,70 +28,88 @@ object VideoEditorProxy : IClient.Stub() {
         waitLatch = CountDownLatch(1)
     }
 
-//    fun transAudio(inAudioPath: String, outAudioPath: String): Observable<File> {
-//        return Observable.create { emmitter ->
-//
-//            {
-//                if (this == 0) {
-//                    emmitter.onNext(File(outAudioPath))
-//                    emmitter.onComplete()
-//                } else {
-//                    Log.e(TAG, "trans audio fail: $this")
-//                    emmitter.onError(ScreenRecordException(Error.MUX_ERROR))
-//                }
-//            }
-//        }
-//    }
+    fun transAudio(inAudioPath: String, outAudioPath: String): Observable<File> {
+        return Observable.create { emmitter ->
+            Intent(app, WorkerService::class.java).apply {
+                Bundle().apply {
+                    putBinder(WorkerService.KEY_CLIENT, this@VideoEditorProxy)
+                    putExtra(WorkerService.KEY_CLIENT_BUNDLE, this)
+                }
+                putExtra(WorkerService.KEY_CMD, WorkerService.CMD_TRANS_AUDIO)
+                putExtra(WorkerService.KEY_IN_AUDIO_PATH, inAudioPath)
+                putExtra(WorkerService.KEY_OUT_AUDIO_PATH, outAudioPath)
+            }.run {
+                app.startService(this)
+            }
+            val timeout = !waitLatch.await(TIMEOUT, TimeUnit.SECONDS)
+            if (timeout) {
+                Log.e(TAG, "trans audio timeout: $this")
+                emmitter.onError(ScreenRecordException(Error.MUX_ERROR))
+            } else {
+                if (resultError == 0) {
+                    emmitter.onNext(File(outAudioPath))
+                    emmitter.onComplete()
+                } else {
+                    Log.e(TAG, "trans audio fail: $resultError")
+                    emmitter.onError(ScreenRecordException(Error.MUX_ERROR))
+                }
+            }
+        }
+    }
 
     // todo 做个优化，以视频为主，音频适配视频
     public fun mux(inVideoPath: String, inAudioPath: String, outPath: String): Observable<File> {
         return Observable.create { emitter ->
-            VEUtils.mux(inVideoPath, inAudioPath, outPath).run {
-                if (this == 0) {
+            Intent(app, WorkerService::class.java).apply {
+                Bundle().apply {
+                    putBinder(WorkerService.KEY_CLIENT, this@VideoEditorProxy)
+                    putExtra(WorkerService.KEY_CLIENT_BUNDLE, this)
+                }
+                putExtra(WorkerService.KEY_CMD, WorkerService.CMD_MUX)
+                putExtra(WorkerService.KEY_IN_MP4_PATH, inVideoPath)
+                putExtra(WorkerService.KEY_IN_AUDIO_PATH, inAudioPath)
+                putExtra(WorkerService.KEY_OUT_MP4_PATH, outPath)
+            }.run {
+                app.startService(this)
+            }
+            val timeout = !waitLatch.await(TIMEOUT, TimeUnit.SECONDS)
+            if (timeout) {
+                Log.e(TAG, "mux timeout.")
+            } else {
+                if (resultError == 0) {
                     emitter.onNext(File(outPath))
                     emitter.onComplete()
                 } else {
-                    val aF = File(inAudioPath)
-                    Log.e(TAG, "mux fail: $this, audio exsits: ${aF.exists()}")
+                    Log.e(TAG, "mux fail $resultError")
                     emitter.onError(ScreenRecordException(Error.MUX_ERROR))
                 }
             }
         }
     }
 
-    public fun crop(inVideoPath: String, cropInfos: List<CropInfo>): Observable<List<CropInfo>> {
+    public fun crop(inVideoPath: String, cropInfos: ArrayList<CropInfo>): Observable<List<CropInfo>> {
         return Observable.create { emitter ->
-            cropInfos.run {
-                if (size == 0) {
-                    Log.w(TAG, "no crop info, return directly")
+            Intent(app, WorkerService::class.java).apply {
+                Bundle().apply {
+                    putBinder(WorkerService.KEY_CLIENT, this@VideoEditorProxy)
+                    putExtra(WorkerService.KEY_CLIENT_BUNDLE, this)
+                }
+                putExtra(WorkerService.KEY_CMD, WorkerService.CMD_CROP)
+                putExtra(WorkerService.KEY_IN_MP4_PATH, inVideoPath)
+                putExtra(WorkerService.KEY_CROP_INFO, cropInfos)
+            }.run {
+                app.startService(this)
+            }
+            val timeout = !waitLatch.await(TIMEOUT, TimeUnit.SECONDS)
+            if (timeout) {
+                Log.e(TAG, "crop video timeout")
+                emitter.onError(ScreenRecordException(Error.MUX_ERROR))
+            } else {
+                if (resultError == 0) {
                     emitter.onNext(cropInfos)
                     emitter.onComplete()
-                    return@run
-                }
-                val outPaths = ArrayList<String>(size)
-                val stTimes = ArrayList<String>(size)
-                val durations = ArrayList<String>(size)
-                forEach {
-                    outPaths.add(it.outPath)
-                    stTimes.add(it.st.run {
-                        String.format("%d:%02d:%02d", this / 3600, (this % 3600) / 60, this % 60)
-                    })
-                    durations.add((it.ed - it.st).run {
-                        String.format("%d:%02d:%02d", this / 3600, (this % 3600) / 60, this % 60)
-                    })
-                }
-                // 代码注释写的有误，是时长
-                VEUtils.curVideo(inVideoPath, outPaths, stTimes, durations).run {
-                    if (this == 0) {
-                        emitter.onNext(cropInfos)
-                        emitter.onComplete()
-                    } else {
-                        Log.e(TAG, "crop fail: $this")
-//                        emitter.onError(ScreenRecordException(Error.CLIP_ERROR))
-//                        Files.copy(File(inVideoPath).toPath(), File(cropInfos[0].outPath).toPath())
-                        cropInfos[0].outPath = inVideoPath
-                        emitter.onComplete()
-                    }
+                } else {
+                    emitter.onError(ScreenRecordException(Error.MUX_ERROR))
                 }
             }
         }

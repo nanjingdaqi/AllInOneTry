@@ -13,6 +13,7 @@ import com.bytedance.ttgame.module.screenrecord.CropInfo
 import com.bytedance.ttgame.module.screenrecord.IClient
 import com.bytedance.ttgame.module.screenrecord.Util
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
+import com.bytedance.ttgame.module.screenrecord.VideoEditorProxy
 import com.bytedance.ttgame.module.screenrecord.VideoManager
 import com.bytedance.ttgame.module.screenrecord.WorkerService
 import com.bytedance.ttgame.module.screenrecord.api.AudioEngineType
@@ -107,25 +108,31 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
         cut.setOnClickListener {
-            VideoEditor.run {
-                crop("/sdcard/mux-org.mp4", listOf(CropInfo(5, 20, "/sdcard/crop_mux1.mp4", 1)))
-                        .subscribe(object : Observer<List<CropInfo>> {
-                            override fun onComplete() {
-                                Log.w("daqi", "onComplete")
-                            }
+            val editor = VideoEditorProxy(application)
+            editor.run {
+                ArrayList<CropInfo>().apply {
+                    add(CropInfo(0, 2, "/sdcard/g_screen_records/crop/1370503465000.mp4", 5))
+//                    add(CropInfo(11, 18, "/sdcard/g_screen_records/crop/1370503465000.mp4", 5))
+                }.run {
+                    crop("/sdcard/org_3.mp4", this)
+                            .subscribe(object : Observer<List<CropInfo>> {
+                                override fun onComplete() {
+                                    Log.w("daqi", "onComplete")
+                                }
 
-                            override fun onNext(t: List<CropInfo>) {
-                                Log.w("daqi", "onNext")
-                            }
+                                override fun onNext(t: List<CropInfo>) {
+                                    Log.w("daqi", "onNext")
+                                }
 
-                            override fun onSubscribe(d: Disposable) {
+                                override fun onSubscribe(d: Disposable) {
+                                    Log.w("daqi", "onSubscribe")
+                                }
 
-                            }
-
-                            override fun onError(e: Throwable) {
-                                Log.w("daqi", "onError")
-                            }
-                        })
+                                override fun onError(e: Throwable) {
+                                    Log.w("daqi", "onError")
+                                }
+                            })
+                }
             }
         }
         inject_key_moment.setOnClickListener {
@@ -137,7 +144,8 @@ class MainActivity2 : AppCompatActivity() {
             val inWav = "/sdcard/outputVoice.wav"
             val outAac = "/sdcard/out.aac"
             val outMp4 = "/sdcard/mux2.mp4"
-            VideoEditor.transAudio(inWav, outAac)
+            val editor = VideoEditorProxy(application)
+            editor.transAudio(inWav, outAac)
                     .flatMap {
                         VideoEditor.mux(inMp4, it.absolutePath, outMp4)
                     }
