@@ -10,9 +10,11 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.bytedance.ttgame.module.screenrecord.CropInfo
+import com.bytedance.ttgame.module.screenrecord.IClient
 import com.bytedance.ttgame.module.screenrecord.Util
 import com.bytedance.ttgame.module.screenrecord.VideoEditor
 import com.bytedance.ttgame.module.screenrecord.VideoManager
+import com.bytedance.ttgame.module.screenrecord.WorkerService
 import com.bytedance.ttgame.module.screenrecord.api.AudioEngineType
 import com.bytedance.ttgame.module.screenrecord.api.Config
 import io.reactivex.Observer
@@ -22,11 +24,10 @@ import kotlinx.android.synthetic.main.content_main2.cut
 import kotlinx.android.synthetic.main.content_main2.img
 import kotlinx.android.synthetic.main.content_main2.inject_key_moment
 import kotlinx.android.synthetic.main.content_main2.mux
-import kotlinx.android.synthetic.main.content_main2.pause
 import kotlinx.android.synthetic.main.content_main2.prepare
-import kotlinx.android.synthetic.main.content_main2.resume
 import kotlinx.android.synthetic.main.content_main2.start
 import kotlinx.android.synthetic.main.content_main2.stop
+import kotlinx.android.synthetic.main.content_main2.test_service
 import java.io.File
 import java.io.FileOutputStream
 
@@ -34,6 +35,12 @@ class MainActivity2 : AppCompatActivity() {
 
     private var audioPlayer: AudioPlayer? = null
     private lateinit var videoManager: VideoManager
+
+    class Client : IClient.Stub() {
+        override fun onResult(cmd: Int, error: Int) {
+            Log.e("daqi", "Yes, on result, cmd: $cmd, error: $error")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,11 +95,16 @@ class MainActivity2 : AppCompatActivity() {
         stop.setOnClickListener {
             videoManager.stopScreenRecord(3, 3)
         }
-        pause.setOnClickListener {
-            //            recorder.pause()
-        }
-        resume.setOnClickListener {
-            //            recorder.resume()
+        test_service.setOnClickListener {
+            Intent(this, WorkerService::class.java).apply {
+                Bundle().apply {
+                    putBinder(WorkerService.KEY_CLIENT, Client())
+                    putExtra(WorkerService.KEY_CLIENT_BUNDLE, this)
+                }
+                putExtra(WorkerService.KEY_CMD, 2)
+            }.run {
+                application.startService(this)
+            }
         }
         cut.setOnClickListener {
             VideoEditor.run {

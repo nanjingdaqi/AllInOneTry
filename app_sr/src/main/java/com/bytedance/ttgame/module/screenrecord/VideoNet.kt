@@ -34,24 +34,24 @@ class VideoNet(val videoManager: VideoManager) {
         const val QUERY_LOOP_COUNT = 60
         const val TAG = "VideoNet"
 
-        val retrofit: IRetrofit
-        val downloadRetrofit: Retrofit
-        val request: Request
-        val downloadRequest: DownloadRequest
+        var retrofit: IRetrofit? = null
+        var downloadRetrofit: Retrofit? = null
+        var request: Request? = null
+        var downloadRequest: DownloadRequest? = null
 
         // todo do not merge from AllInOneTry
         init {
-            retrofit = ServiceManager.get()
-                    .getService(IRetrofitService::class.java)
-                    .createNewRetrofit("")
-            downloadRetrofit = Retrofit.Builder()
-                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                    .setEndpoint("")
-                    .httpExecutor(SsHttpExecutor())
-                    .client { com.bytedance.ttnet.retrofit.SsRetrofitClient() }
-                    .build()
-            request = retrofit.create(Request::class.java)
-            downloadRequest = downloadRetrofit.create(DownloadRequest::class.java)
+//            retrofit = ServiceManager.get()
+//                    .getService(IRetrofitService::class.java)
+//                    .createNewRetrofit("https://adfa")
+//            downloadRetrofit = Retrofit.Builder()
+//                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+//                    .setEndpoint("http://adfa")
+//                    .httpExecutor(SsHttpExecutor())
+//                    .client { com.bytedance.ttnet.retrofit.SsRetrofitClient() }
+//                    .build()
+//            request = retrofit.create(Request::class.java)
+//            downloadRequest = downloadRetrofit.create(DownloadRequest::class.java)
         }
     }
 
@@ -76,7 +76,7 @@ class VideoNet(val videoManager: VideoManager) {
                 this["collection_count"] = albumFragCount.toString()
                 this["video_infos"] = Gson().toJson(videoInfos)
             }.run {
-                return request.uploadVids(this).flatMap {
+                return request?.uploadVids(this)!!.flatMap {
                     if (it.code == 0 && it.data != null && it.data.retCode == 1) {
                         Observable.just(it.data.uploadId)
                     } else {
@@ -88,7 +88,7 @@ class VideoNet(val videoManager: VideoManager) {
     }
 
     fun queryProcessedVideos(queryId: String): Observable<List<ProcessedVideos>> {
-        return request.queryProcessedVideos(queryId).run {
+        return request!!.queryProcessedVideos(queryId).run {
             var count = 0
             var fail = false
             var succ = false
@@ -183,7 +183,7 @@ class VideoNet(val videoManager: VideoManager) {
 
     // 下载视频
     fun download(info: DownloadedVideo): Observable<DownloadedVideo> {
-        return downloadRequest.downloadFile(info.url)
+        return downloadRequest!!.downloadFile(info.url)
                 .flatMap {
                     File(info.localPath).run {
                         FileOutputStream(this).run {

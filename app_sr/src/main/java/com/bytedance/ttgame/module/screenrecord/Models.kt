@@ -3,6 +3,7 @@ package com.bytedance.ttgame.module.screenrecord
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import java.io.Serializable
 
 
 data class DebugConfig(val quality: Int, val duration: Int)
@@ -12,7 +13,7 @@ data class KeyMoment(val timeStampUs: Long, val priority: Int)
 data class MuxedVideoInfo(val firstTimeStampUs: Long, val durationTimeMill: Long)
 
 // unit: s
-data class CropInfo(val st: Long, val ed: Long, var outPath: String, val priority: Int)
+data class CropInfo(val st: Long, val ed: Long, var outPath: String, val priority: Int): Serializable
 
 data class DownloadedVideo(val vid: String, val aid: String, val url: String, val type: Int, val localPath: String)
 

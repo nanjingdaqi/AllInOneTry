@@ -55,7 +55,6 @@ class VideoManager : IScreenRecordService {
         const val CROP_DIR = "crop"
         const val DOWNLOAD_DIR = "download"
         const val ORG_MP4_PREFIX = "org_screen_record_"
-        const val TRANS_AUDIO_PREFIX = "trans_audio_"
         const val MUXED_MP4_PREFIX = "muxed_screen_record_"
 
         const val PREPARE_RESULT_OK = 0
@@ -116,7 +115,6 @@ class VideoManager : IScreenRecordService {
     lateinit var app: Application
     lateinit var recorder: ScreenRecorder
     lateinit var orgMp4Path: String
-    lateinit var transAudioPath: String
     lateinit var muxedMp4Path: String
     var audioSampleRate: Int = Int.MIN_VALUE
     lateinit var audioAdapter: AudioAdapter
@@ -160,10 +158,8 @@ class VideoManager : IScreenRecordService {
         // 每次开始录屏时，都清除之前的数据
         clearDir()
 
-        val suffix = System.currentTimeMillis()
-        orgMp4Path = File(rootDir, "${ORG_MP4_PREFIX}_$suffix.mp4").absolutePath
-        transAudioPath = File(rootDir, "${TRANS_AUDIO_PREFIX}_$suffix.aac").absolutePath
-        muxedMp4Path = File(rootDir, "${MUXED_MP4_PREFIX}_$suffix.mp4").absolutePath
+        orgMp4Path = File(rootDir, "${ORG_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
+        muxedMp4Path = File(rootDir, "${MUXED_MP4_PREFIX}_${System.currentTimeMillis()}.mp4").absolutePath
 
         Quality.apply {
             this.init(app)
@@ -349,14 +345,13 @@ class VideoManager : IScreenRecordService {
     }
 
     /**
-     * 1. trans audio to aac
-     * 2. mux
-     * 3. build crop info
-     * 4. crop
-     * 5. upload to 视频云
-     * 6. 上传信息到中台
-     * 7. 下载中台处理后的视频
-     * 8. 返回给CP
+     * 1. mux
+     * 2. build crop info
+     * 3. crop
+     * 4. upload to 视频云
+     * 5. 上传信息到中台
+     * 6. 下载中台处理后的视频
+     * 7. 返回给CP
      */
     public fun performProcessingJob() {
         state = State.PROCESSING
@@ -364,18 +359,14 @@ class VideoManager : IScreenRecordService {
         Log.w(TAG, "User inject audio path: $injectedAudio")
         if (injectedAudio != null && !File(injectedAudio).exists()) {
             injectedAudio = null
-            Log.w(TAG, "Audio file does not exist")
+            Log.w(TAG, "Audio file doew not exist")
         }
-        val muxMp4FileObservable = if (injectedAudio != null) {
-            VideoEditor.transAudio(injectedAudio, transAudioPath).flatMap {
-                VideoEditor.mux(orgMp4Path, it.absolutePath, muxedMp4Path)
-            }
-        } else {
-            Observable.fromArray(File(orgMp4Path))
-        }
+        val muxedMp4FileObservable = injectedAudio?.run {
+            VideoEditorProxy.mux(orgMp4Path, injectedAudio, muxedMp4Path)
+        } ?: Observable.fromArray(File(orgMp4Path))
 
         var cropInfos: List<CropInfo>? = null
-        muxMp4FileObservable
+        muxedMp4FileObservable
                 .subscribeOn(Schedulers.from(worker))
                 .observeOn(Schedulers.from(worker))
                 .map {
@@ -387,7 +378,7 @@ class VideoManager : IScreenRecordService {
                     Pair(it.first, cropInfos)
                 }
                 .flatMap {
-                    VideoEditor.crop(it.first.absolutePath, it.second!!)
+                    VideoEditorProxy.crop(it.first.absolutePath, it.second!!)
                 }
                 // uploadVideo要切到主线程执行
                 .observeOn(AndroidSchedulers.mainThread())

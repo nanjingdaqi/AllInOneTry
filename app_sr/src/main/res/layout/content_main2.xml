@@ -28,16 +28,9 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"/>
 
-    <Button android:id="@+id/pause"
-            android:visibility="gone"
-            android:text="暂停录制"
-            android:layout_marginTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"/>
-
-    <Button android:id="@+id/resume"
-            android:visibility="gone"
-            android:text="继续录制"
+    <Button android:id="@+id/test_service"
+            android:visibility="visible"
+            android:text="测试IPC"
             android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="50dp"/>
